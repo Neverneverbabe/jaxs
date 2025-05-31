@@ -100,7 +100,7 @@
             background: #9ca3af; 
         }
         
-        .item-card, .watchlist-item-card, .generic-item-card { 
+        .item-card, .watchlist-item-card, .generic-item-card, .related-item-card { 
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; 
             display: flex; 
             flex-direction: column; 
@@ -108,7 +108,8 @@
             text-align: center;
             background-color: #374151; 
             padding: 0.75rem; 
-            border-radius: 0.5rem; 
+            border-radius: 0.5rem;
+            position: relative; /* For seen checkmark positioning */
         }
         .item-card:hover, .watchlist-item-card:hover, .generic-item-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
         .watchlist-item-card .remove-watchlist-btn { opacity: 0; transition: opacity 0.2s ease-in-out; }
@@ -202,6 +203,26 @@
         .pagination-btn:disabled { background-color: #1f2937; color: #6b7280; cursor: not-allowed; }
 
         /* Auth Dropdown Styles */
+        /* ... (existing auth styles) ... */
+
+        /* Mark as Seen Button Styles */
+        .mark-as-seen-button {
+            background-color: transparent;
+            color: #9ca3af; /* Neutral color */
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: color 0.2s, background-color 0.2s;
+        }
+        .mark-as-seen-button:hover {
+            color: #e5e7eb;
+            background-color: #374151;
+        }
+        .mark-as-seen-button.seen {
+            color: #22c55e; /* Green for seen */
+            /* Optional: background-color: rgba(34, 197, 94, 0.1); */
+        }
+
+        /* Watchlist Management Popup on Item Detail Page */
         #userAuthDropdownContainer { position: fixed; top: 1rem; right: 1rem; z-index: 100; }
         #userAuthIcon { background-color: #374151; color: #e5e7eb; padding: 0.5rem; border-radius: 9999px; cursor: pointer; transition: background-color 0.2s; }
         #userAuthIcon:hover { background-color: #4b5563; }
@@ -223,6 +244,13 @@
         .watchlist-manage-button:hover { 
             color: #e5e7eb; 
             background-color: #374151; 
+        }
+        .watchlist-manage-button.in-any-watchlist {
+            color: #facc15; /* Tailwind's yellow-400 / amber-400 */
+        }
+        .watchlist-manage-button.in-any-watchlist:hover {
+            color: #fde047; /* Lighter yellow for hover */
+            background-color: #374151;
         }
          .watchlist-manage-button.active-popup { 
             background-color: #374151;
@@ -368,6 +396,7 @@
         <div class="flex justify-center border-b border-gray-700 mb-6 mt-8 pt-12"> 
             <button id="tabSearch" class="main-tab active">Search</button>
             <button id="tabWatchlist" class="main-tab">My Watchlists</button>
+            <button id="tabSeen" class="main-tab">Seen</button>
             <button id="tabLatest" class="main-tab">Latest</button> 
             <button id="tabPopular" class="main-tab">Popular</button> 
         </div>
@@ -435,6 +464,13 @@
             </div>
         </div>
 
+        <div id="seenView" class="hidden-view bg-gray-800 p-6 rounded-lg shadow-xl">
+            <h2 class="section-title">Seen Items</h2>
+            <div id="seenItemsDisplayContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 generic-items-container custom-scrollbar">
+                <p class="text-gray-500 italic col-span-full text-center">No items marked as seen yet.</p>
+            </div>
+        </div>
+
         <div id="latestView" class="hidden-view bg-gray-800 p-6 rounded-lg shadow-xl">
              <div class="flex justify-between items-center mb-4">
                 <div class="flex border-b border-gray-700">
@@ -498,13 +534,14 @@
         // DOM Elements (Declared globally, assigned in initializeAppState)
         let searchInput, searchButton, resultsContainer, itemDetailContainer, itemDetailTitle, 
             itemSeasonsEpisodesSection, itemRelatedItemsSection, itemCollectionItemsSection, itemBackButtonContainer,
-            tabSearch, tabWatchlist, tabLatest, tabPopular, 
-            searchView, watchlistView, latestView, popularView, 
+            tabSearch, tabWatchlist, tabSeen, tabLatest, tabPopular, 
+            searchView, watchlistView, seenView, latestView, popularView, 
             messageArea, newWatchlistNameInput, createWatchlistBtn, 
             watchlistTilesContainer, watchlistDisplayContainer, 
             watchlistItemDetailPanel, watchlistItemDetailTitle, watchlistItemDetailContainer,
             watchlistSeasonsEpisodesSection, watchlistRelatedItemsSection, watchlistCollectionItemsSection,
             watchlistBackButtonContainer,
+            seenItemsDisplayContainer,
             latestContentDisplay, latestMoviesSubTab, latestTvShowsSubTab,
             popularContentDisplay, popularMoviesSubTab, popularTvShowsSubTab,
             userAuthIcon, authDropdownMenu,
@@ -546,6 +583,7 @@
             else if (section === 'seasons-watchlist') target = watchlistSeasonsEpisodesSection; 
             else if (section === 'seasons-overlay') target = overlaySeasonsEpisodesSection;
             else if (section === 'watchlistItems') target = watchlistDisplayContainer; 
+            else if (section === 'seenItemsDisplayContainer') target = seenItemsDisplayContainer;
             else if (section === 'latest') target = latestContentDisplay; 
             else if (section === 'popular') target = popularContentDisplay; 
             else target = messageArea; 
@@ -559,6 +597,7 @@
             else if (section === 'details-watchlist') target = watchlistItemDetailContainer;
             else if (section === 'details-overlay') target = overlayDetailContainer;
             else if (section === 'watchlistItems') target = watchlistDisplayContainer; 
+            else if (section === 'seenItemsDisplayContainer') target = seenItemsDisplayContainer;
             else if (section === 'latest') target = latestContentDisplay; 
             else if (section === 'popular') target = popularContentDisplay; 
             else target = messageArea; 
@@ -970,12 +1009,30 @@
             } catch (error) { console.error("Error checking if item is in Firestore watchlist:", error); return false; }
         }
         
+        async function isItemInAnyFirestoreWatchlist(itemId) {
+            if (!currentUserId) return false;
+            try {
+                const watchlistsColRef = collection(db, "users", currentUserId, "watchlists");
+                const querySnapshot = await getDocs(watchlistsColRef);
+                for (const wlDoc of querySnapshot.docs) {
+                    const items = wlDoc.data().items || [];
+                    if (items.some(item => String(item.tmdb_id) === String(itemId))) {
+                        return true; // Found in at least one watchlist
+                    }
+                }
+                return false; // Not found in any watchlist
+            } catch (error) {
+                console.error("Error checking if item is in any Firestore watchlist:", error);
+                return false;
+            }
+        }
+        
         async function updateAddToWatchlistButtonState(itemId, itemData, buttonContainerId = 'addToWatchlistBtnContainer') {
             console.log(`[DEBUG] updateAddToWatchlistButtonState CALLED for containerId: ${buttonContainerId}, itemId: ${itemId}`);
             const container = document.getElementById(buttonContainerId); 
             // console.log(`[updateAddToWatchlistButtonState] Called for item ID: ${itemId}, container ID: ${buttonContainerId}. Container found: ${!!container}`);
             if (!container) { 
-                console.warn("Button container not found for updateAddToWatchlistButtonState:", buttonContainerId);
+                // console.warn("Button container not found for updateAddToWatchlistButtonState:", buttonContainerId); // Can be noisy
                 return; 
             }
             container.innerHTML = ''; 
@@ -985,6 +1042,11 @@
             mainButton.title = "Add to/manage watchlists";
             mainButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clip-rule="evenodd" /></svg>`;
             mainButton.className = "p-2 rounded-md hover:bg-sky-700 transition-colors text-white watchlist-manage-button"; 
+            
+            if (currentUserId && await isItemInAnyFirestoreWatchlist(itemId)) {
+                mainButton.classList.add('in-any-watchlist');
+            }
+
             container.appendChild(mainButton);
 
             // Ensure popup is created fresh or properly managed if it exists
@@ -1020,6 +1082,10 @@
                         
                         // Add a log to see if it's still considered visible after population
                         console.log(`[DEBUG] Popup after populate/position. Computed display: ${window.getComputedStyle(currentPopup).display}, Visibility: ${window.getComputedStyle(currentPopup).visibility}`);
+                        // Check if the button still has the 'in-any-watchlist' class after popup interaction
+                        if (mainButton.classList.contains('in-any-watchlist')) {
+                            console.log("[DEBUG] Bookmark icon still has 'in-any-watchlist' after popup open.");
+                        }
                         console.log(`[DEBUG] Popup BoundingClientRect after populate/position: ${JSON.stringify(currentPopup.getBoundingClientRect())}`);
 
                     } else {
@@ -1084,6 +1150,12 @@
                     // it might be better to signal the main button's onclick to handle it,
                     // or simply let the user close and reopen for a fresh state.
                 });
+                // After checkbox change, re-check if item is in any watchlist to update main icon color
+                if (await isItemInAnyFirestoreWatchlist(itemId)) {
+                    anchorButton.classList.add('in-any-watchlist');
+                } else {
+                    anchorButton.classList.remove('in-any-watchlist');
+                }
 
                 const label = document.createElement('label');
                 label.htmlFor = checkbox.id;
@@ -1124,6 +1196,11 @@
                 popupElement.innerHTML = ''; // Clear current content
                 await populateWatchlistManagePopup(popupElement, itemId, itemData, anchorButton, mainButtonContainerId); // Re-populate
                 if (!popupElement.classList.contains('hidden')) positionPopup(anchorButton, popupElement); // Re-position if still visible
+                // After creating and adding, the item is now in a watchlist, so update the main icon
+                if (await isItemInAnyFirestoreWatchlist(itemId)) {
+                    anchorButton.classList.add('in-any-watchlist');
+                }
+
                 await loadAndDisplayWatchlistsFromFirestore(); 
             };
 
@@ -1132,6 +1209,108 @@
             popupElement.appendChild(createNewDiv);
         }
 
+        // --- "Mark as Seen" Functionality ---
+        async function isItemInSeenList(itemId) {
+            if (!currentUserId || !itemId) return false;
+            try {
+                const seenItemRef = doc(db, "users", currentUserId, "seenItems", String(itemId));
+                const docSnap = await getDoc(seenItemRef);
+                return docSnap.exists();
+            } catch (error) {
+                console.error("Error checking if item is in seen list:", error);
+                return false;
+            }
+        }
+
+        async function addItemToSeenList(itemData) {
+            if (!currentUserId || !itemData || !itemData.tmdb_id) {
+                showToast("Cannot mark as seen: User not signed in or invalid item data.", "error");
+                return false;
+            }
+            const itemId = String(itemData.tmdb_id);
+            const itemToAdd = {
+                tmdb_id: itemId,
+                title: itemData.title || itemData.name,
+                item_type: itemData.item_type,
+                poster_path: itemData.poster_path || null,
+                release_year: (itemData.release_date || itemData.first_air_date || '').substring(0,4),
+                vote_average: itemData.vote_average || null,
+                seenAt: new Date().toISOString()
+            };
+            try {
+                const seenItemRef = doc(db, "users", currentUserId, "seenItems", itemId);
+                await setDoc(seenItemRef, itemToAdd);
+                showToast(`"${itemToAdd.title}" marked as seen.`, "success");
+                if (seenView && !seenView.classList.contains('hidden-view')) await loadAndDisplaySeenItems();
+                return true;
+            } catch (error) {
+                console.error("Error adding item to seen list:", error);
+                showToast("Failed to mark item as seen.", "error");
+                return false;
+            }
+        }
+
+        async function removeItemFromSeenList(itemId) {
+            if (!currentUserId || !itemId) {
+                showToast("Cannot unmark as seen: User not signed in or invalid item ID.", "error");
+                return false;
+            }
+            const strItemId = String(itemId);
+            try {
+                const seenItemRef = doc(db, "users", currentUserId, "seenItems", strItemId);
+                await deleteDoc(seenItemRef);
+                showToast("Item unmarked as seen.", "info");
+                if (seenView && !seenView.classList.contains('hidden-view')) await loadAndDisplaySeenItems();
+                return true;
+            } catch (error) {
+                console.error("Error removing item from seen list:", error);
+                showToast("Failed to unmark item as seen.", "error");
+                return false;
+            }
+        }
+
+        async function loadAndDisplaySeenItems() {
+            if (!seenItemsDisplayContainer) {
+                console.error("Seen items display container not found.");
+                return;
+            }
+            if (!currentUserId) {
+                seenItemsDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Please sign in to view your seen items.</p>';
+                return;
+            }
+
+            showLoading('seenItemsDisplayContainer', 'Loading seen items...'); 
+
+            try {
+                const seenItemsColRef = collection(db, "users", currentUserId, "seenItems");
+                const querySnapshot = await getDocs(seenItemsColRef);
+                
+                seenItemsDisplayContainer.innerHTML = ''; // Clear previous items
+
+                if (querySnapshot.empty) {
+                    seenItemsDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">No items marked as seen yet.</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const item = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'generic-item-card cursor-pointer'; 
+                    const posterUrl = item.poster_path ? `${smallImageBaseUrl}${item.poster_path}` : genericItemPlaceholder;
+                    card.innerHTML = `
+                        <img src="${posterUrl}" alt="${item.title}" onerror="this.src='${genericItemPlaceholder}'; this.onerror=null;">
+                        <h4 class="text-md font-semibold text-sky-300 truncate mt-2" title="${item.title}">${item.title}</h4>
+                        <p class="text-xs text-gray-400">${item.release_year || 'N/A'} (${item.item_type === 'tv' ? 'TV Show' : 'Movie'})</p>
+                        ${item.vote_average ? `<p class="text-xs text-yellow-400">★ ${item.vote_average.toFixed(1)}</p>` : ''}
+                    `;
+                    card.addEventListener('click', () => handleItemSelect(String(item.tmdb_id), item.title, item.item_type, true)); // Open in overlay
+                    seenItemsDisplayContainer.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Error loading seen items:", error);
+                showMessage("Could not load seen items. Please try again.", "error", "seenItemsDisplayContainer");
+            }
+        }
         
         function positionPopup(button, popup) {
             const rect = button.getBoundingClientRect();
@@ -1257,7 +1436,40 @@
         function toggleOptionsMenu(tileElement, watchlistName) { closeAllOptionMenus(tileElement); let menu = tileElement.querySelector('.options-menu'); if (menu) { menu.remove(); } else { menu = document.createElement('div'); menu.className = 'options-menu'; const deleteOption = document.createElement('button'); deleteOption.className = 'options-menu-item delete'; deleteOption.textContent = 'Delete Watchlist'; deleteOption.addEventListener('click', (e) => { e.stopPropagation(); handleDeleteWatchlist(watchlistName); menu.remove(); }); menu.appendChild(deleteOption); tileElement.appendChild(menu); } }
         function closeAllOptionMenus(exceptThisTile = null) { document.querySelectorAll('.watchlist-tile').forEach(tile => { if (tile !== exceptThisTile) { const menu = tile.querySelector('.options-menu'); if (menu) { menu.remove(); } } }); }
         
-        function setupMainTabs() { const mainTabs = [ { button: tabSearch, view: searchView }, { button: tabWatchlist, view: watchlistView }, { button: tabLatest, view: latestView }, { button: tabPopular, view: popularView } ]; const allViews = [searchView, watchlistView, latestView, popularView]; mainTabs.forEach(tabInfo => { if(tabInfo.button) tabInfo.button.addEventListener('click', async () => { allViews.forEach(v => {if(v) v.classList.add('hidden-view')}); mainTabs.forEach(t => {if(t.button) t.button.classList.remove('active')}); if(tabInfo.view) tabInfo.view.classList.remove('hidden-view'); if(tabInfo.button) tabInfo.button.classList.add('active'); if (tabInfo.button === tabWatchlist) { await loadAndDisplayWatchlistsFromFirestore(); clearAllDynamicContent('watchlist'); } else if (tabInfo.button === tabLatest) { const activeSubTab = latestView.querySelector('.sub-tab.active') || latestMoviesSubTab; if(activeSubTab) loadTmdbCategoryContent('latest', activeSubTab.dataset.type, activeSubTab.dataset.category, 1); clearAllDynamicContent('item'); } else if (tabInfo.button === tabPopular) { const activeSubTab = popularView.querySelector('.sub-tab.active') || popularMoviesSubTab; if(activeSubTab) loadTmdbCategoryContent('popular', activeSubTab.dataset.type, activeSubTab.dataset.category, 1); clearAllDynamicContent('item'); } else if (tabInfo.button === tabSearch) { clearAllDynamicContent('item'); } }); }); }
+        function setupMainTabs() { 
+            const mainTabs = [ 
+                { button: tabSearch, view: searchView }, 
+                { button: tabWatchlist, view: watchlistView }, 
+                { button: tabSeen, view: seenView },
+                { button: tabLatest, view: latestView }, 
+                { button: tabPopular, view: popularView } 
+            ]; 
+            const allViews = [searchView, watchlistView, seenView, latestView, popularView]; 
+            mainTabs.forEach(tabInfo => { 
+                if(tabInfo.button) tabInfo.button.addEventListener('click', async () => { 
+                    allViews.forEach(v => {if(v) v.classList.add('hidden-view')}); 
+                    mainTabs.forEach(t => {if(t.button) t.button.classList.remove('active')}); 
+                    if(tabInfo.view) tabInfo.view.classList.remove('hidden-view'); 
+                    if(tabInfo.button) tabInfo.button.classList.add('active'); 
+                    if (tabInfo.button === tabWatchlist) { 
+                        await loadAndDisplayWatchlistsFromFirestore(); 
+                        clearAllDynamicContent('watchlist'); 
+                    } else if (tabInfo.button === tabSeen) {
+                        await loadAndDisplaySeenItems(); 
+                    } else if (tabInfo.button === tabLatest) { 
+                        const activeSubTab = latestView.querySelector('.sub-tab.active') || latestMoviesSubTab; 
+                        if(activeSubTab) loadTmdbCategoryContent('latest', activeSubTab.dataset.type, activeSubTab.dataset.category, 1); 
+                        clearAllDynamicContent('item'); 
+                    } else if (tabInfo.button === tabPopular) { 
+                        const activeSubTab = popularView.querySelector('.sub-tab.active') || popularMoviesSubTab; 
+                        if(activeSubTab) loadTmdbCategoryContent('popular', activeSubTab.dataset.type, activeSubTab.dataset.category, 1); 
+                        clearAllDynamicContent('item'); 
+                    } else if (tabInfo.button === tabSearch) { 
+                        clearAllDynamicContent('item'); 
+                    } 
+                }); 
+            }); 
+        }
         function setupSubTabs(moviesTab, tvShowsTab, contentDisplayElement, mainCategory) { const subTabs = [moviesTab, tvShowsTab]; subTabs.forEach(tab => { if(tab) tab.addEventListener('click', () => { const parentView = tab.closest('.hidden-view') || (mainCategory === 'latest' ? latestView : popularView); if(parentView) parentView.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const type = tab.dataset.type; const category = tab.dataset.category; if (mainCategory === 'latest') { currentLatestPage = 1; currentLatestType = type; currentLatestCategory = category; } else if (mainCategory === 'popular') { currentPopularPage = 1; currentPopularType = type; } loadTmdbCategoryContent(mainCategory, type, category, 1); }); }); }
         
         function getSelectedSearchType() { const checkedRadio = document.querySelector('input[name="searchType"]:checked'); return checkedRadio ? checkedRadio.value : 'movie'; }
@@ -1384,16 +1596,26 @@
             titleEl.textContent = `${itemTitle} ${year ? `(${year})` : ''}`;
             titleBookmarkWrapper.appendChild(titleEl);
 
-            // Create the specific container for the bookmark button for this view context
+            // Container for both icons
+            const iconsWrapper = document.createElement('div');
+            iconsWrapper.className = 'flex items-center flex-shrink-0 ml-2'; // Removed space-x-1
+
             const bookmarkButtonContainer = document.createElement('div');
-            bookmarkButtonContainer.id = `${targetViewContext}DetailAddToBtnContainer`; 
-            bookmarkButtonContainer.className = 'relative ml-2 flex-shrink-0'; // For positioning popup and icon
-            titleBookmarkWrapper.appendChild(bookmarkButtonContainer);
+            bookmarkButtonContainer.id = `${targetViewContext}DetailAddToBtnContainer`;
+            bookmarkButtonContainer.className = 'relative'; // For positioning popup
+            iconsWrapper.appendChild(bookmarkButtonContainer);
+
+            const seenButtonContainer = document.createElement('div');
+            seenButtonContainer.id = `${targetViewContext}DetailMarkAsSeenBtnContainer`;
+            iconsWrapper.appendChild(seenButtonContainer); // Appended after bookmark
+
+            titleBookmarkWrapper.appendChild(iconsWrapper);
 
             targetDetailContainerEl.appendChild(titleBookmarkWrapper);
-
             // Call updateAddToWatchlistButtonState with the new container's ID
             updateAddToWatchlistButtonState(detailsObject.tmdb_id, detailsObject, bookmarkButtonContainer.id);
+            // Call updateMarkAsSeenButtonState with the new container's ID
+            updateMarkAsSeenButtonState(detailsObject.tmdb_id, detailsObject, seenButtonContainer.id);
             
             const badgesContainer = document.createElement('div');
             badgesContainer.className = 'mb-3 flex flex-wrap items-center';
@@ -1446,7 +1668,75 @@
         function determineActiveWatchlistButtonContainerId() {
             if (detailOverlay && !detailOverlay.classList.contains('hidden')) return 'overlayDetailAddToBtnContainer';
             if (watchlistView && !watchlistView.classList.contains('hidden-view')) return 'watchlistDetailAddToBtnContainer';
+            // Add other contexts if the button appears elsewhere
             return 'itemDetailAddToBtnContainer'; 
+        }
+
+        function determineActiveSeenButtonContainerId() {
+            if (detailOverlay && !detailOverlay.classList.contains('hidden')) return 'overlayDetailMarkAsSeenBtnContainer';
+            if (watchlistView && !watchlistView.classList.contains('hidden-view') && watchlistItemDetailPanel && !watchlistItemDetailPanel.classList.contains('hidden')) return 'watchlistDetailMarkAsSeenBtnContainer';
+            return 'itemDetailMarkAsSeenBtnContainer';
+        }
+
+        async function updateMarkAsSeenButtonState(itemId, itemData, buttonContainerId) {
+            if (!buttonContainerId) {
+                console.warn("[updateMarkAsSeenButtonState] No buttonContainerId provided.");
+                return;
+            }
+            const container = document.getElementById(buttonContainerId);
+            if (!container) {
+                // console.warn("Seen button container not found:", buttonContainerId); // Can be noisy
+                return;
+            }
+            container.innerHTML = ''; // Clear previous button
+
+            const seenButton = document.createElement('button');
+            seenButton.id = buttonContainerId.replace('Container', 'Button'); // Assign an ID for popup management
+            seenButton.title = "Mark as Seen";
+            seenButton.className = "mark-as-seen-button p-2 rounded-md"; // Added p-2 and rounded-md for consistency
+            // Checkmark SVG
+            seenButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd" stroke="currentColor" stroke-width="1.5"/></svg>`;
+
+            if (currentUserId) {
+                if (await isItemInSeenList(itemId)) {
+                    seenButton.classList.add('seen');
+                }
+                seenButton.onclick = async () => {
+                    if (seenButton.classList.contains('seen')) {
+                        if (await removeItemFromSeenList(itemId)) seenButton.classList.remove('seen');
+                    } else {
+                        if (await addItemToSeenList(itemData)) seenButton.classList.add('seen');
+                    }
+                };
+            } else {
+                // User is not logged in, set up the auth popup
+                seenButton.title = "Sign in to mark as seen";
+
+                let seenAuthPopupElement = document.getElementById(buttonContainerId + 'SeenAuthPopup');
+                if (!seenAuthPopupElement) {
+                    seenAuthPopupElement = document.createElement('div');
+                    seenAuthPopupElement.id = buttonContainerId + 'SeenAuthPopup';
+                    seenAuthPopupElement.className = 'hidden detail-panel-popup'; // Start hidden
+                    container.appendChild(seenAuthPopupElement); // Append to the button's container
+                }
+
+                seenButton.onclick = (e) => {
+                    e.stopPropagation();
+                    if (seenAuthPopupElement.classList.contains('hidden')) {
+                        seenAuthPopupElement.classList.remove('hidden');
+                        createAuthFormUI(seenAuthPopupElement, async () => {
+                            // On success (user signed in/up)
+                            seenAuthPopupElement.classList.add('hidden'); // Close auth form
+                            // Re-update the button state, it should now be interactive
+                            await updateMarkAsSeenButtonState(itemId, itemData, buttonContainerId);
+                        });
+                        positionPopup(seenButton, seenAuthPopupElement);
+                    } else {
+                        seenAuthPopupElement.classList.add('hidden');
+                    }
+                };
+            }
+            container.appendChild(seenButton);
         }
 
         // --- Initialize the App ---
@@ -1464,10 +1754,12 @@
 
             tabSearch = document.getElementById('tabSearch');
             tabWatchlist = document.getElementById('tabWatchlist');
+            tabSeen = document.getElementById('tabSeen');
             tabLatest = document.getElementById('tabLatest'); 
             tabPopular = document.getElementById('tabPopular'); 
             searchView = document.getElementById('searchView');
             watchlistView = document.getElementById('watchlistView');
+            seenView = document.getElementById('seenView');
             latestView = document.getElementById('latestView'); 
             popularView = document.getElementById('popularView'); 
             messageArea = document.getElementById('messageArea');
@@ -1483,6 +1775,8 @@
             watchlistRelatedItemsSection = document.getElementById('watchlistRelatedItemsSection');
             watchlistCollectionItemsSection = document.getElementById('watchlistCollectionItemsSection');
             watchlistBackButtonContainer = document.getElementById('watchlistBackButtonContainer');
+
+            seenItemsDisplayContainer = document.getElementById('seenItemsDisplayContainer');
 
             latestContentDisplay = document.getElementById('latestContentDisplay');
             latestMoviesSubTab = document.getElementById('latestMoviesSubTab');
@@ -1574,16 +1868,35 @@
                 });
             });
 
-            onAuthStateChanged(auth, async (user) => {
+            setupMainTabs(); 
+            setupSubTabs(latestMoviesSubTab, latestTvShowsSubTab, latestContentDisplay, 'latest');
+            setupSubTabs(popularMoviesSubTab, popularTvShowsSubTab, popularContentDisplay, 'popular');
+            
+            // Initial load for Latest/Popular if their tabs are configured
+            if(latestMoviesSubTab) loadTmdbCategoryContent('latest', latestMoviesSubTab.dataset.type, latestMoviesSubTab.dataset.category, 1);
+            // else console.warn("latestMoviesSubTab not found during init");
+            
+            if(popularMoviesSubTab) loadTmdbCategoryContent('popular', popularMoviesSubTab.dataset.type, popularMoviesSubTab.dataset.category, 1);
+            // else console.warn("popularMoviesSubTab not found during init");
+
+            // Moved onAuthStateChanged to be one of the last things in init
+            // to ensure other UI elements and handlers are set up.
+             onAuthStateChanged(auth, async (user) => {
                 updateAuthDropdownUI(user); 
                 if (user) {
                     currentUserId = user.uid;
                     if(newWatchlistNameInput) newWatchlistNameInput.disabled = false;
                     if(createWatchlistBtn) createWatchlistBtn.disabled = false;
+                    if (seenView && !seenView.classList.contains('hidden-view')) await loadAndDisplaySeenItems(); // Refresh if seen tab is active
                     await loadAndDisplayWatchlistsFromFirestore(); 
                      if (currentSelectedItemDetails) { 
                         const activeBtnContainerId = determineActiveWatchlistButtonContainerId();
                         updateAddToWatchlistButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeBtnContainerId);
+                        const activeSeenBtnContainerId = determineActiveSeenButtonContainerId(); 
+                        updateMarkAsSeenButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeSeenBtnContainerId);
+                        // TODO: Also call updateMarkAsSeenButtonState here
+                        // const activeSeenBtnContainerId = determineActiveSeenButtonContainerId(); // You'll need this function
+                        // updateMarkAsSeenButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeSeenBtnContainerId);
                     }
                 } else {
                     currentUserId = null;
@@ -1592,22 +1905,21 @@
                     
                     if(watchlistTilesContainer) watchlistTilesContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full w-full text-center">Sign in to see your watchlists.</p>';
                     if(watchlistDisplayContainer) watchlistDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Sign in to manage your watchlists.</p>';
+                    if(seenItemsDisplayContainer) seenItemsDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Sign in to see your seen items.</p>';
                     clearAllDynamicContent('watchlist'); 
                     if(newWatchlistNameInput) newWatchlistNameInput.disabled = true;
                     if(createWatchlistBtn) createWatchlistBtn.disabled = true;
                     if (currentSelectedItemDetails) { 
                         const activeBtnContainerId = determineActiveWatchlistButtonContainerId();
                         updateAddToWatchlistButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeBtnContainerId); 
+                        const activeSeenBtnContainerId = determineActiveSeenButtonContainerId();
+                        updateMarkAsSeenButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeSeenBtnContainerId);
+                        // TODO: Also call updateMarkAsSeenButtonState here
+                        // const activeSeenBtnContainerId = determineActiveSeenButtonContainerId();
+                        // updateMarkAsSeenButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeSeenBtnContainerId);
                     }
                 }
             });
-
-            setupMainTabs(); 
-            setupSubTabs(latestMoviesSubTab, latestTvShowsSubTab, latestContentDisplay, 'latest');
-            setupSubTabs(popularMoviesSubTab, popularTvShowsSubTab, popularContentDisplay, 'popular');
-            
-            if(latestMoviesSubTab) loadTmdbCategoryContent('latest', latestMoviesSubTab.dataset.type, latestMoviesSubTab.dataset.category, 1);
-            if(popularMoviesSubTab) loadTmdbCategoryContent('popular', popularMoviesSubTab.dataset.type, popularMoviesSubTab.dataset.category, 1);
         }
         
         // Call initializeAppState after the DOM is fully loaded and parsed.
