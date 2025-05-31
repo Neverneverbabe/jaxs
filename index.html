@@ -61,7 +61,9 @@
         #watchlistTilesContainer::-webkit-scrollbar, .generic-items-container::-webkit-scrollbar,
         #watchlistManagePopupList::-webkit-scrollbar, #watchlistItemDetailContainer::-webkit-scrollbar,
         #watchlistSeasonsEpisodesSection::-webkit-scrollbar, #watchlistRelatedItemsSection::-webkit-scrollbar,
-        #watchlistCollectionItemsSection::-webkit-scrollbar { 
+        #watchlistCollectionItemsSection::-webkit-scrollbar,
+        #overlayDetailContainer::-webkit-scrollbar, .overlay-content-scroll::-webkit-scrollbar,
+        .custom-scrollbar::-webkit-scrollbar { 
             width: 8px; height: 8px; 
         }
         #resultsContainer::-webkit-scrollbar-track, #watchlistDisplayContainer::-webkit-scrollbar-track, 
@@ -70,7 +72,9 @@
         #watchlistTilesContainer::-webkit-scrollbar-track, .generic-items-container::-webkit-scrollbar-track,
         #watchlistManagePopupList::-webkit-scrollbar-track, #watchlistItemDetailContainer::-webkit-scrollbar-track,
         #watchlistSeasonsEpisodesSection::-webkit-scrollbar-track, #watchlistRelatedItemsSection::-webkit-scrollbar-track,
-        #watchlistCollectionItemsSection::-webkit-scrollbar-track { 
+        #watchlistCollectionItemsSection::-webkit-scrollbar-track,
+        #overlayDetailContainer::-webkit-scrollbar-track, .overlay-content-scroll::-webkit-scrollbar-track,
+        .custom-scrollbar::-webkit-scrollbar-track { 
             background: #374151; border-radius: 10px; 
         }
         #resultsContainer::-webkit-scrollbar-thumb, #watchlistDisplayContainer::-webkit-scrollbar-thumb, 
@@ -79,7 +83,9 @@
         #watchlistTilesContainer::-webkit-scrollbar-thumb, .generic-items-container::-webkit-scrollbar-thumb,
         #watchlistManagePopupList::-webkit-scrollbar-thumb, #watchlistItemDetailContainer::-webkit-scrollbar-thumb,
         #watchlistSeasonsEpisodesSection::-webkit-scrollbar-thumb, #watchlistRelatedItemsSection::-webkit-scrollbar-thumb,
-        #watchlistCollectionItemsSection::-webkit-scrollbar-thumb { 
+        #watchlistCollectionItemsSection::-webkit-scrollbar-thumb,
+        #overlayDetailContainer::-webkit-scrollbar-thumb, .overlay-content-scroll::-webkit-scrollbar-thumb,
+        .custom-scrollbar::-webkit-scrollbar-thumb { 
             background: #6b7280; border-radius: 10px; 
         }
         #resultsContainer::-webkit-scrollbar-thumb:hover, #watchlistDisplayContainer::-webkit-scrollbar-thumb:hover, 
@@ -88,7 +94,9 @@
         #watchlistTilesContainer::-webkit-scrollbar-thumb:hover, .generic-items-container::-webkit-scrollbar-thumb:hover,
         #watchlistManagePopupList::-webkit-scrollbar-thumb:hover, #watchlistItemDetailContainer::-webkit-scrollbar-thumb:hover,
         #watchlistSeasonsEpisodesSection::-webkit-scrollbar-thumb:hover, #watchlistRelatedItemsSection::-webkit-scrollbar-thumb:hover,
-        #watchlistCollectionItemsSection::-webkit-scrollbar-thumb:hover { 
+        #watchlistCollectionItemsSection::-webkit-scrollbar-thumb:hover,
+        #overlayDetailContainer::-webkit-scrollbar-thumb:hover, .overlay-content-scroll::-webkit-scrollbar-thumb:hover,
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { 
             background: #9ca3af; 
         }
         
@@ -177,7 +185,7 @@
         .options-menu-item.delete:hover { background-color: #ef4444; color: white; }
 
         #watchlistTilesContainer { max-height: 200px; overflow-y: auto; padding-bottom: 0.5rem; }
-        .generic-items-container { max-height: calc(100vh - 350px); overflow-y: auto; } 
+        .generic-items-container { max-height: calc(100vh - 250px); overflow-y: auto; } 
         .generic-item-card img { 
             width: 100%; 
             max-width: 150px; 
@@ -204,7 +212,7 @@
         .auth-dropdown-status { margin-bottom: 0.75rem; color: #9ca3af; font-size: 0.875rem; }
 
         /* Watchlist Management Popup on Item Detail Page */
-        #watchlistManageButton { 
+        .watchlist-manage-button { /* Class for the bookmark icon button */
             background-color: transparent; 
             color: #9ca3af; 
             padding: 0.5rem; 
@@ -212,16 +220,16 @@
             transition: color 0.2s, background-color 0.2s;
             border: 1px solid transparent; 
         }
-        #watchlistManageButton:hover { 
+        .watchlist-manage-button:hover { 
             color: #e5e7eb; 
             background-color: #374151; 
         }
-         #watchlistManageButton.active-popup { 
+         .watchlist-manage-button.active-popup { 
             background-color: #374151;
             color: #38bdf8;
         }
 
-        #watchlistManagePopup {
+        .detail-panel-popup { /* Common class for popups in detail panels */
             position: absolute;
             background-color: #1f2937; 
             border: 1px solid #374151; 
@@ -233,32 +241,110 @@
             max-height: 300px; 
             margin-top: 0.5rem; 
         }
-        #watchlistManagePopupList {
+        .detail-panel-popup-list {
             max-height: 150px; 
             overflow-y: auto;
             margin-bottom: 0.75rem;
         }
-        .watchlist-popup-item {
+        .detail-panel-popup-item {
             display: flex;
             align-items: center;
             padding: 0.5rem 0;
             border-bottom: 1px solid #374151; 
         }
-        .watchlist-popup-item:last-child { border-bottom: none; }
-        .watchlist-popup-item input[type="checkbox"] {
+        .detail-panel-popup-item:last-child { border-bottom: none; }
+        .detail-panel-popup-item input[type="checkbox"] {
             margin-right: 0.75rem;
             accent-color: #38bdf8; 
         }
-        .watchlist-popup-item label { flex-grow: 1; cursor: pointer; }
-        .popup-new-watchlist-input {
+        .detail-panel-popup-item label { flex-grow: 1; cursor: pointer; }
+        .detail-panel-popup-new-input {
             background-color: #374151; color: white; border: 1px solid #4b5563; 
             padding: 0.5rem; border-radius: 0.375rem; width: calc(100% - 4.5rem); 
             margin-right: 0.5rem;
         }
-        .popup-create-watchlist-btn {
+        .detail-panel-popup-create-btn {
              background-color: #22c55e; color: white; padding: 0.5rem; border-radius: 0.375rem;
         }
-         .popup-create-watchlist-btn:hover { background-color: #16a34a; }
+         .detail-panel-popup-create-btn:hover { background-color: #16a34a; }
+         
+        .position-indicator {
+            position: fixed;
+            top: 100px; 
+            right: 20px;
+            background-color: rgba(56, 189, 248, 0.9); 
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px; 
+            font-size: 0.8rem; 
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex; 
+            align-items: center;
+            gap: 6px; 
+        }
+
+        .back-button {
+            background-color: #4b5563; 
+            color: #e5e7eb; 
+            padding: 0.5rem 1rem; 
+            border-radius: 0.375rem; 
+            font-weight: 500; 
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem; 
+            transition: all 0.2s;
+            margin-bottom: 1rem; 
+        }
+        .back-button:hover {
+            background-color: #6b7280; 
+            transform: translateX(-3px); 
+        }
+        .back-button svg {
+            width: 16px; 
+            height: 16px; 
+        }
+
+
+        /* Detail Overlay Styles */
+        #detailOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8); 
+            z-index: 1000; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem; 
+        }
+        #detailOverlayContent {
+            background-color: #1f2937; 
+            padding: 2rem; 
+            border-radius: 0.5rem; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 800px; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+            position: relative; 
+        }
+        #closeOverlayButton {
+            position: absolute;
+            top: 0.75rem; 
+            right: 0.75rem; 
+            background: none;
+            border: none;
+            color: #9ca3af; 
+            font-size: 1.5rem; 
+            cursor: pointer;
+            line-height: 1;
+        }
+        #closeOverlayButton:hover {
+            color: white;
+        }
 
     </style>
 </head>
@@ -271,6 +357,12 @@
                 </svg>
             </button>
             <div id="authDropdownMenu" class="hidden"></div>
+        </div>
+        <div id="positionIndicator" class="position-indicator hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+            <span>Position saved</span>
         </div>
 
         <div class="flex justify-center border-b border-gray-700 mb-6 mt-8 pt-12"> 
@@ -297,11 +389,14 @@
                     <div id="resultsContainer" class="space-y-3 max-h-[calc(100vh-450px)] md:max-h-[70vh] overflow-y-auto pr-2"><p class="text-gray-500 italic">Search for media.</p></div>
                 </div>
                 <div id="itemDetailSection" class="md:col-span-2 bg-gray-800 p-6 rounded-lg shadow-xl min-h-[400px]">
+                    <div id="itemBackButtonContainer" class="mb-2"></div> 
                     <h2 id="itemDetailTitle" class="section-title">Details & Player</h2>
                     <div id="itemDetailContainer"><p class="text-gray-500 italic">Select an item.</p></div>
-                    <div id="seasonsEpisodesSection" class="mt-4"></div>
-                    <div id="relatedItemsSection" class="mt-6"></div>
-                    <div id="collectionItemsSection" class="mt-6"></div> 
+                    <!-- Watchlist button container will be dynamically added here by JS -->
+                    <div id="itemVidsrcPlayerSection" class="mt-4"></div>
+                    <div id="itemSeasonsEpisodesSection" class="mt-4"></div>
+                    <div id="itemRelatedItemsSection" class="mt-6"></div>
+                    <div id="itemCollectionItemsSection" class="mt-6"></div> 
                 </div>
             </div>
         </div>
@@ -328,8 +423,11 @@
                     <p class="text-gray-500 italic col-span-full text-center">Select a watchlist or create one to view items.</p>
                 </div>
                 <div id="watchlistItemDetailPanel" class="md:col-span-2 bg-gray-800 p-6 rounded-lg shadow-xl min-h-[400px]">
+                    <div id="watchlistBackButtonContainer" class="mb-2"></div>
                     <h2 id="watchlistDetailTitle" class="section-title">Details & Player</h2>
                     <div id="watchlistDetailContainer"><p class="text-gray-500 italic">Select an item from your watchlist.</p></div>
+                    <!-- Watchlist button container will be dynamically added here by JS -->
+                    <div id="watchlistVidsrcPlayerSection" class="mt-4"></div>
                     <div id="watchlistSeasonsEpisodesSection" class="mt-4"></div>
                     <div id="watchlistRelatedItemsSection" class="mt-6"></div>
                     <div id="watchlistCollectionItemsSection" class="mt-6"></div> 
@@ -338,19 +436,37 @@
         </div>
 
         <div id="latestView" class="hidden-view bg-gray-800 p-6 rounded-lg shadow-xl">
-            <div class="flex justify-center border-b border-gray-700 mb-4">
-                <button id="latestMoviesSubTab" class="sub-tab active" data-type="movie" data-category="now_playing">Now Playing Movies</button>
-                <button id="latestTvShowsSubTab" class="sub-tab" data-type="tv" data-category="airing_today">Airing Today TV</button>
+             <div class="flex justify-between items-center mb-4">
+                <div class="flex border-b border-gray-700">
+                    <button id="latestMoviesSubTab" class="sub-tab active" data-type="movie" data-category="now_playing">Now Playing Movies</button>
+                    <button id="latestTvShowsSubTab" class="sub-tab" data-type="tv" data-category="airing_today">Airing Today TV</button>
+                </div>
             </div>
-            <div id="latestContentDisplay" class="space-y-4"></div>
+            <div id="latestContentDisplay" class="space-y-4 custom-scrollbar"></div>
         </div>
         
         <div id="popularView" class="hidden-view bg-gray-800 p-6 rounded-lg shadow-xl">
-            <div class="flex justify-center border-b border-gray-700 mb-4">
-                <button id="popularMoviesSubTab" class="sub-tab active" data-type="movie" data-category="popular">Popular Movies</button>
-                <button id="popularTvShowsSubTab" class="sub-tab" data-type="tv" data-category="popular">Popular TV Shows</button>
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex border-b border-gray-700">
+                    <button id="popularMoviesSubTab" class="sub-tab active" data-type="movie" data-category="popular">Popular Movies</button>
+                    <button id="popularTvShowsSubTab" class="sub-tab" data-type="tv" data-category="popular">Popular TV Shows</button>
+                </div>
             </div>
-            <div id="popularContentDisplay" class="space-y-4"></div>
+             <div id="popularContentDisplay" class="space-y-4 custom-scrollbar"></div>
+        </div>
+
+        <div id="detailOverlay" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-[1000]">
+            <div id="detailOverlayContent" class="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative custom-scrollbar">
+                <button id="closeOverlayButton" class="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl">&times;</button>
+                <div id="overlayBackButtonContainer" class="mb-2"></div>
+                <h2 id="overlayDetailTitle" class="section-title">Details & Player</h2>
+                <div id="overlayDetailContainer"><p class="text-gray-500 italic">Loading details...</p></div>
+                <!-- Watchlist button container will be dynamically added here by JS -->
+                <div id="overlayVidsrcPlayerSection" class="mt-4"></div>
+                <div id="overlaySeasonsEpisodesSection" class="mt-4"></div>
+                <div id="overlayRelatedItemsSection" class="mt-6"></div>
+                <div id="overlayCollectionItemsSection" class="mt-6"></div>
+            </div>
         </div>
 
         <div id="messageArea" class="fixed bottom-5 right-5 z-50"></div>
@@ -368,6 +484,7 @@
         const tmdbBaseUrl = "https://api.themoviedb.org/3";
         const imageBaseUrl = "https://image.tmdb.org/t/p/w300"; 
         const smallImageBaseUrl = "https://image.tmdb.org/t/p/w200"; 
+        const stillImageBaseUrl = "https://image.tmdb.org/t/p/w300";
         const tileThumbnailPlaceholder = "https://placehold.co/40x60/4B5563/E0E0E0?text=N/A";
         const genericItemPlaceholder = "https://placehold.co/150x225/374151/9CA3AF?text=N/A";
 
@@ -378,48 +495,25 @@
             { name: "Vidsrc.net", movieUrl: "https://vidsrc.net/embed/movie/", tvUrl: "https://vidsrc.net/embed/tv/" },
         ];
 
-        // DOM Elements
-        const searchInput = document.getElementById('searchInput');
-        const searchButton = document.getElementById('searchButton');
-        const resultsContainer = document.getElementById('resultsContainer');
-        const itemDetailContainer = document.getElementById('itemDetailContainer'); 
-        const itemDetailTitle = document.getElementById('itemDetailTitle'); 
-        const seasonsEpisodesSection = document.getElementById('seasonsEpisodesSection'); 
-        const relatedItemsSection = document.getElementById('relatedItemsSection'); 
-        const collectionItemsSection = document.getElementById('collectionItemsSection'); 
-
-        const tabSearch = document.getElementById('tabSearch');
-        const tabWatchlist = document.getElementById('tabWatchlist');
-        const tabLatest = document.getElementById('tabLatest'); 
-        const tabPopular = document.getElementById('tabPopular'); 
-        const searchView = document.getElementById('searchView');
-        const watchlistView = document.getElementById('watchlistView');
-        const latestView = document.getElementById('latestView'); 
-        const popularView = document.getElementById('popularView'); 
-        const messageArea = document.getElementById('messageArea');
-        const newWatchlistNameInput = document.getElementById('newWatchlistName');
-        const createWatchlistBtn = document.getElementById('createWatchlistBtn');
-        const watchlistTilesContainer = document.getElementById('watchlistTilesContainer'); 
-        const watchlistDisplayContainer = document.getElementById('watchlistDisplayContainer'); 
-        
-        const watchlistItemDetailPanel = document.getElementById('watchlistItemDetailPanel');
-        const watchlistItemDetailTitle = document.getElementById('watchlistDetailTitle'); 
-        const watchlistItemDetailContainer = document.getElementById('watchlistDetailContainer'); 
-        const watchlistSeasonsEpisodesSection = document.getElementById('watchlistSeasonsEpisodesSection');
-        const watchlistRelatedItemsSection = document.getElementById('watchlistRelatedItemsSection');
-        const watchlistCollectionItemsSection = document.getElementById('watchlistCollectionItemsSection');
-
-        const latestContentDisplay = document.getElementById('latestContentDisplay');
-        const latestMoviesSubTab = document.getElementById('latestMoviesSubTab');
-        const latestTvShowsSubTab = document.getElementById('latestTvShowsSubTab');
-        
-        const popularContentDisplay = document.getElementById('popularContentDisplay');
-        const popularMoviesSubTab = document.getElementById('popularMoviesSubTab');
-        const popularTvShowsSubTab = document.getElementById('popularTvShowsSubTab');
-
-        // Auth Dropdown UI Elements
-        const userAuthIcon = document.getElementById('userAuthIcon');
-        const authDropdownMenu = document.getElementById('authDropdownMenu');
+        // DOM Elements (Declared globally, assigned in initializeAppState)
+        let searchInput, searchButton, resultsContainer, itemDetailContainer, itemDetailTitle, 
+            itemSeasonsEpisodesSection, itemRelatedItemsSection, itemCollectionItemsSection, itemBackButtonContainer,
+            tabSearch, tabWatchlist, tabLatest, tabPopular, 
+            searchView, watchlistView, latestView, popularView, 
+            messageArea, newWatchlistNameInput, createWatchlistBtn, 
+            watchlistTilesContainer, watchlistDisplayContainer, 
+            watchlistItemDetailPanel, watchlistItemDetailTitle, watchlistItemDetailContainer,
+            watchlistSeasonsEpisodesSection, watchlistRelatedItemsSection, watchlistCollectionItemsSection,
+            watchlistBackButtonContainer,
+            latestContentDisplay, latestMoviesSubTab, latestTvShowsSubTab,
+            popularContentDisplay, popularMoviesSubTab, popularTvShowsSubTab,
+            userAuthIcon, authDropdownMenu,
+            detailOverlay, detailOverlayContent, closeOverlayButton, 
+            overlayDetailTitle, overlayDetailContainer, 
+            overlayVidsrcPlayerSection, overlayDetailAddToBtnContainer,
+            overlaySeasonsEpisodesSection, 
+            overlayRelatedItemsSection, overlayCollectionItemsSection, overlayBackButtonContainer,
+            positionIndicator; 
         
         let currentSelectedItemDetails = null; 
         let currentSelectedWatchlistName = null; 
@@ -430,198 +524,202 @@
         let currentLatestCategory = 'now_playing'; 
         let currentPopularPage = 1;
         let currentPopularType = 'movie'; 
+        let previousStateForBackButton = null; 
+        let scrollPositions = { latest: 0, popular: 0 };
 
-        // --- UI Helper Functions (Placed before their first call) ---
-        function showToast(message, type = 'info') { 
-            messageArea.innerHTML = ''; 
-            const toast = document.createElement('div'); 
-            const bgColor = type === 'error' ? 'bg-red-600' : (type === 'success' ? 'bg-green-600' : 'bg-sky-600'); 
-            toast.className = `p-3 rounded-lg shadow-lg text-white ${bgColor} text-sm`; 
-            toast.textContent = message; 
-            messageArea.appendChild(toast); 
-            setTimeout(() => toast.remove(), 3500); 
-        }
+
+        // --- UI Helper Functions ---
+        function showToast(message, type = 'info') { if(!messageArea) return; messageArea.innerHTML = ''; const toast = document.createElement('div'); const bgColor = type === 'error' ? 'bg-red-600' : (type === 'success' ? 'bg-green-600' : 'bg-sky-600'); toast.className = `p-3 rounded-lg shadow-lg text-white ${bgColor} text-sm`; toast.textContent = message; messageArea.appendChild(toast); setTimeout(() => toast.remove(), 3500); }
         function showLoading(section = 'main', text = 'Loading...') { 
             let target; 
             if (section === 'results') target = resultsContainer; 
-            else if (section === 'details') target = itemDetailContainer; 
-            else if (section === 'watchlist-details') target = watchlistItemDetailContainer; 
-            else if (section === 'related') target = relatedItemsSection; 
-            else if (section === 'watchlist-related') target = watchlistRelatedItemsSection; 
-            else if (section === 'collection') target = collectionItemsSection; 
-            else if (section === 'watchlist-collection') target = watchlistCollectionItemsSection; 
-            else if (section === 'seasons') target = seasonsEpisodesSection; 
-            else if (section === 'watchlist-seasons') target = watchlistSeasonsEpisodesSection; 
+            else if (section === 'details-item') target = itemDetailContainer; 
+            else if (section === 'details-watchlist') target = watchlistItemDetailContainer; 
+            else if (section === 'details-overlay') target = overlayDetailContainer;
+            else if (section === 'related-item') target = itemRelatedItemsSection; 
+            else if (section === 'related-watchlist') target = watchlistRelatedItemsSection; 
+            else if (section === 'related-overlay') target = overlayRelatedItemsSection;
+            else if (section === 'collection-item') target = itemCollectionItemsSection; 
+            else if (section === 'collection-watchlist') target = watchlistCollectionItemsSection; 
+            else if (section === 'collection-overlay') target = overlayCollectionItemsSection;
+            else if (section === 'seasons-item') target = itemSeasonsEpisodesSection; 
+            else if (section === 'seasons-watchlist') target = watchlistSeasonsEpisodesSection; 
+            else if (section === 'seasons-overlay') target = overlaySeasonsEpisodesSection;
             else if (section === 'watchlistItems') target = watchlistDisplayContainer; 
             else if (section === 'latest') target = latestContentDisplay; 
             else if (section === 'popular') target = popularContentDisplay; 
             else target = messageArea; 
-            target.innerHTML = `<div class="loader"></div><p class="text-gray-400 text-center">${text}</p>`; 
+            if(target) target.innerHTML = `<div class="loader"></div><p class="text-gray-400 text-center">${text}</p>`; 
+            else console.warn("showLoading: Target element not found for section", section);
         }
         function showMessage(message, type = 'info', section = 'main') { 
             let target; 
             if (section === 'results') target = resultsContainer; 
-            else if (section === 'details') target = itemDetailContainer; 
-            else if (section === 'watchlist-details') target = watchlistItemDetailContainer; 
+            else if (section === 'details-item') target = itemDetailContainer; 
+            else if (section === 'details-watchlist') target = watchlistItemDetailContainer;
+            else if (section === 'details-overlay') target = overlayDetailContainer;
             else if (section === 'watchlistItems') target = watchlistDisplayContainer; 
             else if (section === 'latest') target = latestContentDisplay; 
             else if (section === 'popular') target = popularContentDisplay; 
             else target = messageArea; 
-            const color = type === 'error' ? 'text-red-400' : 'text-green-400'; 
-            target.innerHTML = `<p class="${color} p-3 bg-gray-700 rounded-md text-center">${message}</p>`; 
-        }
-        function clearAllDynamicContent(targetPrefix = "item") { 
-            if (targetPrefix === "item") { 
-                if (resultsContainer) resultsContainer.innerHTML = '<p class="text-gray-500 italic">Search for media.</p>';
-                if (itemDetailContainer) itemDetailContainer.innerHTML = '<p class="text-gray-500 italic">Select an item.</p>';
-                if (itemDetailTitle) itemDetailTitle.textContent = 'Details & Player';
-                if (seasonsEpisodesSection) seasonsEpisodesSection.innerHTML = '';
-                if (relatedItemsSection) relatedItemsSection.innerHTML = '';
-                if (collectionItemsSection) collectionItemsSection.innerHTML = '';
-            } else if (targetPrefix === "watchlist") { 
-                if (watchlistItemDetailContainer) watchlistItemDetailContainer.innerHTML = '<p class="text-gray-500 italic">Select an item from your watchlist.</p>';
-                if (watchlistItemDetailTitle) watchlistItemDetailTitle.textContent = 'Details & Player';
-                if (watchlistSeasonsEpisodesSection) watchlistSeasonsEpisodesSection.innerHTML = '';
-                if (watchlistRelatedItemsSection) watchlistRelatedItemsSection.innerHTML = '';
-                if (watchlistCollectionItemsSection) watchlistCollectionItemsSection.innerHTML = '';
+            if(target) {
+                const color = type === 'error' ? 'text-red-400' : 'text-green-400'; 
+                target.innerHTML = `<p class="${color} p-3 bg-gray-700 rounded-md text-center">${message}</p>`; 
+            } else {
+                console.warn("showMessage: Target element not found for section", section);
             }
         }
+        function clearAllDynamicContent(targetViewContext = "item") { 
+            const detailContainer = document.getElementById(targetViewContext + 'DetailContainer');
+            const detailTitle = document.getElementById(targetViewContext + 'DetailTitle');
+            const seasonsSection = document.getElementById(targetViewContext + 'SeasonsEpisodesSection');
+            const relatedSection = document.getElementById(targetViewContext + 'RelatedItemsSection');
+            const collectionSection = document.getElementById(targetViewContext + 'CollectionItemsSection');
+            const playerSectionToClear = document.getElementById(targetViewContext + 'VidsrcPlayerSection');
+            const watchlistBtnContainerToClear = document.getElementById(targetViewContext + 'DetailAddToBtnContainer');
+
+            if (targetViewContext === "item" && resultsContainer) resultsContainer.innerHTML = '<p class="text-gray-500 italic">Search for media.</p>'; 
+            
+            if (detailContainer) detailContainer.innerHTML = `<p class="text-gray-500 italic">Select an item${targetViewContext !== 'item' ? ' from the list' : ''}.</p>`;
+            if (detailTitle) detailTitle.classList.add('hidden'); 
+            if (seasonsSection) seasonsSection.innerHTML = '';
+            if (relatedSection) relatedSection.innerHTML = '';
+            if (collectionSection) collectionSection.innerHTML = '';
+            if (playerSectionToClear) playerSectionToClear.innerHTML = '';
+            if (watchlistBtnContainerToClear) watchlistBtnContainerToClear.innerHTML = '';
+            const backBtnContainer = document.getElementById(targetViewContext + 'BackButtonContainer'); // Re-fetch for clarity
+            if (backBtnContainer) backBtnContainer.innerHTML = '';
+        }
+
+        // --- Scroll Position & Back Button ---
+        function showPositionSavedIndicator() {
+            if (!positionIndicator) return;
+            positionIndicator.classList.remove('hidden');
+            setTimeout(() => {
+                positionIndicator.classList.add('hidden');
+            }, 2000);
+        }
+
+        function createBackButton(originContext) { // originContext: 'latestList', 'popularList', 'watchlistItemsList', 'searchList'
+            const backBtn = document.createElement('button');
+            backBtn.className = 'back-button';
+            let buttonText = "Back to List";
+            if (originContext === 'latestList') buttonText = "Back to Latest";
+            else if (originContext === 'popularList') buttonText = "Back to Popular";
+            else if (originContext === 'watchlistItemsList') buttonText = "Back to Watchlist Items";
+            else if (originContext === 'searchList') buttonText = "Back to Search Results";
+            
+            backBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                    <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                ${buttonText}
+            `;
+
+            backBtn.onclick = () => {
+                if (originContext === 'latestList' || originContext === 'popularList') {
+                    detailOverlay.classList.add('hidden');
+                    clearAllDynamicContent('overlay'); 
+                    if (originContext === 'latestList' && latestContentDisplay) {
+                        latestContentDisplay.scrollTop = scrollPositions.latest;
+                    } else if (originContext === 'popularList' && popularContentDisplay) {
+                        popularContentDisplay.scrollTop = scrollPositions.popular;
+                    }
+                } else if (originContext === 'watchlistItemsList') {
+                    clearAllDynamicContent('watchlist'); // Clear watchlist detail panel
+                } else if (originContext === 'searchList') {
+                    clearAllDynamicContent('item'); // Clear item detail panel
+                }
+                 previousStateForBackButton = null; 
+            };
+            return backBtn;
+        }
+
 
         // --- Authentication Logic & UI ---
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
+        function isValidEmail(email) { const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; return emailRegex.test(email); }
+
+        function createAuthFormUI(parentElement, onSuccessCallback) {
+            parentElement.innerHTML = ''; // Clear previous content
+
+            const instructionText = document.createElement('p');
+            instructionText.className = 'text-sm text-gray-300 mb-3';
+            instructionText.textContent = 'Sign in or sign up to manage watchlists:';
+            parentElement.appendChild(instructionText);
+
+            const emailField = document.createElement('input');
+            emailField.type = 'email';
+            emailField.placeholder = 'Email';
+            emailField.className = 'auth-dropdown-input w-full mb-2'; 
+            parentElement.appendChild(emailField);
+
+            const passwordField = document.createElement('input');
+            passwordField.type = 'password';
+            passwordField.placeholder = 'Password';
+            passwordField.className = 'auth-dropdown-input w-full mb-3'; 
+            parentElement.appendChild(passwordField);
+
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'flex justify-between gap-2';
+
+            const signInButton = document.createElement('button');
+            signInButton.textContent = 'Sign In';
+            signInButton.className = 'auth-dropdown-button flex-grow'; 
+            signInButton.onclick = async () => {
+                const email = emailField.value; const password = passwordField.value;
+                if (!email || !password) { showToast("Email and password required.", "error"); return; }
+                if (!isValidEmail(email)) { showToast("Invalid email format.", "error"); return; }
+                try { await signInWithEmailAndPassword(auth, email, password); showToast("Signed in!", "success"); if (onSuccessCallback) onSuccessCallback(); } catch (error) { showToast(`Sign in error: ${error.message}`, "error"); }
+            };
+            buttonContainer.appendChild(signInButton);
+
+            const signUpButton = document.createElement('button');
+            signUpButton.textContent = 'Sign Up';
+            signUpButton.className = 'auth-dropdown-button flex-grow'; 
+            signUpButton.onclick = async () => {
+                const email = emailField.value; const password = passwordField.value;
+                if (!email || !password) { showToast("Email and password required.", "error"); return; }
+                if (!isValidEmail(email)) { showToast("Invalid email format.", "error"); return; }
+                try { await createUserWithEmailAndPassword(auth, email, password); showToast("Signed up! You are now logged in.", "success"); if (onSuccessCallback) onSuccessCallback(); } catch (error) { showToast(`Sign up error: ${error.message}`, "error"); }
+            };
+            buttonContainer.appendChild(signUpButton);
+            parentElement.appendChild(buttonContainer);
         }
 
         function updateAuthDropdownUI(user) {
-            authDropdownMenu.innerHTML = ''; 
+            if (!authDropdownMenu) return;
+            authDropdownMenu.innerHTML = ''; // Clear it once at the beginning
+
             if (user) {
+                // Logged-in UI
                 const userInfo = document.createElement('div');
                 userInfo.className = 'auth-dropdown-status';
                 userInfo.textContent = `Logged in as: ${user.email}`;
                 authDropdownMenu.appendChild(userInfo);
-
                 const signOutDropdownButton = document.createElement('button');
-                signOutDropdownButton.id = 'signOutDropdownButton'; 
-                signOutDropdownButton.className = 'auth-dropdown-button bg-red-600 hover:bg-red-700 w-full mt-2'; 
+                signOutDropdownButton.id = 'signOutDropdownButton';
+                signOutDropdownButton.className = 'auth-dropdown-button bg-red-600 hover:bg-red-700 w-full mt-2';
                 signOutDropdownButton.textContent = 'Sign Out';
                 signOutDropdownButton.addEventListener('click', async () => {
-                    try {
-                        await signOut(auth);
-                        showToast("Signed out successfully.", "info");
-                        authDropdownMenu.classList.add('hidden'); 
-                    } catch (error) {
-                        showToast(`Sign out error: ${error.message}`, "error");
-                    }
+                    try { await signOut(auth); showToast("Signed out successfully.", "info"); authDropdownMenu.classList.add('hidden'); } catch (error) { showToast(`Sign out error: ${error.message}`, "error"); }
                 });
                 authDropdownMenu.appendChild(signOutDropdownButton);
             } else {
-                const emailField = document.createElement('input');
-                emailField.type = 'email';
-                emailField.id = 'dropdownEmailInput';
-                emailField.placeholder = 'Email';
-                emailField.className = 'auth-dropdown-input';
-                authDropdownMenu.appendChild(emailField);
-
-                const passwordField = document.createElement('input');
-                passwordField.type = 'password';
-                passwordField.id = 'dropdownPasswordInput';
-                passwordField.placeholder = 'Password';
-                passwordField.className = 'auth-dropdown-input';
-                authDropdownMenu.appendChild(passwordField);
-
-                const buttonContainer = document.createElement('div');
-                buttonContainer.className = 'flex justify-between';
-
-                const signInDropdownButton = document.createElement('button');
-                signInDropdownButton.id = 'signInDropdownButton';
-                signInDropdownButton.className = 'auth-dropdown-button';
-                signInDropdownButton.textContent = 'Sign In';
-                signInDropdownButton.addEventListener('click', async () => {
-                    const email = emailField.value;
-                    const password = passwordField.value;
-                    if (!email || !password) { showToast("Email and password required.", "error"); return; }
-                    if (!isValidEmail(email)) { showToast("Invalid email format.", "error"); return; }
-                    try {
-                        await signInWithEmailAndPassword(auth, email, password);
-                        showToast("Signed in!", "success");
-                        authDropdownMenu.classList.add('hidden');
-                    } catch (error) { showToast(`Sign in error: ${error.message}`, "error"); }
+                // Logged-out UI: Use the new helper function
+                createAuthFormUI(authDropdownMenu, () => {
+                // On success from main dropdown, just close it.
+                // onAuthStateChanged will handle updating the UI.
+                if (authDropdownMenu) authDropdownMenu.classList.add('hidden');
                 });
-                buttonContainer.appendChild(signInDropdownButton);
-
-                const signUpDropdownButton = document.createElement('button');
-                signUpDropdownButton.id = 'signUpDropdownButton';
-                signUpDropdownButton.className = 'auth-dropdown-button';
-                signUpDropdownButton.textContent = 'Sign Up';
-                signUpDropdownButton.addEventListener('click', async () => {
-                    const email = emailField.value;
-                    const password = passwordField.value;
-                    if (!email || !password) { showToast("Email and password required.", "error"); return; }
-                    if (!isValidEmail(email)) { showToast("Invalid email format.", "error"); return; }
-                    try {
-                        await createUserWithEmailAndPassword(auth, email, password);
-                        showToast("Signed up! You are now logged in.", "success"); 
-                        authDropdownMenu.classList.add('hidden');
-                    } catch (error) { showToast(`Sign up error: ${error.message}`, "error"); }
-                });
-                buttonContainer.appendChild(signUpDropdownButton);
-                authDropdownMenu.appendChild(buttonContainer);
             }
         }
-
-        userAuthIcon.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            authDropdownMenu.classList.toggle('hidden');
-        });
-
-        document.addEventListener('click', (event) => {
-            if (userAuthIcon && authDropdownMenu && !userAuthIcon.contains(event.target) && !authDropdownMenu.contains(event.target)) {
-                authDropdownMenu.classList.add('hidden');
-            }
-            if (!event.target.closest('.watchlist-tile')) { 
-                closeAllOptionMenus();
-            }
-            const managePopup = document.getElementById('watchlistManagePopup');
-            const manageButtonContainer = document.getElementById('addToWatchlistBtnContainer');
-             if (managePopup && !managePopup.classList.contains('hidden')) {
-                if (manageButtonContainer && !manageButtonContainer.contains(event.target) && !managePopup.contains(event.target) ) {
-                    managePopup.classList.add('hidden');
-                }
-            }
-        });
-
-        onAuthStateChanged(auth, async (user) => {
-            updateAuthDropdownUI(user); 
-            if (user) {
-                currentUserId = user.uid;
-                newWatchlistNameInput.disabled = false;
-                createWatchlistBtn.disabled = false;
-                await loadAndDisplayWatchlistsFromFirestore(); 
-                 if (currentSelectedItemDetails) { 
-                    updateAddToWatchlistButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails);
-                }
-            } else {
-                currentUserId = null;
-                currentSelectedWatchlistName = null; 
-                localStorage.removeItem('mediaFinderLastSelectedWatchlist'); 
-                
-                watchlistTilesContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full w-full text-center">Sign in to see your watchlists.</p>';
-                watchlistDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Sign in to manage your watchlists.</p>';
-                clearAllDynamicContent('watchlist'); 
-                newWatchlistNameInput.disabled = true;
-                createWatchlistBtn.disabled = true;
-                if (currentSelectedItemDetails) { 
-                    updateAddToWatchlistButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails);
-                }
-            }
-        });
         
-        // --- Firestore Watchlist Functions ---
+        
+        // --- Firestore Watchlist Functions & UI ---
         async function loadAndDisplayWatchlistsFromFirestore() {
             if (!currentUserId) {
-                watchlistTilesContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full w-full text-center">Sign in to see your watchlists.</p>';
-                watchlistDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Sign in to manage your watchlists.</p>';
+                if(watchlistTilesContainer) watchlistTilesContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full w-full text-center">Sign in to see your watchlists.</p>';
+                if(watchlistDisplayContainer) watchlistDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Sign in to manage your watchlists.</p>';
                 clearAllDynamicContent('watchlist'); 
                 currentSelectedWatchlistName = null; 
                 return;
@@ -645,7 +743,7 @@
                     currentSelectedWatchlistName = null;
                 }
                 
-                watchlistTilesContainer.querySelectorAll('.watchlist-tile').forEach(tile => {
+                if(watchlistTilesContainer) watchlistTilesContainer.querySelectorAll('.watchlist-tile').forEach(tile => {
                     tile.classList.remove('selected-watchlist-tile');
                     if (tile.dataset.watchlistName === currentSelectedWatchlistName) {
                         tile.classList.add('selected-watchlist-tile');
@@ -655,38 +753,17 @@
                 if (currentSelectedWatchlistName) {
                     await displayItemsInSelectedWatchlist();
                 } else {
-                    watchlistDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Select a watchlist or create one.</p>';
+                    if(watchlistDisplayContainer) watchlistDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Select a watchlist or create one.</p>';
                     clearAllDynamicContent('watchlist'); 
                 }
 
             } catch (error) {
                 console.error("Error loading watchlists from Firestore: ", error);
                 showToast("Error loading watchlists. Check console and Firestore rules.", "error");
-                watchlistTilesContainer.innerHTML = '<p class="text-red-400">Could not load watchlists.</p>';
+                if(watchlistTilesContainer) watchlistTilesContainer.innerHTML = '<p class="text-red-400">Could not load watchlists.</p>';
             }
         }
         
-        createWatchlistBtn.addEventListener('click', async () => {
-            if (!currentUserId) { showToast("You must be signed in to create a watchlist.", "error"); return; }
-            const name = newWatchlistNameInput.value.trim();
-            if (!name) { showToast("Please enter a name for the new watchlist.", "error"); return; }
-            
-            try {
-                const watchlistRef = doc(db, "users", currentUserId, "watchlists", name);
-                const docSnap = await getDoc(watchlistRef); 
-                if (docSnap.exists()) { showToast(`Watchlist "${name}" already exists.`, "error"); return; }
-
-                await setDoc(watchlistRef, {
-                    name: name, items: [], createdAt: new Date().toISOString(), uid: currentUserId 
-                });
-                currentSelectedWatchlistName = name; 
-                localStorage.setItem(`mediaFinderLastSelectedWatchlist_${currentUserId}`, name);
-                await loadAndDisplayWatchlistsFromFirestore(); 
-                newWatchlistNameInput.value = ''; 
-                showToast(`Watchlist "${name}" created.`, "success");
-            } catch (error) { console.error("Error creating watchlist: ", error); showToast("Failed to create watchlist. Check console.", "error"); }
-        });
-
         async function handleDeleteWatchlist(watchlistName) {
             if (!currentUserId) { showToast("You must be signed in to delete a watchlist.", "error"); return; }
             if (!watchlistName) { console.error("[handleDeleteWatchlist] Called with no name."); return; }
@@ -702,13 +779,15 @@
                 await loadAndDisplayWatchlistsFromFirestore(); 
                 showToast(`Watchlist "${watchlistName}" deleted.`, "info");
 
-                if (currentSelectedItemDetails) { 
-                    updateAddToWatchlistButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails);
+                if (currentSelectedItemDetails) {
+                    const activeBtnContainerId = determineActiveWatchlistButtonContainerId();
+                    updateAddToWatchlistButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeBtnContainerId);
                 }
             } catch (error) { console.error("Error deleting watchlist: ", error); showToast("Failed to delete watchlist. Check console.", "error"); }
         }
         
         function displayWatchlistSelection(firestoreWatchlists = []) { 
+            if(!watchlistTilesContainer) return;
             watchlistTilesContainer.innerHTML = ''; 
             if (!currentUserId) { 
                  watchlistTilesContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full w-full text-center">Sign in to manage watchlists.</p>';
@@ -764,7 +843,8 @@
                         if(currentUserId) localStorage.setItem(`mediaFinderLastSelectedWatchlist_${currentUserId}`, name);
                         await displayItemsInSelectedWatchlist();
                         if (currentSelectedItemDetails) { 
-                            updateAddToWatchlistButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails);
+                            const activeBtnContainerId = determineActiveWatchlistButtonContainerId();
+                            updateAddToWatchlistButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeBtnContainerId);
                         }
                         clearAllDynamicContent('watchlist');
                     });
@@ -774,6 +854,7 @@
         }
 
         async function displayItemsInSelectedWatchlist() {
+            if(!watchlistDisplayContainer) return;
             watchlistDisplayContainer.innerHTML = ''; 
             if (!currentUserId) {
                 watchlistDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Please sign in to view watchlist items.</p>';
@@ -820,7 +901,7 @@
                 const watchlistRef = doc(db, "users", currentUserId, "watchlists", watchlistName);
                 await updateDoc(watchlistRef, { items: arrayUnion(itemToAdd) });
                 showToast(`"${itemToAdd.title}" added to ${watchlistName}.`, "success");
-                if (currentSelectedWatchlistName === watchlistName && !watchlistView.classList.contains('hidden-view')) {
+                if (currentSelectedWatchlistName === watchlistName && watchlistView && !watchlistView.classList.contains('hidden-view')) {
                     await displayItemsInSelectedWatchlist();
                 }
                 await loadAndDisplayWatchlistsFromFirestore(); 
@@ -847,7 +928,7 @@
                         itemTitleForToast = itemToRemoveObject.title;
                         await updateDoc(watchlistRef, { items: arrayRemove(itemToRemoveObject) });
                         showToast(`"${itemTitleForToast}" removed from ${watchlistName}.`, "info");
-                        if (currentSelectedWatchlistName === watchlistName && !watchlistView.classList.contains('hidden-view')) {
+                        if (currentSelectedWatchlistName === watchlistName && watchlistView && !watchlistView.classList.contains('hidden-view')) {
                             await displayItemsInSelectedWatchlist();
                         }
                         await loadAndDisplayWatchlistsFromFirestore();
@@ -889,8 +970,10 @@
             } catch (error) { console.error("Error checking if item is in Firestore watchlist:", error); return false; }
         }
         
-        async function updateAddToWatchlistButtonState(itemId, itemData, buttonContainerId = 'addToWatchlistBtnContainer') { 
+        async function updateAddToWatchlistButtonState(itemId, itemData, buttonContainerId = 'addToWatchlistBtnContainer') {
+            console.log(`[DEBUG] updateAddToWatchlistButtonState CALLED for containerId: ${buttonContainerId}, itemId: ${itemId}`);
             const container = document.getElementById(buttonContainerId); 
+            // console.log(`[updateAddToWatchlistButtonState] Called for item ID: ${itemId}, container ID: ${buttonContainerId}. Container found: ${!!container}`);
             if (!container) { 
                 console.warn("Button container not found for updateAddToWatchlistButtonState:", buttonContainerId);
                 return; 
@@ -898,62 +981,96 @@
             container.innerHTML = ''; 
             
             const mainButton = document.createElement('button');
-            mainButton.id = 'watchlistManageButton'; // Keep a consistent ID for the button itself
+            mainButton.id = buttonContainerId.replace('Container', 'Button'); 
             mainButton.title = "Add to/manage watchlists";
             mainButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clip-rule="evenodd" /></svg>`;
-            mainButton.className = "p-2 rounded-md hover:bg-sky-700 transition-colors text-white"; 
+            mainButton.className = "p-2 rounded-md hover:bg-sky-700 transition-colors text-white watchlist-manage-button"; 
             container.appendChild(mainButton);
 
-            // Attempt to find or create the popup div associated with this button container
-            let popup = document.getElementById(buttonContainerId + 'Popup');
-            if (!popup) {
-                popup = document.createElement('div');
-                popup.id = buttonContainerId + 'Popup'; // Unique ID for the popup
-                popup.className = 'hidden watchlistManagePopup'; // General class for styling, specific ID for targeting
-                container.appendChild(popup); 
+            // Ensure popup is created fresh or properly managed if it exists
+            let popupElement = document.getElementById(buttonContainerId + 'Popup');
+            if (!popupElement) {
+                popupElement = document.createElement('div');
+                popupElement.id = buttonContainerId + 'Popup';
+                popupElement.className = 'hidden detail-panel-popup'; // Start hidden
+                container.appendChild(popupElement); // Append to the button's container
+            } else {
+                // If the popup already exists and is visible, don't mess with its content or visibility here.
+                // Only hide it if we are re-populating for a *different item* or context,
+                // which is handled by the overall view logic clearing containers.
+                // For now, if it exists, we assume its state is managed by its own open/close logic.
+                // However, we do need to ensure it's initially hidden if it's being set up.
+                // This part is tricky; the main goal is not to hide it if the user just opened it.
             }
             
             mainButton.onclick = async (e) => {
-                e.stopPropagation();
+                console.log(`[DEBUG] Bookmark button clicked for container: ${buttonContainerId}`);
+                e.stopPropagation(); 
                 const currentPopup = document.getElementById(buttonContainerId + 'Popup'); 
-                if (currentPopup.classList.contains('hidden')) {
-                    await populateWatchlistManagePopup(currentPopup, itemId, itemData, mainButton); 
-                    currentPopup.classList.remove('hidden');
-                    positionPopup(mainButton, currentPopup);
+
+                if (currentPopup) {
+                    console.log(`[DEBUG] Popup found: ${currentPopup.id}. Has 'hidden' class: ${currentPopup.classList.contains('hidden')}`);
+                    if (currentPopup.classList.contains('hidden')) {
+                        currentPopup.classList.remove('hidden');
+                        console.log(`[DEBUG] Removed 'hidden' class. Popup should be visible.`);
+                        
+                        // Re-enable actual population and positioning
+                        await populateWatchlistManagePopup(currentPopup, itemId, itemData, mainButton, buttonContainerId); 
+                        positionPopup(mainButton, currentPopup); 
+                        
+                        // Add a log to see if it's still considered visible after population
+                        console.log(`[DEBUG] Popup after populate/position. Computed display: ${window.getComputedStyle(currentPopup).display}, Visibility: ${window.getComputedStyle(currentPopup).visibility}`);
+                        console.log(`[DEBUG] Popup BoundingClientRect after populate/position: ${JSON.stringify(currentPopup.getBoundingClientRect())}`);
+
+                    } else {
+                        currentPopup.classList.add('hidden');
+                        console.log(`[DEBUG] Added 'hidden' class. Popup should be hidden.`);
+                    }
                 } else {
-                    currentPopup.classList.add('hidden');
+                    console.error(`[DEBUG] Popup NOT found for ID: ${buttonContainerId + 'Popup'}`);
                 }
             };
         }
 
-        async function populateWatchlistManagePopup(popupElement, itemId, itemData, anchorButton) {
+        async function populateWatchlistManagePopup(popupElement, itemId, itemData, anchorButton, mainButtonContainerId) {
             popupElement.innerHTML = ''; 
 
             if (!currentUserId) {
-                popupElement.innerHTML = `<p class="text-xs text-gray-400 py-2">Sign in to manage watchlists.</p>`;
-                return;
+                console.log("[populateWatchlistManagePopup] No current user ID. Displaying auth form.");
+                createAuthFormUI(popupElement, async () => {
+                    // Success callback: User is now signed in (or signed up).
+                    // Re-populate this same popup with the watchlist management UI.
+                    await populateWatchlistManagePopup(popupElement, itemId, itemData, anchorButton, mainButtonContainerId);
+                    if (!popupElement.classList.contains('hidden')) {
+                         positionPopup(anchorButton, popupElement); // Reposition after content change
+                    }
+                });
+                return; 
             }
             
             const watchlistsColRef = collection(db, "users", currentUserId, "watchlists");
             const querySnapshot = await getDocs(watchlistsColRef);
             const userWatchlists = [];
+            console.log("Populate popup: Fetching watchlists for user", currentUserId);
             querySnapshot.forEach((doc) => userWatchlists.push({ id: doc.id, ...doc.data() }));
 
             const listElement = document.createElement('div');
-            listElement.id = 'watchlistManagePopupList'; // This ID is fine if only one such list is open at a time
+            listElement.className = 'detail-panel-popup-list'; 
 
             if (userWatchlists.length === 0) {
                 listElement.innerHTML = '<p class="text-xs text-gray-400 py-1">No watchlists yet. Create one below.</p>';
+                console.log("Populate popup: No user watchlists found.");
             }
 
             for (const wl of userWatchlists) {
                 const itemDiv = document.createElement('div');
-                itemDiv.className = 'watchlist-popup-item';
+                itemDiv.className = 'detail-panel-popup-item'; 
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
-                checkbox.id = `wl-check-${wl.id.replace(/\s+/g, '-')}-${itemId}`; 
+                checkbox.id = `wl-check-${wl.id.replace(/\s+/g, '-')}-${itemId}-${mainButtonContainerId}`; 
                 checkbox.dataset.watchlistName = wl.id;
                 checkbox.checked = await isItemInSpecificFirestoreWatchlist(wl.id, itemId);
+                console.log(`Populate popup: Watchlist "${wl.id}", item ID "${itemId}", checked: ${checkbox.checked}`);
                 
                 checkbox.addEventListener('change', async (e) => {
                     if (e.target.checked) {
@@ -961,9 +1078,11 @@
                     } else {
                         await removeItemFromSpecificFirestoreWatchlist(wl.id, itemId);
                     }
-                    // Re-populate to reflect change
-                    await populateWatchlistManagePopup(popupElement, itemId, itemData, anchorButton);
-                    positionPopup(anchorButton, popupElement);
+                    // The checkbox's visual state is already updated by the browser.
+                    // Avoid recursive call to prevent multiple "Populate popup..." logs and potential instability.
+                    // If a full refresh of the popup is desired after every change, 
+                    // it might be better to signal the main button's onclick to handle it,
+                    // or simply let the user close and reopen for a fresh state.
                 });
 
                 const label = document.createElement('label');
@@ -981,25 +1100,30 @@
             const newNameInput = document.createElement('input');
             newNameInput.type = 'text';
             newNameInput.placeholder = 'New Watchlist Name';
-            newNameInput.className = 'popup-new-watchlist-input flex-grow';
+            newNameInput.className = 'detail-panel-popup-new-input flex-grow'; 
             const createBtnPopup = document.createElement('button');
             createBtnPopup.textContent = 'Create & Add';
-            createBtnPopup.className = 'popup-create-watchlist-btn';
+            createBtnPopup.className = 'detail-panel-popup-create-btn'; 
             
             createBtnPopup.onclick = async () => {
                 if (!currentUserId) return;
+                console.log("Populate popup: Create & Add button clicked.");
                 const name = newNameInput.value.trim();
                 if (!name) { showToast("Enter a name.", "error"); return; }
                 
                 const newWatchlistRef = doc(db, "users", currentUserId, "watchlists", name);
                 const docSnap = await getDoc(newWatchlistRef);
                 if (docSnap.exists()) { showToast(`"${name}" already exists. Add item from list.`, "error"); return; }
+                console.log(`Populate popup: Creating new watchlist "${name}" and adding item.`);
 
                 await setDoc(newWatchlistRef, { name: name, items: [itemData], createdAt: new Date().toISOString(), uid: currentUserId }); 
                 showToast(`"${name}" created and item added.`, "success");
                 newNameInput.value = '';
-                await populateWatchlistManagePopup(popupElement, itemId, itemData, anchorButton);
-                positionPopup(anchorButton, popupElement); 
+                // After creating, the popup needs to be refreshed to show the new watchlist and its state.
+                // Clear and re-populate.
+                popupElement.innerHTML = ''; // Clear current content
+                await populateWatchlistManagePopup(popupElement, itemId, itemData, anchorButton, mainButtonContainerId); // Re-populate
+                if (!popupElement.classList.contains('hidden')) positionPopup(anchorButton, popupElement); // Re-position if still visible
                 await loadAndDisplayWatchlistsFromFirestore(); 
             };
 
@@ -1007,56 +1131,216 @@
             createNewDiv.appendChild(createBtnPopup);
             popupElement.appendChild(createNewDiv);
         }
+
         
         function positionPopup(button, popup) {
             const rect = button.getBoundingClientRect();
-            popup.style.top = (rect.bottom + window.scrollY + 5) + 'px'; 
-            popup.style.left = (rect.left + window.scrollX) + 'px'; 
+            const popupBuffer = 10; // Minimum space from viewport edges
+
+            // Make popup temporarily visible to get accurate offsetWidth if it's initially hidden
+            // This is important because offsetWidth is 0 for hidden elements.
+            const initialDisplay = popup.style.display;
+            const initialVisibility = popup.style.visibility;
+            const wasHiddenByClass = popup.classList.contains('hidden');
+
+            if (wasHiddenByClass) popup.classList.remove('hidden'); // Temporarily remove hidden class if present
+            popup.style.display = 'block';    // Ensure it's block for measurement
+            popup.style.visibility = 'hidden'; // Keep it hidden from view but measurable
             
-            if ( (popup.offsetLeft + popup.offsetWidth) > window.innerWidth - 10 ) { 
-                popup.style.left = (window.innerWidth - popup.offsetWidth - 10) + 'px';
+            const popupWidth = popup.offsetWidth;
+            
+            // Restore original display/visibility state
+            if (wasHiddenByClass) popup.classList.add('hidden'); // Add back hidden class if it was there
+            popup.style.display = initialDisplay; // Restore original display
+            popup.style.visibility = initialVisibility; // Restore original visibility
+
+            console.log(`[DEBUG positionPopup] Measured popupWidth: ${popupWidth}`);
+            if (popupWidth === 0) {
+                console.warn("[DEBUG positionPopup] popupWidth is 0, positioning might be incorrect. Popup content might be empty or display issue.");
+                // Consider a default width or further checks if this is a persistent issue
             }
-            if (popup.offsetLeft < 10) { 
-                 popup.style.left = '10px';
+
+            let newTop, newLeft;
+            const overlayContentEl = document.getElementById('detailOverlayContent');
+            // Check if detailOverlay and overlayContentEl exist and are visible, and if the button is inside overlayContentEl
+            const isInOverlay = detailOverlay && !detailOverlay.classList.contains('hidden') && 
+                                overlayContentEl && !overlayContentEl.classList.contains('hidden') && 
+                                overlayContentEl.contains(button);
+
+            if (isInOverlay) {
+                console.log("[DEBUG positionPopup] Context: Overlay");
+                const overlayRect = overlayContentEl.getBoundingClientRect();
+
+                // Calculate button's position relative to the overlayContentEl's scrollable area
+                const buttonTopInOverlay = rect.top - overlayRect.top + overlayContentEl.scrollTop;
+                const buttonLeftInOverlay = rect.left - overlayRect.left + overlayContentEl.scrollLeft;
+                const buttonBottomInOverlay = rect.bottom - overlayRect.top + overlayContentEl.scrollTop;
+
+                newTop = buttonBottomInOverlay + 5; // Position below the button, relative to overlay content
+                newLeft = buttonLeftInOverlay;    // Align with button's left, relative to overlay content
+
+                // Constrain within overlayContentEl's visible client area, considering its scroll
+                const overlayVisibleWidth = overlayContentEl.clientWidth;
+                let maxLeft = overlayContentEl.scrollLeft + overlayVisibleWidth - popupWidth - popupBuffer;
+                let minLeft = overlayContentEl.scrollLeft + popupBuffer;
+                console.log(`[DEBUG positionPopup OVERLAY] Initial newLeft: ${newLeft}, popupWidth: ${popupWidth}, overlayScrollLeft: ${overlayContentEl.scrollLeft}, overlayVisibleWidth: ${overlayVisibleWidth}`);
+                console.log(`[DEBUG positionPopup OVERLAY] Calculated minLeft: ${minLeft}, maxLeft: ${maxLeft}`);
+
+                if (newLeft > maxLeft) newLeft = maxLeft;
+                if (newLeft < minLeft) newLeft = minLeft; // Ensure it doesn't go too far left
+                if (newLeft < minLeft) newLeft = minLeft;
+
+            } else {
+                console.log("[DEBUG positionPopup] Context: Main Page");
+                // Position relative to the document/viewport
+                newTop = rect.bottom + window.scrollY + 5; 
+                newLeft = rect.left + window.scrollX;
+
+                // Constrain within the main window viewport
+                const windowVisibleWidth = window.innerWidth;
+                let maxLeft = window.scrollX + windowVisibleWidth - popupWidth - popupBuffer;
+                let minLeft = window.scrollX + popupBuffer;
+                console.log(`[DEBUG positionPopup MAIN PAGE] Initial newLeft: ${newLeft}, popupWidth: ${popupWidth}, windowScrollX: ${window.scrollX}, windowVisibleWidth: ${windowVisibleWidth}`);
+                console.log(`[DEBUG positionPopup MAIN PAGE] Calculated minLeft: ${minLeft}, maxLeft: ${maxLeft}`);
+
+                if (newLeft > maxLeft) newLeft = maxLeft;
+                if (newLeft < minLeft) newLeft = minLeft; // Ensure it doesn't go too far left
+                if (newLeft < minLeft) newLeft = minLeft;
+            }
+
+            // newTop and newLeft are target absolute positions in their respective coordinate systems
+            // (document-relative for main page, overlay-content-relative for overlay)
+            // We need to convert these to style.top/left relative to the popup's offsetParent.
+
+            const popupOffsetParent = popup.offsetParent || document.body; // The element popup is positioned relative to
+            const parentRect = popupOffsetParent.getBoundingClientRect(); // Viewport-relative
+
+            let styleTop, styleLeft;
+
+            if (isInOverlay) {
+                // newTop/newLeft are relative to overlayContentEl's scrollable area.
+                // parentRect is viewport-relative. We need parent's position relative to overlayContentEl's scrollable area.
+                const overlayRect = overlayContentEl.getBoundingClientRect(); // Viewport-relative
+                const parentTopInOverlayScroll = parentRect.top - overlayRect.top + overlayContentEl.scrollTop;
+                const parentLeftInOverlayScroll = parentRect.left - overlayRect.left + overlayContentEl.scrollLeft;
+
+                styleTop = newTop - parentTopInOverlayScroll;
+                styleLeft = newLeft - parentLeftInOverlayScroll;
+                console.log(`[DEBUG positionPopup OVERLAY] Target newTop: ${newTop}, newLeft: ${newLeft}`);
+                console.log(`[DEBUG positionPopup OVERLAY] ParentInOverlayScroll top: ${parentTopInOverlayScroll}, left: ${parentLeftInOverlayScroll}`);
+            } else { // Main Page
+                // newTop/newLeft are document-relative.
+                // parentRect is viewport-relative. We need parent's document-relative position.
+                const parentDocumentTop = parentRect.top + window.scrollY;
+                const parentDocumentLeft = parentRect.left + window.scrollX;
+
+                styleTop = newTop - parentDocumentTop;
+                styleLeft = newLeft - parentDocumentLeft;
+                console.log(`[DEBUG positionPopup MAIN PAGE] Target newTop: ${newTop}, newLeft: ${newLeft}`);
+                console.log(`[DEBUG positionPopup MAIN PAGE] ParentDocument top: ${parentDocumentTop}, left: ${parentDocumentLeft}`);
+            }
+
+            popup.style.top = styleTop + 'px';
+            popup.style.left = styleLeft + 'px';
+
+            console.log(`[DEBUG positionPopup] Final Applied Style - top: ${popup.style.top}, left: ${popup.style.left}`);
+            console.log(`[DEBUG positionPopup] Button Rect: left=${rect.left}, top=${rect.top}, bottom=${rect.bottom}, right=${rect.right}`);
+            if(isInOverlay) {
+                const overlayRect = overlayContentEl.getBoundingClientRect();
+                console.log(`[DEBUG positionPopup] Overlay Rect: left=${overlayRect.left}, top=${overlayRect.top}`);
+                console.log(`[DEBUG positionPopup] Overlay Scroll: top=${overlayContentEl.scrollTop}, left=${overlayContentEl.scrollLeft}, clientWidth=${overlayContentEl.clientWidth}`);
+            } else {
+                console.log(`[DEBUG positionPopup] Window Scroll: Y=${window.scrollY}, X=${window.scrollX}, InnerWidth=${window.innerWidth}`);
             }
         }
 
         function toggleOptionsMenu(tileElement, watchlistName) { closeAllOptionMenus(tileElement); let menu = tileElement.querySelector('.options-menu'); if (menu) { menu.remove(); } else { menu = document.createElement('div'); menu.className = 'options-menu'; const deleteOption = document.createElement('button'); deleteOption.className = 'options-menu-item delete'; deleteOption.textContent = 'Delete Watchlist'; deleteOption.addEventListener('click', (e) => { e.stopPropagation(); handleDeleteWatchlist(watchlistName); menu.remove(); }); menu.appendChild(deleteOption); tileElement.appendChild(menu); } }
         function closeAllOptionMenus(exceptThisTile = null) { document.querySelectorAll('.watchlist-tile').forEach(tile => { if (tile !== exceptThisTile) { const menu = tile.querySelector('.options-menu'); if (menu) { menu.remove(); } } }); }
         
-        function setupMainTabs() { const mainTabs = [ { button: tabSearch, view: searchView }, { button: tabWatchlist, view: watchlistView }, { button: tabLatest, view: latestView }, { button: tabPopular, view: popularView } ]; const allViews = [searchView, watchlistView, latestView, popularView]; mainTabs.forEach(tabInfo => { tabInfo.button.addEventListener('click', async () => { allViews.forEach(v => v.classList.add('hidden-view')); mainTabs.forEach(t => t.button.classList.remove('active')); tabInfo.view.classList.remove('hidden-view'); tabInfo.button.classList.add('active'); if (tabInfo.button === tabWatchlist) { await loadAndDisplayWatchlistsFromFirestore(); clearAllDynamicContent('watchlist'); /* Clear detail panel in watchlist view */ } else if (tabInfo.button === tabLatest) { const activeSubTab = latestView.querySelector('.sub-tab.active') || latestMoviesSubTab; loadTmdbCategoryContent('latest', activeSubTab.dataset.type, activeSubTab.dataset.category, 1); clearAllDynamicContent('item'); /* Clear main detail panel */ } else if (tabInfo.button === tabPopular) { const activeSubTab = popularView.querySelector('.sub-tab.active') || popularMoviesSubTab; loadTmdbCategoryContent('popular', activeSubTab.dataset.type, activeSubTab.dataset.category, 1); clearAllDynamicContent('item'); /* Clear main detail panel */ } else if (tabInfo.button === tabSearch) { clearAllDynamicContent('item'); /* Clear main detail panel */ } }); }); }
-        function setupSubTabs(moviesTab, tvShowsTab, contentDisplayElement, mainCategory) { const subTabs = [moviesTab, tvShowsTab]; subTabs.forEach(tab => { tab.addEventListener('click', () => { const parentView = tab.closest('.hidden-view') || (mainCategory === 'latest' ? latestView : popularView); parentView.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const type = tab.dataset.type; const category = tab.dataset.category; if (mainCategory === 'latest') { currentLatestPage = 1; currentLatestType = type; currentLatestCategory = category; } else if (mainCategory === 'popular') { currentPopularPage = 1; currentPopularType = type; } loadTmdbCategoryContent(mainCategory, type, category, 1); }); }); }
-        searchButton.addEventListener('click', () => handleSearch()); searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
-        function getSelectedSearchType() { return document.querySelector('input[name="searchType"]:checked').value; }
+        function setupMainTabs() { const mainTabs = [ { button: tabSearch, view: searchView }, { button: tabWatchlist, view: watchlistView }, { button: tabLatest, view: latestView }, { button: tabPopular, view: popularView } ]; const allViews = [searchView, watchlistView, latestView, popularView]; mainTabs.forEach(tabInfo => { if(tabInfo.button) tabInfo.button.addEventListener('click', async () => { allViews.forEach(v => {if(v) v.classList.add('hidden-view')}); mainTabs.forEach(t => {if(t.button) t.button.classList.remove('active')}); if(tabInfo.view) tabInfo.view.classList.remove('hidden-view'); if(tabInfo.button) tabInfo.button.classList.add('active'); if (tabInfo.button === tabWatchlist) { await loadAndDisplayWatchlistsFromFirestore(); clearAllDynamicContent('watchlist'); } else if (tabInfo.button === tabLatest) { const activeSubTab = latestView.querySelector('.sub-tab.active') || latestMoviesSubTab; if(activeSubTab) loadTmdbCategoryContent('latest', activeSubTab.dataset.type, activeSubTab.dataset.category, 1); clearAllDynamicContent('item'); } else if (tabInfo.button === tabPopular) { const activeSubTab = popularView.querySelector('.sub-tab.active') || popularMoviesSubTab; if(activeSubTab) loadTmdbCategoryContent('popular', activeSubTab.dataset.type, activeSubTab.dataset.category, 1); clearAllDynamicContent('item'); } else if (tabInfo.button === tabSearch) { clearAllDynamicContent('item'); } }); }); }
+        function setupSubTabs(moviesTab, tvShowsTab, contentDisplayElement, mainCategory) { const subTabs = [moviesTab, tvShowsTab]; subTabs.forEach(tab => { if(tab) tab.addEventListener('click', () => { const parentView = tab.closest('.hidden-view') || (mainCategory === 'latest' ? latestView : popularView); if(parentView) parentView.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const type = tab.dataset.type; const category = tab.dataset.category; if (mainCategory === 'latest') { currentLatestPage = 1; currentLatestType = type; currentLatestCategory = category; } else if (mainCategory === 'popular') { currentPopularPage = 1; currentPopularType = type; } loadTmdbCategoryContent(mainCategory, type, category, 1); }); }); }
+        
+        function getSelectedSearchType() { const checkedRadio = document.querySelector('input[name="searchType"]:checked'); return checkedRadio ? checkedRadio.value : 'movie'; }
         async function handleSearch() { const query = searchInput.value.trim(); const itemType = getSelectedSearchType(); if (!query) { showToast("Please enter a title.", "error"); return; } clearAllDynamicContent("item"); showLoading('results', `Searching for "${query}"...`); try { const response = await fetch(`${tmdbBaseUrl}/search/${itemType}?api_key=${apiKey}&query=${encodeURIComponent(query)}&include_adult=false`); if (!response.ok) throw new Error(`API Error: ${response.statusText}`); const data = await response.json(); if (data.results && data.results.length > 0) { displayResults(data.results, itemType); } else { showMessage(`No results found for "${query}". Please check spelling or try a different title.`, 'info', 'results'); } } catch (error) { showMessage(`Search Error: ${error.message}`, 'error', 'results'); console.error("Search Error:", error); } }
-        function displayResults(items, itemType) { resultsContainer.innerHTML = ''; if (!items || items.length === 0) { showMessage("No results found.", 'info', 'results'); return; } items.forEach(item => { const title = item.title || item.name; const releaseDate = item.release_date || item.first_air_date; const year = releaseDate ? releaseDate.substring(0, 4) : 'N/A'; const posterPath = item.poster_path; const card = document.createElement('div'); card.className = 'item-card bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-600 flex items-start space-x-3'; card.dataset.id = item.id; card.dataset.title = title; card.dataset.type = itemType; const posterUrl = posterPath ? `${smallImageBaseUrl}${posterPath}` : 'https://placehold.co/80x120/374151/9CA3AF?text=No+Img'; card.innerHTML = ` <img src="${posterUrl}" alt="${title}" class="w-16 h-24 object-cover rounded-md flex-shrink-0" onerror="this.src='https://placehold.co/80x120/374151/9CA3AF?text=No+Img'; this.onerror=null;"> <div> <h3 class="text-md font-semibold text-sky-300">${title}</h3> <p class="text-xs text-gray-400">${year}</p> ${item.vote_average ? `<p class="text-xs text-yellow-400">★ ${item.vote_average.toFixed(1)}</p>` : ''} </div> `; card.addEventListener('click', () => handleItemSelect(String(item.id), title, itemType)); resultsContainer.appendChild(card); }); }
+        function displayResults(items, itemType) { if(!resultsContainer) return; resultsContainer.innerHTML = ''; if (!items || items.length === 0) { showMessage("No results found.", 'info', 'results'); return; } items.forEach(item => { const title = item.title || item.name; const releaseDate = item.release_date || item.first_air_date; const year = releaseDate ? releaseDate.substring(0, 4) : 'N/A'; const posterPath = item.poster_path; const card = document.createElement('div'); card.className = 'item-card bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-600 flex items-start space-x-3'; card.dataset.id = item.id; card.dataset.title = title; card.dataset.type = itemType; const posterUrl = posterPath ? `${smallImageBaseUrl}${posterPath}` : 'https://placehold.co/80x120/374151/9CA3AF?text=No+Img'; card.innerHTML = ` <img src="${posterUrl}" alt="${title}" class="w-16 h-24 object-cover rounded-md flex-shrink-0" onerror="this.src='https://placehold.co/80x120/374151/9CA3AF?text=No+Img'; this.onerror=null;"> <div> <h3 class="text-md font-semibold text-sky-300">${title}</h3> <p class="text-xs text-gray-400">${year}</p> ${item.vote_average ? `<p class="text-xs text-yellow-400">★ ${item.vote_average.toFixed(1)}</p>` : ''} </div> `; card.addEventListener('click', () => handleItemSelect(String(item.id), title, itemType)); resultsContainer.appendChild(card); }); }
+        
         async function handleItemSelect(itemId, itemTitle, itemType, calledFromGenericList = false, calledFromWatchlistItem = false) { 
-            const targetPrefix = calledFromWatchlistItem ? "watchlist" : "item";
-            
-            const detailTitleEl = document.getElementById(targetPrefix + 'DetailTitle');
-            const detailContainerEl = document.getElementById(targetPrefix + 'DetailContainer');
-            const seasonsEl = document.getElementById(targetPrefix + 'SeasonsEpisodesSection');
-            const relatedEl = document.getElementById(targetPrefix + 'RelatedItemsSection');
-            const collectionEl = document.getElementById(targetPrefix + 'CollectionItemsSection');
+            let currentTargetViewContext;
+            let currentDetailTitleEl, currentDetailContainerEl, currentSeasonsEl, currentRelatedEl, currentCollectionEl,
+                currentPlayerEl, currentBackButtonContainerEl; // Removed currentWatchlistBtnContainerEl from here
 
-            showLoading(calledFromWatchlistItem ? 'watchlist-details' : 'details', `Loading ${itemTitle}...`); 
-            
-            if(seasonsEl) seasonsEl.innerHTML = ''; 
-            if(relatedEl) relatedEl.innerHTML = ''; 
-            if(collectionEl) collectionEl.innerHTML = ''; 
-            if(detailTitleEl) detailTitleEl.textContent = `${itemTitle} - Details & Player`;
-            if(detailContainerEl) detailContainerEl.innerHTML = ''; 
+            if (calledFromGenericList) { // From Latest/Popular, use Overlay
+                currentTargetViewContext = "overlay";
+                currentDetailTitleEl = overlayDetailTitle;
+                currentDetailContainerEl = overlayDetailContainer;
+                currentSeasonsEl = overlaySeasonsEpisodesSection;
+                currentRelatedEl = overlayRelatedItemsSection;
+                currentCollectionEl = overlayCollectionItemsSection;
+                currentPlayerEl = overlayVidsrcPlayerSection;
+                currentBackButtonContainerEl = overlayBackButtonContainer;
 
-            if (calledFromGenericList && !calledFromWatchlistItem) { 
+                const activeMainTabForState = latestView && !latestView.classList.contains('hidden-view') ? tabLatest : tabPopular;
+                if (activeMainTabForState) {
+                    previousStateForBackButton = { originTabId: activeMainTabForState.id };
+                    if (previousStateForBackButton.originTabId === 'tabLatest' && latestContentDisplay) {
+                        scrollPositions.latest = latestContentDisplay.scrollTop;
+                    } else if (previousStateForBackButton.originTabId === 'tabPopular' && popularContentDisplay) {
+                        scrollPositions.popular = popularContentDisplay.scrollTop;
+                    }
+                    showPositionSavedIndicator();
+                }
+                if(detailOverlay) detailOverlay.classList.remove('hidden');
+                if(detailOverlayContent) detailOverlayContent.scrollTop = 0;
+
+            } else if (calledFromWatchlistItem) { // From Watchlist items, use Watchlist Detail Panel
+                currentTargetViewContext = "watchlist";
+                currentDetailTitleEl = watchlistItemDetailTitle;
+                currentDetailContainerEl = watchlistItemDetailContainer;
+                currentSeasonsEl = watchlistSeasonsEpisodesSection;
+                currentRelatedEl = watchlistRelatedItemsSection;
+                currentCollectionEl = watchlistCollectionItemsSection;
+                currentPlayerEl = document.getElementById('watchlistVidsrcPlayerSection'); 
+                currentBackButtonContainerEl = watchlistBackButtonContainer;
+                previousStateForBackButton = { originTabId: 'tabWatchlist' };
+            } else { // From Search results, use Main Item Detail Panel
+                currentTargetViewContext = "item";
+                currentDetailTitleEl = itemDetailTitle;
+                currentDetailContainerEl = itemDetailContainer;
+                currentSeasonsEl = itemSeasonsEpisodesSection;
+                currentRelatedEl = itemRelatedItemsSection;
+                currentCollectionEl = itemCollectionItemsSection;
+                currentPlayerEl = document.getElementById('itemVidsrcPlayerSection'); 
+                currentBackButtonContainerEl = itemBackButtonContainer;
+                previousStateForBackButton = { originTabId: 'tabSearch' };
+            }
+            
+            clearAllDynamicContent(currentTargetViewContext);
+            showLoading(`details-${currentTargetViewContext}`, `Loading ${itemTitle}...`);
+            if(currentDetailTitleEl) currentDetailTitleEl.classList.add('hidden'); 
+
+            if (currentBackButtonContainerEl) {
+                currentBackButtonContainerEl.innerHTML = ''; 
+                let backButtonContext;
+                if (currentTargetViewContext === 'overlay' && previousStateForBackButton) {
+                    backButtonContext = previousStateForBackButton.originTabId === 'tabLatest' ? 'latestList' : 'popularList';
+                } else if (currentTargetViewContext === 'watchlist') {
+                    backButtonContext = 'watchlistItemsList';
+                } else if (currentTargetViewContext === 'item') {
+                    backButtonContext = 'searchList';
+                }
+                if (backButtonContext) {
+                    const backBtn = createBackButton(backButtonContext);
+                    currentBackButtonContainerEl.appendChild(backBtn);
+                }
+            }
+            
+            if (calledFromGenericList && searchView && !searchView.classList.contains('hidden-view')) { 
                 searchView.classList.remove('hidden-view'); 
-                latestView.classList.add('hidden-view'); 
-                popularView.classList.add('hidden-view'); 
-                watchlistView.classList.add('hidden-view'); 
-                
-                tabSearch.classList.add('active'); 
-                tabLatest.classList.remove('active'); 
-                tabPopular.classList.remove('active'); 
-                tabWatchlist.classList.remove('active'); 
+                if(latestView) latestView.classList.add('hidden-view'); 
+                if(popularView) popularView.classList.add('hidden-view'); 
+                if(watchlistView) watchlistView.classList.add('hidden-view'); 
+                if(tabSearch) tabSearch.classList.add('active'); 
+                [tabLatest, tabPopular, tabWatchlist].forEach(t => {if(t)t.classList.remove('active')}); 
             }
 
             try { 
@@ -1067,40 +1351,49 @@
                 const details = await response.json(); 
                 currentSelectedItemDetails = { ...details, tmdb_id: String(details.id), item_type: itemType, }; 
                 
-                await displayItemDetails(details.external_ids?.imdb_id, itemTitle, currentSelectedItemDetails, itemType, targetPrefix); 
+                await displayItemDetails(details.external_ids?.imdb_id, itemTitle, currentSelectedItemDetails, itemType, 
+                    currentDetailContainerEl, currentSeasonsEl, currentRelatedEl, currentCollectionEl, currentPlayerEl, currentTargetViewContext
+                ); 
                 
-                const detailSectionToScroll = document.getElementById(targetPrefix === 'watchlist' ? 'watchlistItemDetailPanel' : 'itemDetailSection');
-                if (detailSectionToScroll) {
-                     detailSectionToScroll.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (currentTargetViewContext !== "overlay") { 
+                    const detailSectionToScroll = document.getElementById(currentTargetViewContext === 'watchlist' ? 'watchlistItemDetailPanel' : 'itemDetailSection');
+                    if (detailSectionToScroll) {
+                         detailSectionToScroll.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
                 }
 
             } catch (error) { 
-                showMessage(`Error loading details for "${itemTitle}": ${error.message}`, 'error', calledFromWatchlistItem ? 'watchlist-details' : 'details'); 
+                showMessage(`Error loading details for "${itemTitle}": ${error.message}`, 'error', `details-${currentTargetViewContext}`); 
                 console.error("Detail Loading Error:", error); 
             } 
         }
-        async function displayItemDetails(imdbId, itemTitle, detailsObject, itemType, targetPrefix = "item") { 
-            const detailContainerElId = targetPrefix + 'DetailContainer';
-            const detailContainerEl = document.getElementById(detailContainerElId);
-            const seasonsTargetEl = document.getElementById(targetPrefix + 'SeasonsEpisodesSection');
-            const relatedTargetEl = document.getElementById(targetPrefix + 'RelatedItemsSection');
-            const collectionTargetEl = document.getElementById(targetPrefix + 'CollectionItemsSection');
+        async function displayItemDetails(imdbId, itemTitle, detailsObject, itemType, 
+            targetDetailContainerEl, targetSeasonsEl, targetRelatedEl, targetCollectionEl, 
+            targetPlayerEl, targetViewContext = "item"
+        ) { 
+            if (!targetDetailContainerEl) { console.error("displayItemDetails: targetDetailContainerEl is null"); return; }
+            targetDetailContainerEl.innerHTML = ''; 
 
-
-            if (!detailContainerEl) { console.error("Target detail container not found:", detailContainerElId); return; }
-            detailContainerEl.innerHTML = ''; 
+            // Create a wrapper for title and bookmark
+            const titleBookmarkWrapper = document.createElement('div');
+            titleBookmarkWrapper.className = 'flex justify-between items-start mb-2';
 
             const titleEl = document.createElement('h3');
-            titleEl.className = 'text-xl font-bold mb-1 text-sky-300';
+            titleEl.className = 'text-xl font-bold text-sky-300 flex-grow mr-2'; // Added flex-grow and mr-2
             const year = (detailsObject.release_date || detailsObject.first_air_date)?.substring(0,4) || '';
             titleEl.textContent = `${itemTitle} ${year ? `(${year})` : ''}`;
-            detailContainerEl.appendChild(titleEl);
-            
-            const watchlistButtonContainer = document.createElement('div');
-            watchlistButtonContainer.id = targetPrefix === 'watchlist' ? 'watchlistDetailAddToBtnContainer' : 'addToWatchlistBtnContainer'; 
-            watchlistButtonContainer.className = 'my-3 relative';
-            detailContainerEl.appendChild(watchlistButtonContainer);
-            updateAddToWatchlistButtonState(detailsObject.tmdb_id, detailsObject, watchlistButtonContainer.id); 
+            titleBookmarkWrapper.appendChild(titleEl);
+
+            // Create the specific container for the bookmark button for this view context
+            const bookmarkButtonContainer = document.createElement('div');
+            bookmarkButtonContainer.id = `${targetViewContext}DetailAddToBtnContainer`; 
+            bookmarkButtonContainer.className = 'relative ml-2 flex-shrink-0'; // For positioning popup and icon
+            titleBookmarkWrapper.appendChild(bookmarkButtonContainer);
+
+            targetDetailContainerEl.appendChild(titleBookmarkWrapper);
+
+            // Call updateAddToWatchlistButtonState with the new container's ID
+            updateAddToWatchlistButtonState(detailsObject.tmdb_id, detailsObject, bookmarkButtonContainer.id);
             
             const badgesContainer = document.createElement('div');
             badgesContainer.className = 'mb-3 flex flex-wrap items-center';
@@ -1109,55 +1402,216 @@
             if (itemType === 'movie' && detailsObject.release_dates?.results) { const usRelease = detailsObject.release_dates.results.find(r => r.iso_3166_1 === 'US'); if (usRelease?.release_dates) { const certObj = usRelease.release_dates.find(rd => rd.certification && rd.certification !== "" && (rd.type === 3 || rd.type === 4 || rd.type === 5 || rd.type === 6)) || usRelease.release_dates.find(rd => rd.certification && rd.certification !== ""); if (certObj) certification = certObj.certification; } } else if (itemType === 'tv' && detailsObject.content_ratings?.results) { const usRating = detailsObject.content_ratings.results.find(r => r.iso_3166_1 === 'US'); if (usRating?.rating && usRating.rating !== "") certification = usRating.rating; }
             const ageBadge = document.createElement('span'); ageBadge.className = 'detail-badge bg-sky-500 text-white'; ageBadge.textContent = `Age: ${certification}`; badgesContainer.appendChild(ageBadge);
             if(itemType === 'movie' && detailsObject.runtime) { const runtimeBadge = document.createElement('span'); runtimeBadge.className = 'detail-badge bg-gray-600 text-gray-200'; runtimeBadge.textContent = `Runtime: ${Math.floor(detailsObject.runtime / 60)}h ${detailsObject.runtime % 60}m`; badgesContainer.appendChild(runtimeBadge); } else if (itemType === 'tv' && detailsObject.episode_run_time?.length > 0 && detailsObject.episode_run_time[0] > 0) { const runtimeBadge = document.createElement('span'); runtimeBadge.className = 'detail-badge bg-gray-600 text-gray-200'; runtimeBadge.textContent = `Episode: ~${detailsObject.episode_run_time[0]} min`; badgesContainer.appendChild(runtimeBadge); }
-            detailContainerEl.appendChild(badgesContainer);
-            if (detailsObject.tagline) { const taglineEl = document.createElement('p'); taglineEl.className = 'text-gray-400 italic mb-2 text-sm'; taglineEl.textContent = detailsObject.tagline; detailContainerEl.appendChild(taglineEl); }
-            const overviewEl = document.createElement('p'); overviewEl.className = 'text-gray-300 mb-3 text-sm overview-scroll'; overviewEl.textContent = detailsObject.overview || "No overview available."; detailContainerEl.appendChild(overviewEl);
-            const imdbInfoContainer = document.createElement('div'); imdbInfoContainer.className = 'mb-4 text-xs'; imdbInfoContainer.innerHTML = imdbId ? `<p><strong>IMDb ID:</strong> <span class="text-yellow-400">${imdbId}</span> | <a href="https://www.imdb.com/title/${imdbId}/" target="_blank" class="text-sky-400 hover:underline">View on IMDb</a></p>` : `<p>IMDb ID: Not Available</p>`; detailContainerEl.appendChild(imdbInfoContainer);
+            targetDetailContainerEl.appendChild(badgesContainer);
+            if (detailsObject.tagline) { const taglineEl = document.createElement('p'); taglineEl.className = 'text-gray-400 italic mb-2 text-sm'; taglineEl.textContent = detailsObject.tagline; targetDetailContainerEl.appendChild(taglineEl); }
+            const overviewEl = document.createElement('p'); overviewEl.className = 'text-gray-300 mb-3 text-sm overview-scroll'; overviewEl.textContent = detailsObject.overview || "No overview available."; targetDetailContainerEl.appendChild(overviewEl);
+            const imdbInfoContainer = document.createElement('div'); imdbInfoContainer.className = 'mb-4 text-xs'; imdbInfoContainer.innerHTML = imdbId ? `<p><strong>IMDb ID:</strong> <span class="text-yellow-400">${imdbId}</span> | <a href="https://www.imdb.com/title/${imdbId}/" target="_blank" class="text-sky-400 hover:underline">View on IMDb</a></p>` : `<p>IMDb ID: Not Available</p>`; targetDetailContainerEl.appendChild(imdbInfoContainer);
             
-            const playerSection = document.createElement('div');
-            playerSection.id = `${targetPrefix}VidsrcPlayerSection`; 
-            detailContainerEl.appendChild(playerSection);
-            const idForPlayer = detailsObject.tmdb_id; 
-            if (idForPlayer) { 
-                updateVidsrcPlayer(playerSection, itemType, idForPlayer, imdbId); 
-            } else { 
-                playerSection.innerHTML = `<p class="text-center text-gray-500 italic">Video player requires a TMDB ID.</p>`; 
+            if (targetPlayerEl) {
+                const idForPlayer = detailsObject.tmdb_id; 
+                if (idForPlayer) { 
+                    updateVidsrcPlayer(targetPlayerEl, itemType, idForPlayer, imdbId); 
+                } else { 
+                    targetPlayerEl.innerHTML = `<p class="text-center text-gray-500 italic">Video player requires a TMDB ID.</p>`; 
+                } 
+            } else {
+                 console.warn("Player section element not found for detail panel");
             } 
 
-            fetchAndDisplayRecommendations(String(detailsObject.id), itemType, relatedTargetEl); 
+            fetchAndDisplayRecommendations(String(detailsObject.id), itemType, targetRelatedEl, targetViewContext); 
             if (itemType === 'tv') { 
-                displaySeasons(detailsObject.seasons, String(detailsObject.id), detailsObject.external_ids?.imdb_id, seasonsTargetEl); 
+                displaySeasons(detailsObject.seasons, String(detailsObject.id), detailsObject.external_ids?.imdb_id, targetSeasonsEl, targetViewContext); 
             } else if (itemType === 'movie' && detailsObject.belongs_to_collection) { 
-                fetchAndDisplayCollection(detailsObject.belongs_to_collection.id, String(detailsObject.id), collectionTargetEl); 
+                fetchAndDisplayCollection(detailsObject.belongs_to_collection.id, String(detailsObject.id), targetCollectionEl, targetViewContext); 
             }
         }
-        function updateVidsrcPlayer(containerEl, itemType, tmdbIdForUrl, imdbIdForDisplay, season = null, episode = null) { containerEl.innerHTML = ''; let playingTxt = itemType === 'tv' ? "Entire Series" : "Movie"; if (season && episode) { playingTxt = `Season ${season}, Episode ${episode}`; } const playingInfo = document.createElement('p'); playingInfo.className = 'text-sm text-sky-300 mb-2'; playingInfo.innerHTML = `<strong>Now Playing:</strong> ${playingTxt}`; containerEl.appendChild(playingInfo); const tabsContainer = document.createElement('div'); tabsContainer.className = 'flex border-b border-gray-700 mb-3'; const playerWrapper = document.createElement('div'); vidsrcProviders.forEach((provider, index) => { const tab = document.createElement('div'); tab.className = `player-tab ${index === 0 ? 'active' : ''}`; tab.textContent = provider.name; tab.dataset.player = `${provider.name.replace(/\./g,'')}-Player-${containerEl.id}`; tabsContainer.appendChild(tab); const playerContainer = document.createElement('div'); playerContainer.id = `${provider.name.replace(/\./g,'')}-PlayerContainer-${containerEl.id}`; playerContainer.className = `aspect-video relative ${index !== 0 ? 'hidden' : ''}`; let embedUrlBase = itemType === 'movie' ? provider.movieUrl : provider.tvUrl; let embedUrl = `${embedUrlBase}${tmdbIdForUrl}`; if (itemType === 'tv' && season && episode) { embedUrl += `/${season}/${episode}`; } const iframe = document.createElement('iframe'); iframe.src = embedUrl; iframe.className = 'absolute top-0 left-0 w-full h-full rounded-lg shadow-lg border-2 border-gray-700'; iframe.allow = 'autoplay; encrypted-media; fullscreen'; iframe.setAttribute('allowfullscreen', ''); iframe.frameBorder = '0'; iframe.scrolling = 'no'; playerContainer.appendChild(iframe); playerWrapper.appendChild(playerContainer); tab.addEventListener('click', () => { tabsContainer.querySelectorAll('.player-tab').forEach(t => t.classList.remove('active')); playerWrapper.querySelectorAll('div[id$="PlayerContainer-' + containerEl.id + '"]').forEach(p => p.classList.add('hidden')); tab.classList.add('active'); document.getElementById(playerContainer.id).classList.remove('hidden'); }); }); containerEl.appendChild(tabsContainer); containerEl.appendChild(playerWrapper); const urlsContainer = document.createElement('div'); urlsContainer.className = 'mt-3 text-xs space-y-1'; vidsrcProviders.forEach(provider => { let directUrlBase = itemType === 'movie' ? provider.movieUrl : provider.tvUrl; let directUrl = `${directUrlBase}${tmdbIdForUrl}`; if (itemType === 'tv' && season && episode) { directUrl += `/${season}/${episode}`; } const urlParagraph = document.createElement('p'); urlParagraph.innerHTML = `<strong>${provider.name} URL:</strong> <a href="${directUrl}" target="_blank" class="text-sky-400 hover:underline break-all">${directUrl}</a>`; urlsContainer.appendChild(urlParagraph); }); containerEl.appendChild(urlsContainer); }
-        function displaySeasons(seasons, parentShowTmdbId, parentShowImdbId, targetSeasonsEl) { if (!targetSeasonsEl) return; targetSeasonsEl.innerHTML = ''; if (!seasons || seasons.length === 0) return; const title = document.createElement('h3'); title.className = 'section-title mt-4'; title.textContent = 'Seasons'; targetSeasonsEl.appendChild(title); const list = document.createElement('div'); list.className = 'seasons-list space-x-4'; seasons.filter(s => s.season_number > 0).forEach(s => { const card = document.createElement('div'); card.className = 'season-card bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-600 w-[160px] flex-shrink-0 text-center'; const poster = s.poster_path ? `${smallImageBaseUrl}${s.poster_path}` : 'https://placehold.co/150x225/374151/9CA3AF?text=N/A'; card.innerHTML = ` <img src="${poster}" alt="${s.name}" class="w-full h-48 object-cover rounded-md mb-2 mx-auto" onerror="this.src='https://placehold.co/150x225/374151/9CA3AF?text=N/A'; this.onerror=null;"> <h4 class="text-sm font-semibold text-sky-200 truncate">${s.name || `Season ${s.season_number}`}</h4> <p class="text-xs text-gray-400">${s.episode_count} Episodes</p> ${s.air_date ? `<p class="text-xs text-gray-500">${s.air_date.substring(0,4)}</p>`:''} `; card.addEventListener('click', () => fetchAndDisplayEpisodes(parentShowTmdbId, s.season_number, parentShowImdbId, card, targetSeasonsEl.id.replace('SeasonsEpisodesSection', 'EpisodeDisplayContainer'))); list.appendChild(card); }); targetSeasonsEl.appendChild(list); const episodeDisplayContainer = document.createElement('div'); episodeDisplayContainer.id = targetSeasonsEl.id.replace('SeasonsEpisodesSection', 'EpisodeDisplayContainer'); episodeDisplayContainer.className = 'mt-3'; targetSeasonsEl.appendChild(episodeDisplayContainer); }
-        // let activeSeasonCard = null; // This seems to be a global, ensure it's handled if multiple season lists are active
-        async function fetchAndDisplayEpisodes(parentShowTmdbId, seasonNum, parentShowImdbId, seasonCardElement, targetEpisodeContainerId) { const episodeContainer = document.getElementById(targetEpisodeContainerId); if (!episodeContainer) { console.error("Episode display container not found:", targetEpisodeContainerId); return; } showLoading(targetEpisodeContainerId.startsWith('watchlist') ? 'watchlist-seasons' : 'seasons', `Loading Season ${seasonNum} episodes...`); 
-            const currentContextActiveSeasonCard = seasonCardElement.closest('#seasonsEpisodesSection') ? 'searchActiveSeasonCard' : 'watchlistActiveSeasonCard';
-            if (window[currentContextActiveSeasonCard]) window[currentContextActiveSeasonCard].classList.remove('border-sky-400', 'border-2');
+        function updateVidsrcPlayer(containerEl, itemType, tmdbIdForUrl, imdbIdForDisplay, season = null, episode = null) { if(!containerEl) return; containerEl.innerHTML = ''; let playingTxt = itemType === 'tv' ? "Entire Series" : "Movie"; if (season && episode) { playingTxt = `Season ${season}, Episode ${episode}`; } const playingInfo = document.createElement('p'); playingInfo.className = 'text-sm text-sky-300 mb-2'; playingInfo.innerHTML = `<strong>Now Playing:</strong> ${playingTxt}`; containerEl.appendChild(playingInfo); const tabsContainer = document.createElement('div'); tabsContainer.className = 'flex border-b border-gray-700 mb-3'; const playerWrapper = document.createElement('div'); vidsrcProviders.forEach((provider, index) => { const tab = document.createElement('div'); tab.className = `player-tab ${index === 0 ? 'active' : ''}`; tab.textContent = provider.name; tab.dataset.player = `${provider.name.replace(/\./g,'')}-Player-${containerEl.id}`; tabsContainer.appendChild(tab); const playerContainer = document.createElement('div'); playerContainer.id = `${provider.name.replace(/\./g,'')}-PlayerContainer-${containerEl.id}`; playerContainer.className = `aspect-video relative ${index !== 0 ? 'hidden' : ''}`; let embedUrlBase = itemType === 'movie' ? provider.movieUrl : provider.tvUrl; let embedUrl = `${embedUrlBase}${tmdbIdForUrl}`; if (itemType === 'tv' && season && episode) { embedUrl += `/${season}/${episode}`; } const iframe = document.createElement('iframe'); iframe.src = embedUrl; iframe.className = 'absolute top-0 left-0 w-full h-full rounded-lg shadow-lg border-2 border-gray-700'; iframe.allow = 'autoplay; encrypted-media; fullscreen'; iframe.setAttribute('allowfullscreen', ''); iframe.frameBorder = '0'; iframe.scrolling = 'no'; playerContainer.appendChild(iframe); playerWrapper.appendChild(playerContainer); tab.addEventListener('click', () => { tabsContainer.querySelectorAll('.player-tab').forEach(t => t.classList.remove('active')); playerWrapper.querySelectorAll('div[id$="PlayerContainer-' + containerEl.id + '"]').forEach(p => p.classList.add('hidden')); tab.classList.add('active'); const targetPlayerDiv = document.getElementById(playerContainer.id); if(targetPlayerDiv) targetPlayerDiv.classList.remove('hidden'); }); }); containerEl.appendChild(tabsContainer); containerEl.appendChild(playerWrapper); const urlsContainer = document.createElement('div'); urlsContainer.className = 'mt-3 text-xs space-y-1'; vidsrcProviders.forEach(provider => { let directUrlBase = itemType === 'movie' ? provider.movieUrl : provider.tvUrl; let directUrl = `${directUrlBase}${tmdbIdForUrl}`; if (itemType === 'tv' && season && episode) { directUrl += `/${season}/${episode}`; } const urlParagraph = document.createElement('p'); urlParagraph.innerHTML = `<strong>${provider.name} URL:</strong> <a href="${directUrl}" target="_blank" class="text-sky-400 hover:underline break-all">${directUrl}</a>`; urlsContainer.appendChild(urlParagraph); }); containerEl.appendChild(urlsContainer); }
+        function displaySeasons(seasons, parentShowTmdbId, parentShowImdbId, targetSeasonsEl, targetViewContext = "item") { if (!targetSeasonsEl) return; targetSeasonsEl.innerHTML = ''; if (!seasons || seasons.length === 0) return; const title = document.createElement('h3'); title.className = 'section-title mt-4'; title.textContent = 'Seasons'; targetSeasonsEl.appendChild(title); const list = document.createElement('div'); list.className = 'seasons-list space-x-4'; seasons.filter(s => s.season_number > 0).forEach(s => { const card = document.createElement('div'); card.className = 'season-card bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-600 w-[160px] flex-shrink-0 text-center'; const poster = s.poster_path ? `${smallImageBaseUrl}${s.poster_path}` : 'https://placehold.co/150x225/374151/9CA3AF?text=N/A'; card.innerHTML = ` <img src="${poster}" alt="${s.name}" class="w-full h-48 object-cover rounded-md mb-2 mx-auto" onerror="this.src='https://placehold.co/150x225/374151/9CA3AF?text=N/A'; this.onerror=null;"> <h4 class="text-sm font-semibold text-sky-200 truncate">${s.name || `Season ${s.season_number}`}</h4> <p class="text-xs text-gray-400">${s.episode_count} Episodes</p> ${s.air_date ? `<p class="text-xs text-gray-500">${s.air_date.substring(0,4)}</p>`:''} `; card.addEventListener('click', () => fetchAndDisplayEpisodes(parentShowTmdbId, s.season_number, parentShowImdbId, card, `${targetViewContext}EpisodeDisplayContainer`, targetViewContext)); list.appendChild(card); }); targetSeasonsEl.appendChild(list); const episodeDisplayContainer = document.createElement('div'); episodeDisplayContainer.id = `${targetViewContext}EpisodeDisplayContainer`; episodeDisplayContainer.className = 'mt-3'; targetSeasonsEl.appendChild(episodeDisplayContainer); }
+        window.itemActiveSeasonCard = null; window.watchlistActiveSeasonCard = null; window.overlayActiveSeasonCard = null; 
+        async function fetchAndDisplayEpisodes(parentShowTmdbId, seasonNum, parentShowImdbId, seasonCardElement, targetEpisodeContainerId, targetViewContext = "item") { const episodeContainer = document.getElementById(targetEpisodeContainerId); if (!episodeContainer) { console.error("Episode display container not found:", targetEpisodeContainerId); return; } 
+            showLoading(`seasons-${targetViewContext}`, `Loading Season ${seasonNum} episodes...`); 
+            
+            const activeCardVarName = `${targetViewContext}ActiveSeasonCard`;
+            if(window[activeCardVarName]) window[activeCardVarName].classList.remove('border-sky-400', 'border-2');
             seasonCardElement.classList.add('border-sky-400', 'border-2'); 
-            window[currentContextActiveSeasonCard] = seasonCardElement;
+            window[activeCardVarName] = seasonCardElement;
 
-            try { const response = await fetch(`${tmdbBaseUrl}/tv/${parentShowTmdbId}/season/${seasonNum}?api_key=${apiKey}`); if (!response.ok) throw new Error(`API Error: ${response.statusText}`); const seasonDetails = await response.json(); episodeContainer.innerHTML = ''; if (seasonDetails.episodes && seasonDetails.episodes.length > 0) { const title = document.createElement('h4'); title.className = 'text-lg font-semibold mb-2 text-sky-300'; title.textContent = `${seasonDetails.name || `Season ${seasonNum}`} Episodes`; episodeContainer.appendChild(title); const list = document.createElement('div'); list.className = 'episodes-list space-y-2 pr-2'; seasonDetails.episodes.forEach(ep => { const card = document.createElement('div'); card.className = 'episode-card bg-gray-750 p-3 rounded-md hover:bg-gray-700 cursor-pointer flex space-x-3 items-start'; const stillPath = ep.still_path ? `${stillImageBaseUrl}${ep.still_path}` : 'https://placehold.co/120x68/374151/9CA3AF?text=N/A'; card.innerHTML = ` <img src="${stillPath}" alt="Episode ${ep.episode_number}" class="w-28 h-16 object-cover rounded-md flex-shrink-0" onerror="this.src='https://placehold.co/120x68/374151/9CA3AF?text=N/A'; this.onerror=null;"> <div> <h5 class="text-sm font-semibold text-sky-200">Ep ${ep.episode_number}: ${ep.name}</h5> <p class="text-xs text-gray-400">${ep.air_date||''}</p> <p class="text-xs text-gray-500 mt-1 truncate" title="${ep.overview}">${ep.overview||'No overview.'}</p> </div> `; card.addEventListener('click', () => { const playerSection = document.getElementById(targetEpisodeContainerId.replace('EpisodeDisplayContainer', 'VidsrcPlayerSection')); updateVidsrcPlayer(playerSection, 'tv', parentShowTmdbId, parentShowImdbId, seasonNum, ep.episode_number); playerSection.scrollIntoView({behavior:'smooth', block:'center'}); }); list.appendChild(card); }); episodeContainer.appendChild(list); } else { episodeContainer.innerHTML = `<p class="text-gray-400">No episodes found for this season.</p>`; } } catch (error) { episodeContainer.innerHTML = `<p class="text-red-400">Error loading episodes: ${error.message}</p>`; console.error("Episode Loading Error:", error); } }
-        async function fetchAndDisplayCollection(collectionId, currentMovieId, targetCollectionEl) { if (!targetCollectionEl) return; showLoading(targetCollectionEl.id.startsWith('watchlist') ? 'watchlist-collection' : 'collection', 'Loading movie series...'); targetCollectionEl.innerHTML = ''; try { const response = await fetch(`${tmdbBaseUrl}/collection/${collectionId}?api_key=${apiKey}`); if (!response.ok) throw new Error(`API Error: ${response.statusText}`); const data = await response.json(); const titleEl = document.createElement('h3'); titleEl.className = 'section-title'; titleEl.textContent = data.name || 'Movie Series'; targetCollectionEl.appendChild(titleEl); const list = document.createElement('div'); list.className = 'flex overflow-x-auto space-x-3 pb-3 related-movies-scroll'; if (data.parts?.length > 0) { data.parts.forEach(movie => { if (String(movie.id) === String(currentMovieId)) return; list.appendChild(createRelatedItemCard(movie, 'movie')); }); targetCollectionEl.appendChild(list); if(list.children.length === 0) { targetCollectionEl.innerHTML += '<p class="text-sm text-gray-400">No other movies in this series.</p>'; } } else { targetCollectionEl.innerHTML += '<p class="text-sm text-gray-400">No other movies found in this series.</p>'; } } catch (error) { showMessage("Could not load movie series.", 'error', targetCollectionEl.id.startsWith('watchlist') ? 'watchlist-collection' : 'collection'); console.error("Collection Error:", error); } }
-        async function fetchAndDisplayRecommendations(itemId, itemType, targetRelatedEl) { if (!targetRelatedEl) return; showLoading(targetRelatedEl.id.startsWith('watchlist') ? 'watchlist-related' : 'related', `Loading recommendations...`); targetRelatedEl.innerHTML = ''; try { const response = await fetch(`${tmdbBaseUrl}/${itemType}/${itemId}/recommendations?api_key=${apiKey}`); if (!response.ok) throw new Error(`API Error: ${response.statusText}`); const data = await response.json(); const titleEl = document.createElement('h3'); titleEl.className = 'section-title'; titleEl.textContent = `Recommended ${itemType === 'tv' ? 'Shows' : 'Movies'}`; targetRelatedEl.appendChild(titleEl); const list = document.createElement('div'); list.className = 'flex overflow-x-auto space-x-3 pb-3 related-movies-scroll'; if (data.results?.length > 0) { data.results.slice(0,10).forEach(item => list.appendChild(createRelatedItemCard(item, itemType))); targetRelatedEl.appendChild(list); } else { targetRelatedEl.innerHTML += '<p class="text-sm text-gray-400">No recommendations found.</p>'; } } catch (error) { showMessage("Could not load recommendations.", 'error', targetRelatedEl.id.startsWith('watchlist') ? 'watchlist-related' : 'related'); console.error("Recommendations Error:", error); } }
-        function createRelatedItemCard(item, itemType) { const card = document.createElement('div'); card.className = 'related-item-card bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-600 flex-shrink-0 w-[150px]'; const poster = item.poster_path ? `${smallImageBaseUrl}${item.poster_path}` : 'https://placehold.co/150x225/374151/9CA3AF?text=N/A'; card.innerHTML = ` <img src="${poster}" alt="${item.title||item.name}" class="w-full h-48 object-cover rounded-md mb-2" onerror="this.src='https://placehold.co/150x225/374151/9CA3AF?text=N/A'; this.onerror=null;"> <h4 class="text-sm font-semibold text-sky-200 truncate">${item.title||item.name}</h4> <p class="text-xs text-gray-400">${(item.release_date||item.first_air_date)?.substring(0,4)||'N/A'}</p> `; card.addEventListener('click', () => { const currentViewIsWatchlist = !watchlistView.classList.contains('hidden-view'); handleItemSelect(String(item.id), item.title||item.name, itemType, false, currentViewIsWatchlist); }); return card; }
-        async function loadTmdbCategoryContent(mainCategory, type, category, page) { const displayContainer = mainCategory === 'latest' ? latestContentDisplay : popularContentDisplay; showLoading(mainCategory, `Loading ${category.replace('_', ' ')} ${type}s...`); let url = `${tmdbBaseUrl}/${type}/${category}?api_key=${apiKey}&page=${page}`; try { const response = await fetch(url); if (!response.ok) throw new Error(`TMDB API Error: ${response.statusText}`); const data = await response.json(); if (data && data.results && data.results.length > 0) { displayTmdbCategoryItems(data.results, type, displayContainer, mainCategory, category, page, data.total_pages); } else { showMessage('No items found for this category.', 'info', mainCategory); } } catch (error) { showMessage(`Error loading content: ${error.message}`, 'error', mainCategory); console.error(`Error loading ${type}/${category}:`, error); } }
-        function displayTmdbCategoryItems(items, itemType, container, mainCategory, category, currentPage, totalPages) { container.innerHTML = ''; const itemsGrid = document.createElement('div'); itemsGrid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 generic-items-container'; items.forEach(item => { const card = document.createElement('div'); card.className = 'generic-item-card cursor-pointer'; const title = item.title || item.name; const posterPath = item.poster_path; const posterUrl = posterPath ? `${smallImageBaseUrl}${posterPath}` : genericItemPlaceholder; card.innerHTML = ` <img src="${posterUrl}" alt="${title}" onerror="this.src='${genericItemPlaceholder}'; this.onerror=null;"> <h4 class="text-md font-semibold text-sky-300 truncate mt-2" title="${title}">${title}</h4> ${item.vote_average ? `<p class="text-xs text-yellow-400">★ ${item.vote_average.toFixed(1)}</p>` : ''} `; card.addEventListener('click', () => handleItemSelect(String(item.id), title, itemType, true)); itemsGrid.appendChild(card); }); container.appendChild(itemsGrid); const paginationDiv = document.createElement('div'); paginationDiv.className = 'flex justify-between mt-4'; const prevBtn = document.createElement('button'); prevBtn.textContent = 'Previous'; prevBtn.className = 'pagination-btn prev-page-btn'; prevBtn.disabled = currentPage <= 1; prevBtn.addEventListener('click', () => { if (currentPage > 1) { if (mainCategory === 'latest') currentLatestPage--; else currentPopularPage--; loadTmdbCategoryContent(mainCategory, itemType, category, currentPage - 1); } }); const nextBtn = document.createElement('button'); nextBtn.textContent = 'Next'; nextBtn.className = 'pagination-btn next-page-btn'; nextBtn.disabled = currentPage >= totalPages; nextBtn.addEventListener('click', () => { if (currentPage < totalPages) { if (mainCategory === 'latest') currentLatestPage++; else currentPopularPage++; loadTmdbCategoryContent(mainCategory, itemType, category, currentPage + 1); } }); paginationDiv.appendChild(prevBtn); paginationDiv.appendChild(nextBtn); container.appendChild(paginationDiv); }
+            try { const response = await fetch(`${tmdbBaseUrl}/tv/${parentShowTmdbId}/season/${seasonNum}?api_key=${apiKey}`); if (!response.ok) throw new Error(`API Error: ${response.statusText}`); const seasonDetails = await response.json(); episodeContainer.innerHTML = ''; if (seasonDetails.episodes && seasonDetails.episodes.length > 0) { const title = document.createElement('h4'); title.className = 'text-lg font-semibold mb-2 text-sky-300'; title.textContent = `${seasonDetails.name || `Season ${seasonNum}`} Episodes`; episodeContainer.appendChild(title); const list = document.createElement('div'); list.className = 'episodes-list space-y-2 pr-2'; seasonDetails.episodes.forEach(ep => { const card = document.createElement('div'); card.className = 'episode-card bg-gray-750 p-3 rounded-md hover:bg-gray-700 cursor-pointer flex space-x-3 items-start'; const stillPath = ep.still_path ? `${stillImageBaseUrl}${ep.still_path}` : 'https://placehold.co/120x68/374151/9CA3AF?text=N/A'; card.innerHTML = ` <img src="${stillPath}" alt="Episode ${ep.episode_number}" class="w-28 h-16 object-cover rounded-md flex-shrink-0" onerror="this.src='https://placehold.co/120x68/374151/9CA3AF?text=N/A'; this.onerror=null;"> <div> <h5 class="text-sm font-semibold text-sky-200">Ep ${ep.episode_number}: ${ep.name}</h5> <p class="text-xs text-gray-400">${ep.air_date||''}</p> <p class="text-xs text-gray-500 mt-1 truncate" title="${ep.overview}">${ep.overview||'No overview.'}</p> </div> `; card.addEventListener('click', () => { const playerSection = document.getElementById(`${targetViewContext}VidsrcPlayerSection`); if(playerSection) {updateVidsrcPlayer(playerSection, 'tv', parentShowTmdbId, parentShowImdbId, seasonNum, ep.episode_number); playerSection.scrollIntoView({behavior:'smooth', block:'center'});} else { console.error("Player section not found for episode click:", `${targetViewContext}VidsrcPlayerSection`);} }); list.appendChild(card); }); episodeContainer.appendChild(list); } else { episodeContainer.innerHTML = `<p class="text-gray-400">No episodes found for this season.</p>`; } } catch (error) { episodeContainer.innerHTML = `<p class="text-red-400">Error loading episodes: ${error.message}</p>`; console.error("Episode Loading Error:", error); } }
+        async function fetchAndDisplayCollection(collectionId, currentMovieId, targetCollectionEl, targetViewContext = "item") { if (!targetCollectionEl) return; showLoading(`collection-${targetViewContext}`, 'Loading movie series...'); targetCollectionEl.innerHTML = ''; try { const response = await fetch(`${tmdbBaseUrl}/collection/${collectionId}?api_key=${apiKey}`); if (!response.ok) throw new Error(`API Error: ${response.statusText}`); const data = await response.json(); const titleEl = document.createElement('h3'); titleEl.className = 'section-title'; titleEl.textContent = data.name || 'Movie Series'; targetCollectionEl.appendChild(titleEl); const list = document.createElement('div'); list.className = 'flex overflow-x-auto space-x-3 pb-3 related-movies-scroll'; if (data.parts?.length > 0) { data.parts.forEach(movie => { if (String(movie.id) === String(currentMovieId)) return; list.appendChild(createRelatedItemCard(movie, 'movie', targetViewContext)); }); targetCollectionEl.appendChild(list); if(list.children.length === 0) { targetCollectionEl.innerHTML += '<p class="text-sm text-gray-400">No other movies in this series.</p>'; } } else { targetCollectionEl.innerHTML += '<p class="text-sm text-gray-400">No other movies found in this series.</p>'; } } catch (error) { showMessage("Could not load movie series.", 'error', `collection-${targetViewContext}`); console.error("Collection Error:", error); } }
+        async function fetchAndDisplayRecommendations(itemId, itemType, targetRelatedEl, targetViewContext = "item") { if (!targetRelatedEl) return; showLoading(`related-${targetViewContext}`, `Loading recommendations...`); targetRelatedEl.innerHTML = ''; try { const response = await fetch(`${tmdbBaseUrl}/${itemType}/${itemId}/recommendations?api_key=${apiKey}`); if (!response.ok) throw new Error(`API Error: ${response.statusText}`); const data = await response.json(); const titleEl = document.createElement('h3'); titleEl.className = 'section-title'; titleEl.textContent = `Recommended ${itemType === 'tv' ? 'Shows' : 'Movies'}`; targetRelatedEl.appendChild(titleEl); const list = document.createElement('div'); list.className = 'flex overflow-x-auto space-x-3 pb-3 related-movies-scroll'; if (data.results?.length > 0) { data.results.slice(0,10).forEach(item => list.appendChild(createRelatedItemCard(item, itemType, targetViewContext))); targetRelatedEl.appendChild(list); } else { targetRelatedEl.innerHTML += '<p class="text-sm text-gray-400">No recommendations found.</p>'; } } catch (error) { showMessage("Could not load recommendations.", 'error', `related-${targetViewContext}`); console.error("Recommendations Error:", error); } }
+        function createRelatedItemCard(item, itemType, currentViewContext = "item") { const card = document.createElement('div'); card.className = 'related-item-card bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-600 flex-shrink-0 w-[150px]'; const poster = item.poster_path ? `${smallImageBaseUrl}${item.poster_path}` : 'https://placehold.co/150x225/374151/9CA3AF?text=N/A'; card.innerHTML = ` <img src="${poster}" alt="${item.title||item.name}" class="w-full h-48 object-cover rounded-md mb-2" onerror="this.src='https://placehold.co/150x225/374151/9CA3AF?text=N/A'; this.onerror=null;"> <h4 class="text-sm font-semibold text-sky-200 truncate">${item.title||item.name}</h4> <p class="text-xs text-gray-400">${(item.release_date||item.first_air_date)?.substring(0,4)||'N/A'}</p> `; card.addEventListener('click', () => { const calledFromOverlay = currentViewContext === 'overlay'; const calledFromWatchlist = currentViewContext === 'watchlist'; handleItemSelect(String(item.id), item.title||item.name, itemType, calledFromOverlay, calledFromWatchlist); }); return card; }
+        async function loadTmdbCategoryContent(mainCategory, type, category, page) { const displayContainer = mainCategory === 'latest' ? latestContentDisplay : popularContentDisplay; if(!displayContainer) return; showLoading(mainCategory, `Loading ${category.replace('_', ' ')} ${type}s...`); let url = `${tmdbBaseUrl}/${type}/${category}?api_key=${apiKey}&page=${page}`; try { const response = await fetch(url); if (!response.ok) throw new Error(`TMDB API Error: ${response.statusText}`); const data = await response.json(); if (data && data.results && data.results.length > 0) { displayTmdbCategoryItems(data.results, type, displayContainer, mainCategory, category, page, data.total_pages); } else { showMessage('No items found for this category.', 'info', mainCategory); } } catch (error) { showMessage(`Error loading content: ${error.message}`, 'error', mainCategory); console.error(`Error loading ${type}/${category}:`, error); } }
+        function displayTmdbCategoryItems(items, itemType, container, mainCategory, category, currentPage, totalPages) { if(!container) return; container.innerHTML = ''; const itemsGrid = document.createElement('div'); itemsGrid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 generic-items-container'; items.forEach(item => { const card = document.createElement('div'); card.className = 'generic-item-card cursor-pointer'; const title = item.title || item.name; const posterPath = item.poster_path; const posterUrl = posterPath ? `${smallImageBaseUrl}${posterPath}` : genericItemPlaceholder; card.innerHTML = ` <img src="${posterUrl}" alt="${title}" onerror="this.src='${genericItemPlaceholder}'; this.onerror=null;"> <h4 class="text-md font-semibold text-sky-300 truncate mt-2" title="${title}">${title}</h4> ${item.vote_average ? `<p class="text-xs text-yellow-400">★ ${item.vote_average.toFixed(1)}</p>` : ''} `; card.addEventListener('click', () => handleItemSelect(String(item.id), title, itemType, true)); itemsGrid.appendChild(card); }); container.appendChild(itemsGrid); const paginationDiv = document.createElement('div'); paginationDiv.className = 'flex justify-between mt-4'; const prevBtn = document.createElement('button'); prevBtn.textContent = 'Previous'; prevBtn.className = 'pagination-btn prev-page-btn'; prevBtn.disabled = currentPage <= 1; prevBtn.addEventListener('click', () => { if (currentPage > 1) { if (mainCategory === 'latest') currentLatestPage--; else currentPopularPage--; loadTmdbCategoryContent(mainCategory, itemType, category, currentPage - 1); } }); const nextBtn = document.createElement('button'); nextBtn.textContent = 'Next'; nextBtn.className = 'pagination-btn next-page-btn'; nextBtn.disabled = currentPage >= totalPages; nextBtn.addEventListener('click', () => { if (currentPage < totalPages) { if (mainCategory === 'latest') currentLatestPage++; else currentPopularPage++; loadTmdbCategoryContent(mainCategory, itemType, category, currentPage + 1); } }); paginationDiv.appendChild(prevBtn); paginationDiv.appendChild(nextBtn); container.appendChild(paginationDiv); }
+
+        function determineActiveWatchlistButtonContainerId() {
+            if (detailOverlay && !detailOverlay.classList.contains('hidden')) return 'overlayDetailAddToBtnContainer';
+            if (watchlistView && !watchlistView.classList.contains('hidden-view')) return 'watchlistDetailAddToBtnContainer';
+            return 'itemDetailAddToBtnContainer'; 
+        }
 
         // --- Initialize the App ---
         async function initializeAppState() {
+            // Assign DOM elements 
+            searchInput = document.getElementById('searchInput');
+            searchButton = document.getElementById('searchButton');
+            resultsContainer = document.getElementById('resultsContainer');
+            itemDetailContainer = document.getElementById('itemDetailContainer'); 
+            itemDetailTitle = document.getElementById('itemDetailTitle'); 
+            itemSeasonsEpisodesSection = document.getElementById('itemSeasonsEpisodesSection'); 
+            itemRelatedItemsSection = document.getElementById('itemRelatedItemsSection'); 
+            itemCollectionItemsSection = document.getElementById('itemCollectionItemsSection'); 
+            itemBackButtonContainer = document.getElementById('itemBackButtonContainer'); 
+
+            tabSearch = document.getElementById('tabSearch');
+            tabWatchlist = document.getElementById('tabWatchlist');
+            tabLatest = document.getElementById('tabLatest'); 
+            tabPopular = document.getElementById('tabPopular'); 
+            searchView = document.getElementById('searchView');
+            watchlistView = document.getElementById('watchlistView');
+            latestView = document.getElementById('latestView'); 
+            popularView = document.getElementById('popularView'); 
+            messageArea = document.getElementById('messageArea');
+            newWatchlistNameInput = document.getElementById('newWatchlistName');
+            createWatchlistBtn = document.getElementById('createWatchlistBtn');
+            watchlistTilesContainer = document.getElementById('watchlistTilesContainer'); 
+            watchlistDisplayContainer = document.getElementById('watchlistDisplayContainer'); 
+            
+            watchlistItemDetailPanel = document.getElementById('watchlistItemDetailPanel');
+            watchlistItemDetailTitle = document.getElementById('watchlistDetailTitle'); 
+            watchlistItemDetailContainer = document.getElementById('watchlistDetailContainer'); 
+            watchlistSeasonsEpisodesSection = document.getElementById('watchlistSeasonsEpisodesSection');
+            watchlistRelatedItemsSection = document.getElementById('watchlistRelatedItemsSection');
+            watchlistCollectionItemsSection = document.getElementById('watchlistCollectionItemsSection');
+            watchlistBackButtonContainer = document.getElementById('watchlistBackButtonContainer');
+
+            latestContentDisplay = document.getElementById('latestContentDisplay');
+            latestMoviesSubTab = document.getElementById('latestMoviesSubTab');
+            latestTvShowsSubTab = document.getElementById('latestTvShowsSubTab');
+            
+            popularContentDisplay = document.getElementById('popularContentDisplay');
+            popularMoviesSubTab = document.getElementById('popularMoviesSubTab');
+            popularTvShowsSubTab = document.getElementById('popularTvShowsSubTab');
+
+            userAuthIcon = document.getElementById('userAuthIcon');
+            authDropdownMenu = document.getElementById('authDropdownMenu');
+
+            detailOverlay = document.getElementById('detailOverlay');
+            detailOverlayContent = document.getElementById('detailOverlayContent');
+            closeOverlayButton = document.getElementById('closeOverlayButton');
+            overlayDetailTitle = document.getElementById('overlayDetailTitle');
+            overlayDetailContainer = document.getElementById('overlayDetailContainer');
+            overlayVidsrcPlayerSection = document.getElementById('overlayVidsrcPlayerSection');
+            overlayDetailAddToBtnContainer = document.getElementById('overlayDetailAddToBtnContainer');
+            overlaySeasonsEpisodesSection = document.getElementById('overlaySeasonsEpisodesSection');
+            overlayRelatedItemsSection = document.getElementById('overlayRelatedItemsSection');
+            overlayCollectionItemsSection = document.getElementById('overlayCollectionItemsSection');
+            overlayBackButtonContainer = document.getElementById('overlayBackButtonContainer');
+            positionIndicator = document.getElementById('positionIndicator');
+
+
+            // Setup event listeners that depend on these elements
+            if(userAuthIcon) {
+                userAuthIcon.addEventListener('click', (e) => {
+                    e.stopPropagation(); 
+                    if(authDropdownMenu) authDropdownMenu.classList.toggle('hidden');
+                });
+            }
+            if(searchButton) searchButton.addEventListener('click', () => handleSearch());
+            if(searchInput) searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
+            if(createWatchlistBtn) createWatchlistBtn.addEventListener('click', async () => {
+                if (!currentUserId) { showToast("You must be signed in to create a watchlist.", "error"); return; }
+                const name = newWatchlistNameInput.value.trim();
+                if (!name) { showToast("Please enter a name for the new watchlist.", "error"); return; }
+                try {
+                    const watchlistRef = doc(db, "users", currentUserId, "watchlists", name);
+                    const docSnap = await getDoc(watchlistRef); 
+                    if (docSnap.exists()) { showToast(`Watchlist "${name}" already exists.`, "error"); return; }
+                    await setDoc(watchlistRef, { name: name, items: [], createdAt: new Date().toISOString(), uid: currentUserId });
+                    currentSelectedWatchlistName = name; 
+                    localStorage.setItem(`mediaFinderLastSelectedWatchlist_${currentUserId}`, name);
+                    await loadAndDisplayWatchlistsFromFirestore(); 
+                    newWatchlistNameInput.value = ''; 
+                    showToast(`Watchlist "${name}" created.`, "success");
+                } catch (error) { console.error("Error creating watchlist: ", error); showToast("Failed to create watchlist. Check console.", "error"); }
+            });
+            if(closeOverlayButton) {
+                closeOverlayButton.addEventListener('click', () => {
+                    if(detailOverlay) detailOverlay.classList.add('hidden');
+                    clearAllDynamicContent('overlay'); 
+                    if (previousStateForBackButton) {
+                        if (previousStateForBackButton.originTabId === 'tabLatest' && latestContentDisplay) {
+                            latestContentDisplay.scrollTop = scrollPositions.latest;
+                        } else if (previousStateForBackButton.originTabId === 'tabPopular' && popularContentDisplay) {
+                            popularContentDisplay.scrollTop = scrollPositions.popular;
+                        }
+                    }
+                    previousStateForBackButton = null; 
+                });
+            }
+
+            document.addEventListener('click', (event) => {
+                if (userAuthIcon && authDropdownMenu && !userAuthIcon.contains(event.target) && !authDropdownMenu.contains(event.target)) {
+                    authDropdownMenu.classList.add('hidden');
+                }
+                if (!event.target.closest('.watchlist-tile')) { 
+                    closeAllOptionMenus();
+                }
+                
+                const allManagePopups = document.querySelectorAll('.detail-panel-popup');
+                allManagePopups.forEach(popup => {
+                    if (!popup.classList.contains('hidden')) {
+                        const parentButtonContainer = popup.parentElement; // e.g., itemDetailAddToBtnContainer
+                        if (parentButtonContainer) {
+                            // The button ID is derived from the container ID
+                            const buttonId = parentButtonContainer.id.replace('Container', 'Button');
+                            const correspondingButton = document.getElementById(buttonId);
+
+                            if (!popup.contains(event.target) && (!correspondingButton || !correspondingButton.contains(event.target))) {
+                                popup.classList.add('hidden');
+                            }
+                        }
+                    }
+                });
+            });
+
+            onAuthStateChanged(auth, async (user) => {
+                updateAuthDropdownUI(user); 
+                if (user) {
+                    currentUserId = user.uid;
+                    if(newWatchlistNameInput) newWatchlistNameInput.disabled = false;
+                    if(createWatchlistBtn) createWatchlistBtn.disabled = false;
+                    await loadAndDisplayWatchlistsFromFirestore(); 
+                     if (currentSelectedItemDetails) { 
+                        const activeBtnContainerId = determineActiveWatchlistButtonContainerId();
+                        updateAddToWatchlistButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeBtnContainerId);
+                    }
+                } else {
+                    currentUserId = null;
+                    currentSelectedWatchlistName = null; 
+                    localStorage.removeItem('mediaFinderLastSelectedWatchlist'); 
+                    
+                    if(watchlistTilesContainer) watchlistTilesContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full w-full text-center">Sign in to see your watchlists.</p>';
+                    if(watchlistDisplayContainer) watchlistDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Sign in to manage your watchlists.</p>';
+                    clearAllDynamicContent('watchlist'); 
+                    if(newWatchlistNameInput) newWatchlistNameInput.disabled = true;
+                    if(createWatchlistBtn) createWatchlistBtn.disabled = true;
+                    if (currentSelectedItemDetails) { 
+                        const activeBtnContainerId = determineActiveWatchlistButtonContainerId();
+                        updateAddToWatchlistButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeBtnContainerId); 
+                    }
+                }
+            });
+
             setupMainTabs(); 
             setupSubTabs(latestMoviesSubTab, latestTvShowsSubTab, latestContentDisplay, 'latest');
             setupSubTabs(popularMoviesSubTab, popularTvShowsSubTab, popularContentDisplay, 'popular');
             
-            loadTmdbCategoryContent('latest', latestMoviesSubTab.dataset.type, latestMoviesSubTab.dataset.category, 1);
-            loadTmdbCategoryContent('popular', popularMoviesSubTab.dataset.type, popularMoviesSubTab.dataset.category, 1);
+            if(latestMoviesSubTab) loadTmdbCategoryContent('latest', latestMoviesSubTab.dataset.type, latestMoviesSubTab.dataset.category, 1);
+            if(popularMoviesSubTab) loadTmdbCategoryContent('popular', popularMoviesSubTab.dataset.type, popularMoviesSubTab.dataset.category, 1);
         }
         
-        initializeAppState(); 
+        // Call initializeAppState after the DOM is fully loaded and parsed.
+        document.addEventListener('DOMContentLoaded', initializeAppState); 
     </script>
 </body>
 </html>
