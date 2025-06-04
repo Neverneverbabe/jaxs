@@ -1899,9 +1899,9 @@
                         // updateMarkAsSeenButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeSeenBtnContainerId);
                     }
                 } else {
+                    localStorage.removeItem(`mediaFinderLastSelectedWatchlist_${currentUserId}`);
                     currentUserId = null;
-                    currentSelectedWatchlistName = null; 
-                    localStorage.removeItem('mediaFinderLastSelectedWatchlist'); 
+                    currentSelectedWatchlistName = null;
                     
                     if(watchlistTilesContainer) watchlistTilesContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full w-full text-center">Sign in to see your watchlists.</p>';
                     if(watchlistDisplayContainer) watchlistDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Sign in to manage your watchlists.</p>';
