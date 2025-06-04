@@ -1367,8 +1367,6 @@
 
                 if (newLeft > maxLeft) newLeft = maxLeft;
                 if (newLeft < minLeft) newLeft = minLeft; // Ensure it doesn't go too far left
-                if (newLeft < minLeft) newLeft = minLeft;
-
             } else {
                 console.log("[DEBUG positionPopup] Context: Main Page");
                 // Position relative to the document/viewport
@@ -1384,9 +1382,6 @@
 
                 if (newLeft > maxLeft) newLeft = maxLeft;
                 if (newLeft < minLeft) newLeft = minLeft; // Ensure it doesn't go too far left
-                if (newLeft < minLeft) newLeft = minLeft;
-            }
-
             // newTop and newLeft are target absolute positions in their respective coordinate systems
             // (document-relative for main page, overlay-content-relative for overlay)
             // We need to convert these to style.top/left relative to the popup's offsetParent.
