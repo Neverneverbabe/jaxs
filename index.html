@@ -1956,8 +1956,9 @@
 
             // Moved onAuthStateChanged to be one of the last things in init
             // to ensure other UI elements and handlers are set up.
-             onAuthStateChanged(auth, async (user) => {
-                updateAuthDropdownUI(user); 
+            if (typeof onAuthStateChanged === 'function') {
+                onAuthStateChanged(auth, async (user) => {
+                updateAuthDropdownUI(user);
                 if (user) {
                     currentUserId = user.uid;
                     if(newWatchlistNameInput) newWatchlistNameInput.disabled = false;
@@ -1989,6 +1990,9 @@
                     }
                 }
             });
+            } else {
+                console.error('onAuthStateChanged is not available. Firebase may have failed to load.');
+            }
         }
         
         // Call initializeAppState after the DOM is fully loaded and parsed.
