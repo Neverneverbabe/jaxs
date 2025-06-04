@@ -205,7 +205,7 @@ export function displayResults(items, itemType, resContainer) {
         const posterPath = item.poster_path;
 
         const card = document.createElement('div');
-        card.className = 'item-card bg-gray-700 p-1.5 rounded-md cursor-pointer hover:bg-gray-600 w-[100px] flex flex-col items-center text-center'; 
+        card.className = 'item-card bg-gray-700 p-1.5 rounded-md cursor-pointer hover:bg-gray-600 w-[250px] flex flex-col items-center text-center'; 
         card.dataset.id = String(item.id); 
         card.dataset.title = title;
         card.dataset.type = itemType;
