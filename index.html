@@ -525,7 +525,7 @@
         let { db, auth, firebaseAuthFunctions, firebaseFirestoreFunctions } = window;
 
         if (!firebaseAuthFunctions || !firebaseFirestoreFunctions || !db || !auth) {
-            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+            const { initializeApp, getApps, getApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
             const authModule = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
             const firestoreModule = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
 
@@ -539,7 +539,7 @@
                 measurementId: "G-Z0PJL94W66"
             };
 
-            const app = initializeApp(firebaseConfig);
+            const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
             db = firestoreModule.getFirestore(app);
             auth = authModule.getAuth(app);
 
