@@ -1098,7 +1098,6 @@
         }
         
         async function updateAddToWatchlistButtonState(itemId, itemData, buttonContainerId = 'addToWatchlistBtnContainer') {
-            console.log(`[DEBUG] updateAddToWatchlistButtonState CALLED for containerId: ${buttonContainerId}, itemId: ${itemId}`);
             const container = document.getElementById(buttonContainerId); 
             // console.log(`[updateAddToWatchlistButtonState] Called for item ID: ${itemId}, container ID: ${buttonContainerId}. Container found: ${!!container}`);
             if (!container) { 
@@ -1136,34 +1135,26 @@
             }
             
             mainButton.onclick = async (e) => {
-                console.log(`[DEBUG] Bookmark button clicked for container: ${buttonContainerId}`);
                 e.stopPropagation(); 
                 const currentPopup = document.getElementById(buttonContainerId + 'Popup'); 
 
                 if (currentPopup) {
-                    console.log(`[DEBUG] Popup found: ${currentPopup.id}. Has 'hidden' class: ${currentPopup.classList.contains('hidden')}`);
                     if (currentPopup.classList.contains('hidden')) {
                         currentPopup.classList.remove('hidden');
-                        console.log(`[DEBUG] Removed 'hidden' class. Popup should be visible.`);
                         
                         // Re-enable actual population and positioning
                         await populateWatchlistManagePopup(currentPopup, itemId, itemData, mainButton, buttonContainerId); 
                         positionPopup(mainButton, currentPopup); 
                         
                         // Add a log to see if it's still considered visible after population
-                        console.log(`[DEBUG] Popup after populate/position. Computed display: ${window.getComputedStyle(currentPopup).display}, Visibility: ${window.getComputedStyle(currentPopup).visibility}`);
                         // Check if the button still has the 'in-any-watchlist' class after popup interaction
                         if (mainButton.classList.contains('in-any-watchlist')) {
-                            console.log("[DEBUG] Bookmark icon still has 'in-any-watchlist' after popup open.");
                         }
-                        console.log(`[DEBUG] Popup BoundingClientRect after populate/position: ${JSON.stringify(currentPopup.getBoundingClientRect())}`);
 
                     } else {
                         currentPopup.classList.add('hidden');
-                        console.log(`[DEBUG] Added 'hidden' class. Popup should be hidden.`);
                     }
                 } else {
-                    console.error(`[DEBUG] Popup NOT found for ID: ${buttonContainerId + 'Popup'}`);
                 }
             };
         }
@@ -1414,9 +1405,7 @@
             popup.style.display = initialDisplay; // Restore original display
             popup.style.visibility = initialVisibility; // Restore original visibility
 
-            console.log(`[DEBUG positionPopup] Measured popupWidth: ${popupWidth}`);
             if (popupWidth === 0) {
-                console.warn("[DEBUG positionPopup] popupWidth is 0, positioning might be incorrect. Popup content might be empty or display issue.");
                 // Consider a default width or further checks if this is a persistent issue
             }
 
@@ -1428,7 +1417,6 @@
                                 overlayContentEl.contains(button);
 
             if (isInOverlay) {
-                console.log("[DEBUG positionPopup] Context: Overlay");
                 const overlayRect = overlayContentEl.getBoundingClientRect();
 
                 // Calculate button's position relative to the overlayContentEl's scrollable area
@@ -1443,13 +1431,10 @@
                 const overlayVisibleWidth = overlayContentEl.clientWidth;
                 let maxLeft = overlayContentEl.scrollLeft + overlayVisibleWidth - popupWidth - popupBuffer;
                 let minLeft = overlayContentEl.scrollLeft + popupBuffer;
-                console.log(`[DEBUG positionPopup OVERLAY] Initial newLeft: ${newLeft}, popupWidth: ${popupWidth}, overlayScrollLeft: ${overlayContentEl.scrollLeft}, overlayVisibleWidth: ${overlayVisibleWidth}`);
-                console.log(`[DEBUG positionPopup OVERLAY] Calculated minLeft: ${minLeft}, maxLeft: ${maxLeft}`);
 
                 if (newLeft > maxLeft) newLeft = maxLeft;
                 if (newLeft < minLeft) newLeft = minLeft; // Ensure it doesn't go too far left
             } else {
-                console.log("[DEBUG positionPopup] Context: Main Page");
                 // Position relative to the document/viewport
                 newTop = rect.bottom + window.scrollY + 5; 
                 newLeft = rect.left + window.scrollX;
@@ -1458,8 +1443,6 @@
                 const windowVisibleWidth = window.innerWidth;
                 let maxLeft = window.scrollX + windowVisibleWidth - popupWidth - popupBuffer;
                 let minLeft = window.scrollX + popupBuffer;
-                console.log(`[DEBUG positionPopup MAIN PAGE] Initial newLeft: ${newLeft}, popupWidth: ${popupWidth}, windowScrollX: ${window.scrollX}, windowVisibleWidth: ${windowVisibleWidth}`);
-                console.log(`[DEBUG positionPopup MAIN PAGE] Calculated minLeft: ${minLeft}, maxLeft: ${maxLeft}`);
 
                 if (newLeft > maxLeft) newLeft = maxLeft;
                 if (newLeft < minLeft) newLeft = minLeft; // Ensure it doesn't go too far left
@@ -1481,8 +1464,6 @@
 
                 styleTop = newTop - parentTopInOverlayScroll;
                 styleLeft = newLeft - parentLeftInOverlayScroll;
-                console.log(`[DEBUG positionPopup OVERLAY] Target newTop: ${newTop}, newLeft: ${newLeft}`);
-                console.log(`[DEBUG positionPopup OVERLAY] ParentInOverlayScroll top: ${parentTopInOverlayScroll}, left: ${parentLeftInOverlayScroll}`);
             } else { // Main Page
                 // newTop/newLeft are document-relative.
                 // parentRect is viewport-relative. We need parent's document-relative position.
@@ -1491,21 +1472,14 @@
 
                 styleTop = newTop - parentDocumentTop;
                 styleLeft = newLeft - parentDocumentLeft;
-                console.log(`[DEBUG positionPopup MAIN PAGE] Target newTop: ${newTop}, newLeft: ${newLeft}`);
-                console.log(`[DEBUG positionPopup MAIN PAGE] ParentDocument top: ${parentDocumentTop}, left: ${parentDocumentLeft}`);
             }
 
             popup.style.top = styleTop + 'px';
             popup.style.left = styleLeft + 'px';
 
-            console.log(`[DEBUG positionPopup] Final Applied Style - top: ${popup.style.top}, left: ${popup.style.left}`);
-            console.log(`[DEBUG positionPopup] Button Rect: left=${rect.left}, top=${rect.top}, bottom=${rect.bottom}, right=${rect.right}`);
             if(isInOverlay) {
                 const overlayRect = overlayContentEl.getBoundingClientRect();
-                console.log(`[DEBUG positionPopup] Overlay Rect: left=${overlayRect.left}, top=${overlayRect.top}`);
-                console.log(`[DEBUG positionPopup] Overlay Scroll: top=${overlayContentEl.scrollTop}, left=${overlayContentEl.scrollLeft}, clientWidth=${overlayContentEl.clientWidth}`);
             } else {
-                console.log(`[DEBUG positionPopup] Window Scroll: Y=${window.scrollY}, X=${window.scrollX}, InnerWidth=${window.innerWidth}`);
             }
         }
 
