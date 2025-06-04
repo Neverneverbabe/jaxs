@@ -520,10 +520,67 @@
     </div>
 
     <script type="module">
-        // Firebase SDKs are imported in the <head>
-        const { db, auth, firebaseAuthFunctions, firebaseFirestoreFunctions } = window; 
-        const { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } = firebaseAuthFunctions;
-        const { collection, getDocs, doc, setDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, getDoc } = firebaseFirestoreFunctions;
+        // Firebase SDKs are imported in the <head>. If they failed to load,
+        // dynamically import them here so the rest of the app still works.
+        let { db, auth, firebaseAuthFunctions, firebaseFirestoreFunctions } = window;
+
+        if (!firebaseAuthFunctions || !firebaseFirestoreFunctions || !db || !auth) {
+            try {
+                const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+                const authModule = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+                const firestoreModule = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+
+                const firebaseConfig = {
+                    apiKey: "AIzaSyAsLscv3km_0ywQFQb-1D3JhoN3pBS_ia8",
+                    authDomain: "watchlist-app-c5ecb.firebaseapp.com",
+                    projectId: "watchlist-app-c5ecb",
+                    storageBucket: "watchlist-app-c5ecb.appspot.com",
+                    messagingSenderId: "584689541926",
+                    appId: "1:584689541926:web:998b0499c6b84f0db597e7",
+                    measurementId: "G-Z0PJL94W66"
+                };
+
+                const app = initializeApp(firebaseConfig);
+                db = firestoreModule.getFirestore(app);
+                auth = authModule.getAuth(app);
+
+                firebaseAuthFunctions = {
+                    createUserWithEmailAndPassword: authModule.createUserWithEmailAndPassword,
+                    signInWithEmailAndPassword: authModule.signInWithEmailAndPassword,
+                    signOut: authModule.signOut,
+                    onAuthStateChanged: authModule.onAuthStateChanged
+                };
+
+                firebaseFirestoreFunctions = {
+                    collection: firestoreModule.collection,
+                    getDocs: firestoreModule.getDocs,
+                    doc: firestoreModule.doc,
+                    setDoc: firestoreModule.setDoc,
+                    deleteDoc: firestoreModule.deleteDoc,
+                    updateDoc: firestoreModule.updateDoc,
+                    arrayUnion: firestoreModule.arrayUnion,
+                    arrayRemove: firestoreModule.arrayRemove,
+                    getDoc: firestoreModule.getDoc,
+                    query: firestoreModule.query,
+                    where: firestoreModule.where
+                };
+
+                // Expose to window for any other scripts
+                window.db = db;
+                window.auth = auth;
+                window.firebaseAuthFunctions = firebaseAuthFunctions;
+                window.firebaseFirestoreFunctions = firebaseFirestoreFunctions;
+            } catch (e) {
+                console.error("Firebase dynamic import failed", e);
+            }
+        }
+
+        if (!firebaseAuthFunctions || !firebaseFirestoreFunctions || !db || !auth) {
+            console.error("Firebase failed to initialize");
+        }
+
+        const { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } = firebaseAuthFunctions || {};
+        const { collection, getDocs, doc, setDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, getDoc, query, where } = firebaseFirestoreFunctions || {};
 
 
         // --- App Constants and Global Variables ---
