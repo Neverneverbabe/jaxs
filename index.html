@@ -524,7 +524,9 @@
         // dynamically import them here so the rest of the app still works.
         let { db, auth, firebaseAuthFunctions, firebaseFirestoreFunctions } = window;
 
-        if (!firebaseAuthFunctions || !firebaseFirestoreFunctions || !db || !auth) {
+        async function loadFirebaseIfNeeded() {
+            if (firebaseAuthFunctions && firebaseFirestoreFunctions && db && auth) return;
+
             const { initializeApp, getApps, getApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
             const authModule = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
             const firestoreModule = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
@@ -571,8 +573,11 @@
             window.firebaseFirestoreFunctions = firebaseFirestoreFunctions;
         }
 
-        const { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } = firebaseAuthFunctions;
-        const { collection, getDocs, doc, setDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, getDoc, query, where } = firebaseFirestoreFunctions;
+        (async () => {
+            await loadFirebaseIfNeeded();
+
+            const { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } = firebaseAuthFunctions;
+            const { collection, getDocs, doc, setDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, getDoc, query, where } = firebaseFirestoreFunctions;
 
 
         // --- App Constants and Global Variables ---
@@ -1984,7 +1989,8 @@
         }
         
         // Call initializeAppState after the DOM is fully loaded and parsed.
-        document.addEventListener('DOMContentLoaded', initializeAppState); 
+        document.addEventListener('DOMContentLoaded', initializeAppState);
+        })();
     </script>
 </body>
 </html>
