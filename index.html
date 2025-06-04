@@ -520,6 +520,7 @@
     </div>
 
     <script type="module">
+    (async () => {
         // Firebase SDKs are imported in the <head>. If they failed to load,
         // dynamically import them here so the rest of the app still works.
         let { db, auth, firebaseAuthFunctions, firebaseFirestoreFunctions } = window;
@@ -1996,7 +1997,8 @@
         }
         
         // Call initializeAppState after the DOM is fully loaded and parsed.
-        document.addEventListener('DOMContentLoaded', initializeAppState); 
+        document.addEventListener('DOMContentLoaded', initializeAppState);
+    })();
     </script>
 </body>
 </html>
