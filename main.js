@@ -1,24 +1,22 @@
 // js/main.js
 import { auth, firebaseAuthFunctions, loadFirebaseIfNeeded } from './firebase.js';
 import { initApiRefs, fetchTmdbCategoryContent } from './api.js';
-import { initUiRefs, clearAllDynamicContent, showPositionSavedIndicator, positionPopup, createBackButton } from './ui.js';
+import { initUiRefs, clearAllDynamicContent, showPositionSavedIndicator, positionPopup, createBackButton, clearItemDetailPanel, clearSearchResultsPanel } from './ui.js'; // Added clearItemDetailPanel, clearSearchResultsPanel
 import { initAuthRefs, handleAuthStateChanged, createAuthFormUI } from './auth.js';
 import { initWatchlistRefs, loadAndDisplayWatchlistsFromFirestore, closeAllOptionMenus, handleCreateWatchlist } from './watchlist.js';
-import { initSeenListRefs, loadAndDisplaySeenItems } from './seenList.js'; // appendSeenCheckmark is not directly used by main.js
-import { initHandlerRefs, handleSearch, handleItemSelect } from './handlers.js'; // getSelectedSearchType not directly used by main.js
+import { initSeenListRefs, loadAndDisplaySeenItems } from './seenList.js';
+import { initHandlerRefs, handleSearch, handleItemSelect } from './handlers.js';
 import {
     updateCurrentUserId, currentUserId,
     currentLatestType, currentLatestCategory, updateLatestPage, updateLatestType, updateLatestCategory,
-    currentPopularType, /* removed: currentPopularCategory, */ updatePopularPage, updatePopularType, /* removed: updatePopularCategory, */
+    currentPopularType, updatePopularPage, updatePopularType, 
     previousStateForBackButton, updatePreviousStateForBackButton,
-    scrollPositions, updateScrollPosition
+    scrollPositions // Removed updateScrollPosition as it's used internally in handlers/state
 } from './state.js';
 
-// Expose createAuthFormUI globally if it's used by popups in other modules before proper DI is set up
-// This is a workaround. Ideally, UI components manage their own dependencies.
 window.createAuthFormUI_Global = createAuthFormUI;
 
-// --- DOM Element Variables ---
+// DOM Element Variables
 let searchInput, searchButton, resultsContainer, itemDetailContainer, itemDetailTitle,
     itemSeasonsEpisodesSection, itemRelatedItemsSection, itemCollectionItemsSection, itemBackButtonContainer,
     tabSearch, tabWatchlist, tabSeen, tabLatest, tabPopular,
@@ -32,7 +30,7 @@ let searchInput, searchButton, resultsContainer, itemDetailContainer, itemDetail
     latestContentDisplay, latestMoviesSubTab, latestTvShowsSubTab,
     popularContentDisplay, popularMoviesSubTab, popularTvShowsSubTab,
     userAuthIcon, authDropdownMenu,
-    detailOverlay, detailOverlayContent, closeOverlayButton,
+    detailOverlay, detailOverlayContent, closeOverlayButton, // Ensure detailOverlayContent is declared
     overlayDetailTitle, overlayDetailContainer,
     overlayVidsrcPlayerSection,
     overlaySeasonsEpisodesSection,
@@ -40,7 +38,6 @@ let searchInput, searchButton, resultsContainer, itemDetailContainer, itemDetail
     positionIndicator,
     itemVidsrcPlayerSection, watchlistVidsrcPlayerSection;
 
-// --- App Initialization ---
 async function initializeAppState() {
     await loadFirebaseIfNeeded();
 
@@ -95,7 +92,7 @@ async function initializeAppState() {
     authDropdownMenu = document.getElementById('authDropdownMenu');
 
     detailOverlay = document.getElementById('detailOverlay');
-    detailOverlayContent = document.getElementById('detailOverlayContent');
+    detailOverlayContent = document.getElementById('detailOverlayContent'); // Make sure this is assigned
     closeOverlayButton = document.getElementById('closeOverlayButton');
     overlayDetailTitle = document.getElementById('overlayDetailTitle');
     overlayDetailContainer = document.getElementById('overlayDetailContainer');
@@ -146,18 +143,30 @@ async function initializeAppState() {
 
     if (createWatchlistBtn) createWatchlistBtn.addEventListener('click', handleCreateWatchlist);
 
-    if (closeOverlayButton && detailOverlay) {
-        closeOverlayButton.addEventListener('click', () => {
-            detailOverlay.classList.add('hidden');
-            clearAllDynamicContent('overlay');
-            if (previousStateForBackButton) {
-                if (previousStateForBackButton.originTabId === 'tabLatest' && latestContentDisplay) {
-                    latestContentDisplay.scrollTop = scrollPositions.latest;
-                } else if (previousStateForBackButton.originTabId === 'tabPopular' && popularContentDisplay) {
-                    popularContentDisplay.scrollTop = scrollPositions.popular;
-                }
+    // Function to handle closing the overlay
+    const closeOverlay = () => {
+        if (detailOverlay) detailOverlay.classList.add('hidden');
+        clearItemDetailPanel('overlay'); // Use specific clearer for overlay details
+        if (previousStateForBackButton) {
+            if (previousStateForBackButton.originTabId === 'tabLatest' && latestContentDisplay) {
+                latestContentDisplay.scrollTop = scrollPositions.latest;
+            } else if (previousStateForBackButton.originTabId === 'tabPopular' && popularContentDisplay) {
+                popularContentDisplay.scrollTop = scrollPositions.popular;
             }
-            updatePreviousStateForBackButton(null);
+        }
+        updatePreviousStateForBackButton(null);
+    };
+
+    if (closeOverlayButton && detailOverlay) {
+        closeOverlayButton.addEventListener('click', closeOverlay);
+    }
+
+    // NEW: Listener for clicking overlay backdrop to close
+    if (detailOverlay) {
+        detailOverlay.addEventListener('click', (event) => {
+            if (event.target === detailOverlay) { // Only close if the click is directly on the backdrop
+                closeOverlay();
+            }
         });
     }
 
@@ -201,21 +210,25 @@ async function initializeAppState() {
 
 function setupMainNavigationTabs() {
     const mainTabsConfig = [
-        { button: tabSearch, view: searchView, action: () => clearAllDynamicContent('item') },
-        { button: tabWatchlist, view: watchlistView, action: async () => { await loadAndDisplayWatchlistsFromFirestore(); clearAllDynamicContent('watchlist'); } },
+        { button: tabSearch, view: searchView, action: () => {
+            clearItemDetailPanel('item');
+            // clearSearchResultsPanel(); // Uncomment if you want to clear results when clicking "Search" tab
+          }
+        },
+        { button: tabWatchlist, view: watchlistView, action: async () => { await loadAndDisplayWatchlistsFromFirestore(); clearItemDetailPanel('watchlist'); } },
         { button: tabSeen, view: seenView, action: async () => await loadAndDisplaySeenItems() },
         {
             button: tabLatest, view: latestView, action: () => {
                 const activeSubTab = latestView.querySelector('.sub-tab.active') || latestMoviesSubTab;
                 if (activeSubTab) fetchTmdbCategoryContent('latest', activeSubTab.dataset.type, activeSubTab.dataset.category, 1);
-                clearAllDynamicContent('item');
+                clearItemDetailPanel('item'); 
             }
         },
         {
             button: tabPopular, view: popularView, action: () => {
                 const activeSubTab = popularView.querySelector('.sub-tab.active') || popularMoviesSubTab;
                 if (activeSubTab) fetchTmdbCategoryContent('popular', activeSubTab.dataset.type, activeSubTab.dataset.category, 1);
-                clearAllDynamicContent('item');
+                clearItemDetailPanel('item');
             }
         }
     ];
@@ -235,7 +248,7 @@ function setupMainNavigationTabs() {
 }
 
 function setupSubNavigationTabs() {
-    const subTabsSetup = (moviesTab, tvShowsTab, mainCat) => { // Removed contentDisp as it's globally available
+    const subTabsSetup = (moviesTab, tvShowsTab, mainCat) => {
         const subTabs = [moviesTab, tvShowsTab];
         subTabs.forEach(tab => {
             if (tab) {
@@ -253,7 +266,6 @@ function setupSubNavigationTabs() {
                     } else if (mainCat === 'popular') {
                         updatePopularPage(1);
                         updatePopularType(type);
-                        // The category for popular is usually just 'popular', defined in the button's dataset
                     }
                     fetchTmdbCategoryContent(mainCat, type, category, 1);
                 });
@@ -275,7 +287,6 @@ window.handleLatestPageChange = (newPage) => {
 };
 window.handlePopularPageChange = (newPage) => {
     updatePopularPage(newPage);
-    // Ensure popularMoviesSubTab is defined before accessing dataset
     const category = popularMoviesSubTab ? popularMoviesSubTab.dataset.category : 'popular';
     fetchTmdbCategoryContent('popular', currentPopularType, category, newPage);
 };
