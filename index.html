@@ -1894,9 +1894,6 @@
                         updateAddToWatchlistButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeBtnContainerId);
                         const activeSeenBtnContainerId = determineActiveSeenButtonContainerId(); 
                         updateMarkAsSeenButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeSeenBtnContainerId);
-                        // TODO: Also call updateMarkAsSeenButtonState here
-                        // const activeSeenBtnContainerId = determineActiveSeenButtonContainerId(); // You'll need this function
-                        // updateMarkAsSeenButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeSeenBtnContainerId);
                     }
                 } else {
                     currentUserId = null;
@@ -1914,9 +1911,6 @@
                         updateAddToWatchlistButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeBtnContainerId); 
                         const activeSeenBtnContainerId = determineActiveSeenButtonContainerId();
                         updateMarkAsSeenButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeSeenBtnContainerId);
-                        // TODO: Also call updateMarkAsSeenButtonState here
-                        // const activeSeenBtnContainerId = determineActiveSeenButtonContainerId();
-                        // updateMarkAsSeenButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeSeenBtnContainerId);
                     }
                 }
             });
