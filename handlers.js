@@ -14,7 +14,7 @@ import {
 
 // DOM Elements
 let detailOverlay, detailOverlayContent, searchView, latestView, popularView, watchlistView,
-    tabLatest, tabPopular, 
+    tabLatest, tabPopular, tabSearch, tabWatchlist,
     latestContentDisplay, popularContentDisplay,
     itemDetailTitle, overlayDetailTitle, watchlistItemDetailTitle,
     itemDetailContainer, overlayDetailContainer, watchlistItemDetailContainer,
@@ -34,6 +34,8 @@ export function initHandlerRefs(elements) {
     watchlistView = elements.watchlistView;
     tabLatest = elements.tabLatest;
     tabPopular = elements.tabPopular;
+    tabSearch = elements.tabSearch;
+    tabWatchlist = elements.tabWatchlist;
     latestContentDisplay = elements.latestContentDisplay;
     popularContentDisplay = elements.popularContentDisplay;
     itemDetailTitle = elements.itemDetailTitle;
@@ -76,14 +78,19 @@ export async function handleItemSelect(itemId, itemTitle, itemType, calledFromGe
         currentPlayerEl = overlayVidsrcPlayerSection;
         currentBackButtonContainerEl = overlayBackButtonContainer;
 
-        const activeMainTabForState = latestView && !latestView.classList.contains('hidden-view') ? tabLatest : tabPopular;
-        if (activeMainTabForState) {
-            updatePreviousStateForBackButton({ originTabId: activeMainTabForState.id });
-            if (previousStateForBackButton.originTabId === 'tabLatest' && latestContentDisplay) {
-                updateScrollPosition('latest', latestContentDisplay.scrollTop);
-            } else if (previousStateForBackButton.originTabId === 'tabPopular' && popularContentDisplay) {
-                updateScrollPosition('popular', popularContentDisplay.scrollTop);
-            }
+        const activeOriginTab =
+            (searchView && !searchView.classList.contains('hidden-view')) ? tabSearch :
+            (watchlistView && !watchlistView.classList.contains('hidden-view')) ? tabWatchlist :
+            (latestView && !latestView.classList.contains('hidden-view')) ? tabLatest :
+            tabPopular;
+
+        updatePreviousStateForBackButton({ originTabId: activeOriginTab.id });
+
+        if (activeOriginTab.id === 'tabLatest' && latestContentDisplay) {
+            updateScrollPosition('latest', latestContentDisplay.scrollTop);
+            showPositionSavedIndicator();
+        } else if (activeOriginTab.id === 'tabPopular' && popularContentDisplay) {
+            updateScrollPosition('popular', popularContentDisplay.scrollTop);
             showPositionSavedIndicator();
         }
         if (detailOverlay) detailOverlay.classList.remove('hidden');
@@ -124,7 +131,15 @@ export async function handleItemSelect(itemId, itemTitle, itemType, calledFromGe
         currentBackButtonContainerEl.innerHTML = '';
         let backButtonContext;
         if (currentTargetViewContext === 'overlay' && previousStateForBackButton) {
-            backButtonContext = previousStateForBackButton.originTabId === 'tabLatest' ? 'latestList' : 'popularList';
+            if (previousStateForBackButton.originTabId === 'tabLatest') {
+                backButtonContext = 'latestList';
+            } else if (previousStateForBackButton.originTabId === 'tabPopular') {
+                backButtonContext = 'popularList';
+            } else if (previousStateForBackButton.originTabId === 'tabWatchlist') {
+                backButtonContext = 'watchlistItemsList';
+            } else {
+                backButtonContext = 'searchList';
+            }
         } else if (currentTargetViewContext === 'watchlist') {
             backButtonContext = 'watchlistItemsList';
         } else if (currentTargetViewContext === 'item') {
