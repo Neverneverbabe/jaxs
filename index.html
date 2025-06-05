@@ -363,6 +363,14 @@
                 </div>
                 <div class="flex flex-col sm:flex-row gap-4">
                     <input type="text" id="searchInput" placeholder="Enter title (e.g., Inception, Breaking Bad)" class="flex-grow p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
+                    <select id="ratingFilter" class="p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
+                        <option value="All">All</option>
+                        <option value="G">G</option>
+                        <option value="PG">PG</option>
+                        <option value="PG-13">PG-13</option>
+                        <option value="R">R</option>
+                        <option value="NC-17">NC-17</option>
+                    </select>
                     <button id="searchButton" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg">Search</button>
                 </div>
             </div>
