@@ -10,7 +10,8 @@ import {
 } from './ui.js';
 // Removed: import { appendSeenCheckmark } from './seenList.js'; // ui.js now handles its own appendSeenCheckmark
 import { smallImageBaseUrl, genericItemPlaceholder, stillImageBaseUrl } from './config.js';
-import { currentSelectedItemDetails, updateCurrentSelectedItemDetails } from './state.js';
+import { currentSelectedItemDetails, updateCurrentSelectedItemDetails, selectedCertifications } from './state.js';
+import { extractCertification } from './ratingUtils.js';
 
 // TMDB API Configuration
 export const apiKey = "e27a888783eeaa67643bd81c5fb4422f"; // Your TMDB API key
@@ -43,7 +44,25 @@ export async function fetchSearchResults(query, itemType, certifications = []) {
         if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
         const data = await response.json();
         if (data.results && data.results.length > 0) {
-            displayResults(data.results, itemType, resultsContainer); // appendSeenCheckmark argument removed
+            let items = data.results;
+            if (!certifications.includes('All')) {
+                items = await Promise.all(items.map(async it => {
+                    try {
+                        const resp = await fetch(`${tmdbBaseUrl}/${itemType}/${it.id}?api_key=${apiKey}&append_to_response=release_dates,content_ratings`);
+                        const details = await resp.json();
+                        const cert = extractCertification({ ...details, item_type: itemType });
+                        return { ...it, certification: cert };
+                    } catch (err) {
+                        return { ...it, certification: 'NR' };
+                    }
+                }));
+                items = items.filter(it => certifications.includes(it.certification));
+            }
+            if (items.length > 0) {
+                displayResults(items, itemType, resultsContainer); // appendSeenCheckmark argument removed
+            } else {
+                showMessage('No results match the selected ratings.', 'info', 'results', resultsContainer);
+            }
         } else {
             showMessage(`No results found for "${query}". Please check spelling or try a different title.`, 'info', 'results', resultsContainer);
         }
@@ -105,7 +124,25 @@ export async function fetchTmdbCategoryContent(mainCategory, type, category, pag
         if (!response.ok) throw new Error(`TMDB API Error: ${response.statusText}`);
         const data = await response.json();
         if (data && data.results && data.results.length > 0) {
-            displayTmdbCategoryItems(data.results, type, displayContainer, mainCategory, category, page, data.total_pages);
+            let items = data.results;
+            if (!selectedCertifications.includes('All')) {
+                items = await Promise.all(items.map(async it => {
+                    try {
+                        const resp = await fetch(`${tmdbBaseUrl}/${type}/${it.id}?api_key=${apiKey}&append_to_response=release_dates,content_ratings`);
+                        const details = await resp.json();
+                        const cert = extractCertification({ ...details, item_type: type });
+                        return { ...it, certification: cert };
+                    } catch (err) {
+                        return { ...it, certification: 'NR' };
+                    }
+                }));
+                items = items.filter(it => selectedCertifications.includes(it.certification));
+            }
+            if (items.length > 0) {
+                displayTmdbCategoryItems(items, type, displayContainer, mainCategory, category, page, data.total_pages);
+            } else {
+                showMessage('No items match the selected ratings.', 'info', mainCategory, displayContainer);
+            }
         } else {
             showMessage('No items found for this category.', 'info', mainCategory, displayContainer);
         }

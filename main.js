@@ -3,7 +3,7 @@ import { auth, firebaseAuthFunctions, loadFirebaseIfNeeded } from './firebase.js
 import { initApiRefs, fetchTmdbCategoryContent } from './api.js';
 import { initUiRefs, clearAllDynamicContent, showPositionSavedIndicator, positionPopup, createBackButton, clearItemDetailPanel, clearSearchResultsPanel } from './ui.js'; // Added clearItemDetailPanel, clearSearchResultsPanel
 import { initAuthRefs, handleAuthStateChanged, createAuthFormUI } from './auth.js';
-import { initWatchlistRefs, loadAndDisplayWatchlistsFromFirestore, closeAllOptionMenus, handleCreateWatchlist } from './watchlist.js';
+import { initWatchlistRefs, loadAndDisplayWatchlistsFromFirestore, closeAllOptionMenus, handleCreateWatchlist, displayItemsInSelectedWatchlist } from './watchlist.js';
 import { initSeenListRefs, loadAndDisplaySeenItems } from './seenList.js';
 import { initHandlerRefs, handleSearch, handleItemSelect } from './handlers.js';
 import {
@@ -130,6 +130,13 @@ async function initializeAppState() {
             sel.addEventListener('change', () => {
                 const values = Array.from(sel.selectedOptions).map(o => o.value);
                 updateSelectedCertifications(values);
+                if (sel.id === 'ratingFilterSearch') handleSearch();
+                else if (sel.id === 'ratingFilterWatchlist') displayItemsInSelectedWatchlist();
+                else if (sel.id === 'ratingFilterSeen') loadAndDisplaySeenItems();
+                else if (sel.id === 'ratingFilterLatest')
+                    fetchTmdbCategoryContent('latest', currentLatestType, currentLatestCategory, 1);
+                else if (sel.id === 'ratingFilterPopular')
+                    fetchTmdbCategoryContent('popular', currentPopularType, 'popular', 1);
             });
         });
         const initial = Array.from(ratingFilters[0].selectedOptions).map(o => o.value);
