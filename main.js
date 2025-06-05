@@ -49,7 +49,6 @@ async function initializeAppState() {
     tabLatest = document.getElementById('tabLatest');
     tabPopular = document.getElementById('tabPopular');
     searchView = document.getElementById('searchView');
-    if (searchView) searchView.classList.remove('hidden-view');
     watchlistView = document.getElementById('watchlistView');
     seenView = document.getElementById('seenView');
     latestView = document.getElementById('latestView');
