@@ -330,17 +330,32 @@ function setupRatingFilters() {
 
     configs.forEach(cfg => {
         if (!cfg.btn || !cfg.popup || !cfg.apply) return;
+        const checkboxes = cfg.popup.querySelectorAll('input[type="checkbox"]');
         cfg.btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            cfg.popup.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            checkboxes.forEach(cb => {
                 cb.checked = selectedCertifications.includes(cb.value);
             });
             positionPopup(cfg.btn, cfg.popup);
             cfg.popup.classList.toggle('hidden');
         });
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                if (cb.value === 'All' && cb.checked) {
+                    checkboxes.forEach(other => { if (other.value !== 'All') other.checked = false; });
+                } else if (cb.checked) {
+                    const allCb = cfg.popup.querySelector('input[value="All"]');
+                    if (allCb) allCb.checked = false;
+                }
+            });
+        });
         cfg.apply.addEventListener('click', () => {
-            const values = Array.from(cfg.popup.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
-            updateSelectedCertifications(values.length ? values : ['All']);
+            let values = Array.from(cfg.popup.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            if (values.includes('All') && values.length > 1) {
+                values = values.filter(v => v !== 'All');
+            }
+            if (values.length === 0) values = ['All'];
+            updateSelectedCertifications(values);
             cfg.popup.classList.add('hidden');
             if (cfg.action) cfg.action();
         });
