@@ -206,7 +206,7 @@ export function displayResults(items, itemType, resContainer) {
             <p class="text-[10px] text-gray-400">${year}</p>
             ${item.vote_average && item.vote_average > 0 ? `<p class="text-[10px] text-yellow-400">★ ${item.vote_average.toFixed(1)}</p>` : ''}
         `;
-        card.addEventListener('click', () => handleItemSelect(String(item.id), title, itemType));
+        card.addEventListener('click', () => handleItemSelect(String(item.id), title, itemType, true));
         flexContainer.appendChild(card);
         appendSeenCheckmark(card, String(item.id)); 
     });
