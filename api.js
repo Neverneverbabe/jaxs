@@ -118,28 +118,42 @@ export async function fetchTmdbCategoryContent(mainCategory, type, category, pag
         return;
     }
     showLoading(mainCategory, `Loading ${category.replace('_', ' ')} ${type}s...`, displayContainer);
-    let url = `${tmdbBaseUrl}/${type}/${category}?api_key=${apiKey}&page=${page}`;
+
+    let url;
+    const filtering = !selectedCertifications.includes('All');
+    if (filtering) {
+        const certs = encodeURIComponent(selectedCertifications.join('|'));
+        url = `${tmdbBaseUrl}/discover/${type}?api_key=${apiKey}&sort_by=popularity.desc&certification_country=US&certification=${certs}&page=${page}`;
+    } else {
+        url = `${tmdbBaseUrl}/${type}/${category}?api_key=${apiKey}&page=${page}`;
+    }
+
     try {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`TMDB API Error: ${response.statusText}`);
         const data = await response.json();
         if (data && data.results && data.results.length > 0) {
             let items = data.results;
-            if (!selectedCertifications.includes('All')) {
+            if (filtering) {
                 items = await Promise.all(items.map(async it => {
                     try {
                         const resp = await fetch(`${tmdbBaseUrl}/${type}/${it.id}?api_key=${apiKey}&append_to_response=release_dates,content_ratings`);
                         const details = await resp.json();
                         const cert = extractCertification({ ...details, item_type: type });
                         return { ...it, certification: cert };
-                    } catch (err) {
+                    } catch {
                         return { ...it, certification: 'NR' };
                     }
                 }));
-                items = items.filter(it => selectedCertifications.includes(it.certification));
             }
-            if (items.length > 0) {
-                displayTmdbCategoryItems(items, type, displayContainer, mainCategory, category, page, data.total_pages);
+
+            if (!filtering || items.some(it => selectedCertifications.includes(it.certification))) {
+                if (filtering) items = items.filter(it => selectedCertifications.includes(it.certification));
+                if (items.length === 0) {
+                    showMessage('No items match the selected ratings.', 'info', mainCategory, displayContainer);
+                } else {
+                    displayTmdbCategoryItems(items, type, displayContainer, mainCategory, category, page, data.total_pages);
+                }
             } else {
                 showMessage('No items match the selected ratings.', 'info', mainCategory, displayContainer);
             }
@@ -147,8 +161,7 @@ export async function fetchTmdbCategoryContent(mainCategory, type, category, pag
             showMessage('No items found for this category.', 'info', mainCategory, displayContainer);
         }
     } catch (error) {
-        // This console.error in your original code was at api.js:121, matching the error log
-        console.error(`Error loading ${type}/${category}:`, error); 
+        console.error(`Error loading ${type}/${category}:`, error);
         showMessage(`Error loading content: ${error.message}`, 'error', mainCategory, displayContainer);
     }
 }
