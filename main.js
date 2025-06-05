@@ -139,7 +139,10 @@ async function initializeAppState() {
                     fetchTmdbCategoryContent('popular', currentPopularType, 'popular', 1);
             });
         });
-        const initial = Array.from(ratingFilters[0].selectedOptions).map(o => o.value);
+        const searchRatingFilter = document.getElementById('ratingFilterSearch');
+        const initial = searchRatingFilter
+            ? Array.from(searchRatingFilter.selectedOptions).map(o => o.value)
+            : ['All'];
         updateSelectedCertifications(initial);
     }
 
