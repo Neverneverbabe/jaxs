@@ -167,41 +167,35 @@ export function createBackButton(originContext) {
     return backBtn;
 }
 
-export function displayResults(items, itemType, resContainer) { 
+export function displayResults(items, itemType, resContainer) {
     if (!resContainer) return;
     resContainer.innerHTML = '';
     if (!items || items.length === 0) {
         showMessage("No results found.", 'info', 'results', resContainer);
         return;
     }
-    
-    const flexContainer = document.createElement('div');
-    flexContainer.className = 'flex flex-wrap gap-2 justify-start'; 
 
+    // resContainer already has grid classes from index.html
     items.forEach(item => {
         const title = item.title || item.name;
-        const releaseDate = item.release_date || item.first_air_date;
-        const year = releaseDate ? releaseDate.substring(0, 4) : 'N/A';
         const posterPath = item.poster_path;
+        const posterUrl = posterPath ? `${smallImageBaseUrl}${posterPath}` : genericItemPlaceholder;
 
         const card = document.createElement('div');
-        card.className = 'item-card bg-gray-700 p-1.5 rounded-md cursor-pointer hover:bg-gray-600 w-[250px] flex flex-col items-center text-center'; 
-        card.dataset.id = String(item.id); 
-        card.dataset.title = title;
-        card.dataset.type = itemType;
-        const posterUrl = posterPath ? `${smallImageBaseUrl}${posterPath}` : genericItemPlaceholder.replace('150x225', '92x138'); 
+        card.className = 'generic-item-card cursor-pointer';
+        card.dataset.id = String(item.id);
+        const ratingHtml = item.vote_average ? `<p class="text-xs text-yellow-400">★ ${item.vote_average.toFixed(1)}</p>` : '';
 
         card.innerHTML = `
-            <img src="${posterUrl}" alt="${title}" class="w-full h-[138px] object-cover rounded-sm mb-1" onerror="this.src='${genericItemPlaceholder.replace('150x225', '92x138')}'; this.onerror=null;">
-            <h3 class="text-xs font-semibold text-sky-300 w-full truncate" title="${title}">${title}</h3>
-            <p class="text-[10px] text-gray-400">${year}</p>
-            ${item.vote_average && item.vote_average > 0 ? `<p class="text-[10px] text-yellow-400">★ ${item.vote_average.toFixed(1)}</p>` : ''}
+            <img src="${posterUrl}" alt="${title}" onerror="this.src='${genericItemPlaceholder}'; this.onerror=null;">
+            <h4 class="text-md font-semibold text-sky-300 truncate mt-2" title="${title}">${title}</h4>
+            ${ratingHtml}
         `;
+
         card.addEventListener('click', () => handleItemSelect(String(item.id), title, itemType, true));
-        flexContainer.appendChild(card);
-        appendSeenCheckmark(card, String(item.id)); 
+        resContainer.appendChild(card);
+        appendSeenCheckmark(card, String(item.id));
     });
-    resContainer.appendChild(flexContainer);
 }
 
 export async function displayItemDetails(imdbId, itemTitleText, detailsObject, itemType, 
