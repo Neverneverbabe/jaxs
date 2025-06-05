@@ -14,8 +14,7 @@ import { updateMarkAsSeenButtonState, appendSeenCheckmark } from './seenList.js'
 import { handleItemSelect } from './handlers.js';
 
 // DOM Elements (initialized in main.js)
-let messageArea, resultsContainer, itemDetailContainer, itemDetailTitle,
-    itemSeasonsEpisodesSection, itemRelatedItemsSection, itemCollectionItemsSection, itemBackButtonContainer,
+let messageArea, resultsContainer,
     overlayDetailContainer, overlayDetailTitle, overlaySeasonsEpisodesSection,
     overlayRelatedItemsSection, overlayCollectionItemsSection, overlayBackButtonContainer,
     detailOverlay, detailOverlayContent, positionIndicator,
@@ -26,12 +25,6 @@ let messageArea, resultsContainer, itemDetailContainer, itemDetailTitle,
 export function initUiRefs(elements) {
     messageArea = elements.messageArea;
     resultsContainer = elements.resultsContainer;
-    itemDetailContainer = elements.itemDetailContainer;
-    itemDetailTitle = elements.itemDetailTitle;
-    itemSeasonsEpisodesSection = elements.itemSeasonsEpisodesSection;
-    itemRelatedItemsSection = elements.itemRelatedItemsSection;
-    itemCollectionItemsSection = elements.itemCollectionItemsSection;
-    itemBackButtonContainer = elements.itemBackButtonContainer;
     overlayDetailContainer = elements.overlayDetailContainer;
     overlayDetailTitle = elements.overlayDetailTitle;
     overlaySeasonsEpisodesSection = elements.overlaySeasonsEpisodesSection;
@@ -62,7 +55,6 @@ export function showLoading(section = 'main', text = 'Loading...', targetElement
     let target = targetElement; 
     if (!target) { 
         if (section === 'results') target = resultsContainer;
-        else if (section === 'details-item') target = itemDetailContainer;
         else if (section === 'details-overlay') target = overlayDetailContainer;
         else if (section === 'watchlistItems') target = document.getElementById('watchlistDisplayContainer'); 
         else if (section === 'seenItemsDisplayContainer') target = document.getElementById('seenItemsDisplayContainer'); 
@@ -78,7 +70,6 @@ export function showMessage(message, type = 'info', section = 'main', targetElem
     let target = targetElement; 
     if (!target) { 
       if (section === 'results') target = resultsContainer;
-      else if (section === 'details-item') target = itemDetailContainer;
       else if (section === 'details-overlay') target = overlayDetailContainer;
       else if (section === 'watchlistItems') target = document.getElementById('watchlistDisplayContainer');
       else if (section === 'seenItemsDisplayContainer') target = document.getElementById('seenItemsDisplayContainer');
@@ -206,7 +197,7 @@ export function displayResults(items, itemType, resContainer) {
             <p class="text-[10px] text-gray-400">${year}</p>
             ${item.vote_average && item.vote_average > 0 ? `<p class="text-[10px] text-yellow-400">★ ${item.vote_average.toFixed(1)}</p>` : ''}
         `;
-        card.addEventListener('click', () => handleItemSelect(String(item.id), title, itemType));
+        card.addEventListener('click', () => handleItemSelect(String(item.id), title, itemType, true));
         flexContainer.appendChild(card);
         appendSeenCheckmark(card, String(item.id)); 
     });
