@@ -272,8 +272,7 @@ export function createWatchlistItemCard(item) {
     `;
     const removeBtn = card.querySelector('.remove-watchlist-btn');
     removeBtn.addEventListener('click', (e) => { e.stopPropagation(); removeItemFromSpecificFirestoreWatchlist(currentSelectedWatchlistName, item.tmdb_id); });
-    // Use overlay for watchlist item details
-    card.addEventListener('click', () => { handleItemSelect(item.tmdb_id, item.title, item.item_type, true); });
+    card.addEventListener('click', () => { handleItemSelect(item.tmdb_id, item.title, item.item_type, false, true); });
     appendSeenCheckmark(card, item.tmdb_id); // From seenList.js
     return card;
 }

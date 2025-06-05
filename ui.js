@@ -178,19 +178,9 @@ export function createBackButton(originContext) {
                 popularContentDisplay.scrollTop = scrollPositions.popular;
             }
         } else if (originContext === 'watchlistItemsList') {
-            if (detailOverlay && !detailOverlay.classList.contains('hidden')) {
-                detailOverlay.classList.add('hidden');
-                clearItemDetailPanel('overlay');
-            } else {
-                clearItemDetailPanel('watchlist');
-            }
+            clearItemDetailPanel('watchlist'); 
         } else if (originContext === 'searchList') {
-            if (detailOverlay && !detailOverlay.classList.contains('hidden')) {
-                detailOverlay.classList.add('hidden');
-                clearItemDetailPanel('overlay');
-            } else {
-                clearItemDetailPanel('item'); // This will ONLY clear the item detail, search results are not touched here.
-            }
+            clearItemDetailPanel('item'); // This will ONLY clear the item detail, search results are not touched here.
         }
         updatePreviousStateForBackButton(null);
     };
@@ -227,8 +217,7 @@ export function displayResults(items, itemType, resContainer) {
             <p class="text-[10px] text-gray-400">${year}</p>
             ${item.vote_average && item.vote_average > 0 ? `<p class="text-[10px] text-yellow-400">★ ${item.vote_average.toFixed(1)}</p>` : ''}
         `;
-        // Open details in the overlay when selecting from search results
-        card.addEventListener('click', () => handleItemSelect(String(item.id), title, itemType, true));
+        card.addEventListener('click', () => handleItemSelect(String(item.id), title, itemType));
         flexContainer.appendChild(card);
         appendSeenCheckmark(card, String(item.id)); 
     });
