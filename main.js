@@ -133,10 +133,6 @@ async function initializeAppState() {
                 if (sel.id === 'ratingFilterSearch') handleSearch();
                 else if (sel.id === 'ratingFilterWatchlist') displayItemsInSelectedWatchlist();
                 else if (sel.id === 'ratingFilterSeen') loadAndDisplaySeenItems();
-                else if (sel.id === 'ratingFilterLatest')
-                    fetchTmdbCategoryContent('latest', currentLatestType, currentLatestCategory, 1);
-                else if (sel.id === 'ratingFilterPopular')
-                    fetchTmdbCategoryContent('popular', currentPopularType, 'popular', 1);
             });
         });
         const searchRatingFilter = document.getElementById('ratingFilterSearch');
