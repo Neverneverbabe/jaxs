@@ -338,4 +338,14 @@ function setupRatingFilters() {
             }
         });
     });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            configs.forEach(cfg => {
+                if (cfg.popup && !cfg.popup.classList.contains('hidden')) {
+                    cfg.popup.classList.add('hidden');
+                }
+            });
+        }
+    });
 }
