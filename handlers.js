@@ -16,13 +16,10 @@ import {
 let detailOverlay, detailOverlayContent, searchView, latestView, popularView, watchlistView,
     tabLatest, tabPopular,
     latestContentDisplay, popularContentDisplay,
-    itemDetailTitle, overlayDetailTitle,
-    itemDetailContainer, overlayDetailContainer,
-    itemSeasonsEpisodesSection, overlaySeasonsEpisodesSection,
-    itemRelatedItemsSection, overlayRelatedItemsSection,
-    itemCollectionItemsSection, overlayCollectionItemsSection,
-    itemVidsrcPlayerSection, overlayVidsrcPlayerSection,
-    itemBackButtonContainer, overlayBackButtonContainer,
+    overlayDetailTitle, overlayDetailContainer,
+    overlaySeasonsEpisodesSection, overlayRelatedItemsSection,
+    overlayCollectionItemsSection, overlayVidsrcPlayerSection,
+    overlayBackButtonContainer,
     searchInputGlobal;
 
 export function initHandlerRefs(elements) {
@@ -36,119 +33,73 @@ export function initHandlerRefs(elements) {
     tabPopular = elements.tabPopular;
     latestContentDisplay = elements.latestContentDisplay;
     popularContentDisplay = elements.popularContentDisplay;
-    itemDetailTitle = elements.itemDetailTitle;
     overlayDetailTitle = elements.overlayDetailTitle;
-    itemDetailContainer = elements.itemDetailContainer;
     overlayDetailContainer = elements.overlayDetailContainer;
-    itemSeasonsEpisodesSection = elements.itemSeasonsEpisodesSection;
     overlaySeasonsEpisodesSection = elements.overlaySeasonsEpisodesSection;
-    itemRelatedItemsSection = elements.itemRelatedItemsSection;
     overlayRelatedItemsSection = elements.overlayRelatedItemsSection;
-    itemCollectionItemsSection = elements.itemCollectionItemsSection;
     overlayCollectionItemsSection = elements.overlayCollectionItemsSection;
-    itemVidsrcPlayerSection = elements.itemVidsrcPlayerSection;
     overlayVidsrcPlayerSection = elements.overlayVidsrcPlayerSection;
-    itemBackButtonContainer = elements.itemBackButtonContainer;
     overlayBackButtonContainer = elements.overlayBackButtonContainer;
     searchInputGlobal = elements.searchInput;
 }
 
 
-export async function handleItemSelect(itemId, itemTitle, itemType, calledFromGenericList = false, calledFromWatchlistItem = false) {
-    let currentTargetViewContext; 
-    let currentDetailContainerEl, currentSeasonsEl, currentRelatedEl, currentCollectionEl,
-        currentPlayerEl, currentBackButtonContainerEl, currentDetailTitleEl; // Added currentDetailTitleEl here
+export async function handleItemSelect(itemId, itemTitle, itemType, calledFromOverlay = false) {
+    const currentDetailContainerEl = overlayDetailContainer;
+    const currentSeasonsEl = overlaySeasonsEpisodesSection;
+    const currentRelatedEl = overlayRelatedItemsSection;
+    const currentCollectionEl = overlayCollectionItemsSection;
+    const currentPlayerEl = overlayVidsrcPlayerSection;
+    const currentBackButtonContainerEl = overlayBackButtonContainer;
+    const currentDetailTitleEl = overlayDetailTitle;
 
-    if (calledFromGenericList) { 
-        currentTargetViewContext = "overlay";
-        currentDetailTitleEl = overlayDetailTitle; // Assign correct title element
-        currentDetailContainerEl = overlayDetailContainer;
-        currentSeasonsEl = overlaySeasonsEpisodesSection;
-        currentRelatedEl = overlayRelatedItemsSection;
-        currentCollectionEl = overlayCollectionItemsSection;
-        currentPlayerEl = overlayVidsrcPlayerSection;
-        currentBackButtonContainerEl = overlayBackButtonContainer;
+    if (!calledFromOverlay) {
+        let originTabId = 'tabSearch';
+        let backButtonContext = 'searchList';
 
-        const activeMainTabForState = latestView && !latestView.classList.contains('hidden-view') ? tabLatest : tabPopular;
-        if (activeMainTabForState) {
-            updatePreviousStateForBackButton({ originTabId: activeMainTabForState.id });
-            if (previousStateForBackButton.originTabId === 'tabLatest' && latestContentDisplay) {
-                updateScrollPosition('latest', latestContentDisplay.scrollTop);
-            } else if (previousStateForBackButton.originTabId === 'tabPopular' && popularContentDisplay) {
-                updateScrollPosition('popular', popularContentDisplay.scrollTop);
-            }
+        if (watchlistView && !watchlistView.classList.contains('hidden-view')) {
+            originTabId = 'tabWatchlist';
+            backButtonContext = 'watchlistItemsList';
+        } else if (latestView && !latestView.classList.contains('hidden-view')) {
+            originTabId = 'tabLatest';
+            backButtonContext = 'latestList';
+            if (latestContentDisplay) updateScrollPosition('latest', latestContentDisplay.scrollTop);
+            showPositionSavedIndicator();
+        } else if (popularView && !popularView.classList.contains('hidden-view')) {
+            originTabId = 'tabPopular';
+            backButtonContext = 'popularList';
+            if (popularContentDisplay) updateScrollPosition('popular', popularContentDisplay.scrollTop);
             showPositionSavedIndicator();
         }
-        if (detailOverlay) detailOverlay.classList.remove('hidden');
-        if (detailOverlayContent) detailOverlayContent.scrollTop = 0;
 
-    } else if (calledFromWatchlistItem) {
-        currentTargetViewContext = "overlay";
-        currentDetailTitleEl = overlayDetailTitle;
-        currentDetailContainerEl = overlayDetailContainer;
-        currentSeasonsEl = overlaySeasonsEpisodesSection;
-        currentRelatedEl = overlayRelatedItemsSection;
-        currentCollectionEl = overlayCollectionItemsSection;
-        currentPlayerEl = overlayVidsrcPlayerSection;
-        currentBackButtonContainerEl = overlayBackButtonContainer;
-        updatePreviousStateForBackButton({ originTabId: 'tabWatchlist' });
-        if (detailOverlay) detailOverlay.classList.remove('hidden');
-        if (detailOverlayContent) detailOverlayContent.scrollTop = 0;
-    } else {
-        currentTargetViewContext = "item";
-        currentDetailTitleEl = itemDetailTitle; // Assign correct title element
-        currentDetailContainerEl = itemDetailContainer;
-        currentSeasonsEl = itemSeasonsEpisodesSection;
-        currentRelatedEl = itemRelatedItemsSection;
-        currentCollectionEl = itemCollectionItemsSection;
-        currentPlayerEl = itemVidsrcPlayerSection;
-        currentBackButtonContainerEl = itemBackButtonContainer;
-        updatePreviousStateForBackButton({ originTabId: 'tabSearch' });
-    }
+        updatePreviousStateForBackButton({ originTabId });
 
-    clearItemDetailPanel(currentTargetViewContext); // Clears only the detail panel for the current context
-    
-    if (currentDetailContainerEl) { // Check if element exists before showing loading
-        showLoading(`details-${currentTargetViewContext}`, `Loading ${itemTitle}...`, currentDetailContainerEl);
-    } else {
-        console.error("Detail container not found for context:", currentTargetViewContext);
-    }
-    if (currentDetailTitleEl) currentDetailTitleEl.classList.add('hidden'); 
-
-    if (currentBackButtonContainerEl) {
-        currentBackButtonContainerEl.innerHTML = '';
-        let backButtonContext;
-        if (currentTargetViewContext === 'overlay') {
-            if (calledFromWatchlistItem) {
-                backButtonContext = 'watchlistItemsList';
-            } else if (previousStateForBackButton) {
-                backButtonContext = previousStateForBackButton.originTabId === 'tabLatest' ? 'latestList' : 'popularList';
-            }
-        } else if (currentTargetViewContext === 'item') {
-            backButtonContext = 'searchList';
-        }
-        if (backButtonContext) {
+        if (currentBackButtonContainerEl) {
+            currentBackButtonContainerEl.innerHTML = '';
             const backBtn = createBackButton(backButtonContext);
             currentBackButtonContainerEl.appendChild(backBtn);
         }
     }
-    
-    await fetchItemDetails(itemId, itemType, {
-        currentDetailContainerEl, 
-        currentSeasonsEl, 
-        currentRelatedEl, 
-        currentCollectionEl,
-        currentPlayerEl, 
-        targetViewContext: currentTargetViewContext,
-        itemTitle 
-    });
 
-    if (currentTargetViewContext !== "overlay") {
-        const detailSectionToScroll = document.getElementById('itemDetailSection');
-        if (detailSectionToScroll) {
-            detailSectionToScroll.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    if (detailOverlay) detailOverlay.classList.remove('hidden');
+    if (detailOverlayContent) detailOverlayContent.scrollTop = 0;
+
+    clearItemDetailPanel('overlay');
+
+    if (currentDetailContainerEl) {
+        showLoading('details-overlay', `Loading ${itemTitle}...`, currentDetailContainerEl);
     }
+    if (currentDetailTitleEl) currentDetailTitleEl.classList.add('hidden');
+
+    await fetchItemDetails(itemId, itemType, {
+        currentDetailContainerEl,
+        currentSeasonsEl,
+        currentRelatedEl,
+        currentCollectionEl,
+        currentPlayerEl,
+        targetViewContext: 'overlay',
+        itemTitle
+    });
 }
 
 export function getSelectedSearchType() {

@@ -17,16 +17,11 @@ import {
 window.createAuthFormUI_Global = createAuthFormUI;
 
 // DOM Element Variables
-let searchInput, searchButton, resultsContainer, itemDetailContainer, itemDetailTitle,
-    itemSeasonsEpisodesSection, itemRelatedItemsSection, itemCollectionItemsSection, itemBackButtonContainer,
+let searchInput, searchButton, resultsContainer,
     tabSearch, tabWatchlist, tabSeen, tabLatest, tabPopular,
     searchView, watchlistView, seenView, latestView, popularView,
     messageArea, newWatchlistNameInput, createWatchlistBtn,
     watchlistTilesContainer, watchlistDisplayContainer,
-    /* Deprecated watchlist detail variables removed */
-    /* watchlistItemDetailPanel, watchlistItemDetailTitle, watchlistItemDetailContainer,
-    watchlistSeasonsEpisodesSection, watchlistRelatedItemsSection, watchlistCollectionItemsSection,
-    watchlistBackButtonContainer,*/
     seenItemsDisplayContainer,
     latestContentDisplay, latestMoviesSubTab, latestTvShowsSubTab,
     popularContentDisplay, popularMoviesSubTab, popularTvShowsSubTab,
@@ -46,12 +41,6 @@ async function initializeAppState() {
     searchInput = document.getElementById('searchInput');
     searchButton = document.getElementById('searchButton');
     resultsContainer = document.getElementById('resultsContainer');
-    itemDetailContainer = document.getElementById('itemDetailContainer');
-    itemDetailTitle = document.getElementById('itemDetailTitle');
-    itemSeasonsEpisodesSection = document.getElementById('itemSeasonsEpisodesSection');
-    itemRelatedItemsSection = document.getElementById('itemRelatedItemsSection');
-    itemCollectionItemsSection = document.getElementById('itemCollectionItemsSection');
-    itemBackButtonContainer = document.getElementById('itemBackButtonContainer');
     itemVidsrcPlayerSection = document.getElementById('itemVidsrcPlayerSection');
 
     tabSearch = document.getElementById('tabSearch');
@@ -98,8 +87,7 @@ async function initializeAppState() {
     positionIndicator = document.getElementById('positionIndicator');
 
     const allElements = {
-        searchInput, searchButton, resultsContainer, itemDetailContainer, itemDetailTitle,
-        itemSeasonsEpisodesSection, itemRelatedItemsSection, itemCollectionItemsSection, itemBackButtonContainer,
+        searchInput, searchButton, resultsContainer,
         tabSearch, tabWatchlist, tabSeen, tabLatest, tabPopular,
         searchView, watchlistView, seenView, latestView, popularView,
         messageArea, newWatchlistNameInput, createWatchlistBtn,
