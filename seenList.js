@@ -204,11 +204,6 @@ export async function updateMarkAsSeenButtonState(itemId, itemData, buttonContai
 
 export function determineActiveSeenButtonContainerId() {
     const detailOverlayEl = document.getElementById('detailOverlay');
-    const watchlistViewEl = document.getElementById('watchlistView');
-    const watchlistItemDetailPanelEl = document.getElementById('watchlistItemDetailPanel');
-
     if (detailOverlayEl && !detailOverlayEl.classList.contains('hidden')) return 'overlayDetailMarkAsSeenBtnContainer';
-    if (watchlistViewEl && !watchlistViewEl.classList.contains('hidden-view') &&
-        watchlistItemDetailPanelEl && !watchlistItemDetailPanelEl.classList.contains('hidden')) return 'watchlistDetailMarkAsSeenBtnContainer';
     return 'itemDetailMarkAsSeenBtnContainer';
 }

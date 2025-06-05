@@ -14,16 +14,16 @@ import {
 
 // DOM Elements
 let detailOverlay, detailOverlayContent, searchView, latestView, popularView, watchlistView,
-    tabLatest, tabPopular, 
+    tabLatest, tabPopular,
     latestContentDisplay, popularContentDisplay,
-    itemDetailTitle, overlayDetailTitle, watchlistItemDetailTitle,
-    itemDetailContainer, overlayDetailContainer, watchlistItemDetailContainer,
-    itemSeasonsEpisodesSection, overlaySeasonsEpisodesSection, watchlistSeasonsEpisodesSection,
-    itemRelatedItemsSection, overlayRelatedItemsSection, watchlistRelatedItemsSection,
-    itemCollectionItemsSection, overlayCollectionItemsSection, watchlistCollectionItemsSection,
-    itemVidsrcPlayerSection, overlayVidsrcPlayerSection, watchlistVidsrcPlayerSection,
-    itemBackButtonContainer, overlayBackButtonContainer, watchlistBackButtonContainer,
-    searchInputGlobal; 
+    itemDetailTitle, overlayDetailTitle,
+    itemDetailContainer, overlayDetailContainer,
+    itemSeasonsEpisodesSection, overlaySeasonsEpisodesSection,
+    itemRelatedItemsSection, overlayRelatedItemsSection,
+    itemCollectionItemsSection, overlayCollectionItemsSection,
+    itemVidsrcPlayerSection, overlayVidsrcPlayerSection,
+    itemBackButtonContainer, overlayBackButtonContainer,
+    searchInputGlobal;
 
 export function initHandlerRefs(elements) {
     detailOverlay = elements.detailOverlay;
@@ -38,26 +38,19 @@ export function initHandlerRefs(elements) {
     popularContentDisplay = elements.popularContentDisplay;
     itemDetailTitle = elements.itemDetailTitle;
     overlayDetailTitle = elements.overlayDetailTitle;
-    watchlistItemDetailTitle = elements.watchlistItemDetailTitle;
     itemDetailContainer = elements.itemDetailContainer;
     overlayDetailContainer = elements.overlayDetailContainer;
-    watchlistItemDetailContainer = elements.watchlistItemDetailContainer;
     itemSeasonsEpisodesSection = elements.itemSeasonsEpisodesSection;
     overlaySeasonsEpisodesSection = elements.overlaySeasonsEpisodesSection;
-    watchlistSeasonsEpisodesSection = elements.watchlistSeasonsEpisodesSection;
     itemRelatedItemsSection = elements.itemRelatedItemsSection;
     overlayRelatedItemsSection = elements.overlayRelatedItemsSection;
-    watchlistRelatedItemsSection = elements.watchlistRelatedItemsSection;
     itemCollectionItemsSection = elements.itemCollectionItemsSection;
     overlayCollectionItemsSection = elements.overlayCollectionItemsSection;
-    watchlistCollectionItemsSection = elements.watchlistCollectionItemsSection;
     itemVidsrcPlayerSection = elements.itemVidsrcPlayerSection;
     overlayVidsrcPlayerSection = elements.overlayVidsrcPlayerSection;
-    watchlistVidsrcPlayerSection = elements.watchlistVidsrcPlayerSection;
     itemBackButtonContainer = elements.itemBackButtonContainer;
     overlayBackButtonContainer = elements.overlayBackButtonContainer;
-    watchlistBackButtonContainer = elements.watchlistBackButtonContainer;
-    searchInputGlobal = elements.searchInput; 
+    searchInputGlobal = elements.searchInput;
 }
 
 
@@ -89,17 +82,19 @@ export async function handleItemSelect(itemId, itemTitle, itemType, calledFromGe
         if (detailOverlay) detailOverlay.classList.remove('hidden');
         if (detailOverlayContent) detailOverlayContent.scrollTop = 0;
 
-    } else if (calledFromWatchlistItem) { 
-        currentTargetViewContext = "watchlist";
-        currentDetailTitleEl = watchlistItemDetailTitle; // Assign correct title element
-        currentDetailContainerEl = watchlistItemDetailContainer;
-        currentSeasonsEl = watchlistSeasonsEpisodesSection;
-        currentRelatedEl = watchlistRelatedItemsSection;
-        currentCollectionEl = watchlistCollectionItemsSection;
-        currentPlayerEl = watchlistVidsrcPlayerSection;
-        currentBackButtonContainerEl = watchlistBackButtonContainer;
+    } else if (calledFromWatchlistItem) {
+        currentTargetViewContext = "overlay";
+        currentDetailTitleEl = overlayDetailTitle;
+        currentDetailContainerEl = overlayDetailContainer;
+        currentSeasonsEl = overlaySeasonsEpisodesSection;
+        currentRelatedEl = overlayRelatedItemsSection;
+        currentCollectionEl = overlayCollectionItemsSection;
+        currentPlayerEl = overlayVidsrcPlayerSection;
+        currentBackButtonContainerEl = overlayBackButtonContainer;
         updatePreviousStateForBackButton({ originTabId: 'tabWatchlist' });
-    } else { 
+        if (detailOverlay) detailOverlay.classList.remove('hidden');
+        if (detailOverlayContent) detailOverlayContent.scrollTop = 0;
+    } else {
         currentTargetViewContext = "item";
         currentDetailTitleEl = itemDetailTitle; // Assign correct title element
         currentDetailContainerEl = itemDetailContainer;
@@ -123,10 +118,12 @@ export async function handleItemSelect(itemId, itemTitle, itemType, calledFromGe
     if (currentBackButtonContainerEl) {
         currentBackButtonContainerEl.innerHTML = '';
         let backButtonContext;
-        if (currentTargetViewContext === 'overlay' && previousStateForBackButton) {
-            backButtonContext = previousStateForBackButton.originTabId === 'tabLatest' ? 'latestList' : 'popularList';
-        } else if (currentTargetViewContext === 'watchlist') {
-            backButtonContext = 'watchlistItemsList';
+        if (currentTargetViewContext === 'overlay') {
+            if (calledFromWatchlistItem) {
+                backButtonContext = 'watchlistItemsList';
+            } else if (previousStateForBackButton) {
+                backButtonContext = previousStateForBackButton.originTabId === 'tabLatest' ? 'latestList' : 'popularList';
+            }
         } else if (currentTargetViewContext === 'item') {
             backButtonContext = 'searchList';
         }
@@ -147,7 +144,7 @@ export async function handleItemSelect(itemId, itemTitle, itemType, calledFromGe
     });
 
     if (currentTargetViewContext !== "overlay") {
-        const detailSectionToScroll = document.getElementById(currentTargetViewContext === 'watchlist' ? 'watchlistItemDetailPanel' : 'itemDetailSection');
+        const detailSectionToScroll = document.getElementById('itemDetailSection');
         if (detailSectionToScroll) {
             detailSectionToScroll.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }

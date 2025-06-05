@@ -23,9 +23,10 @@ let searchInput, searchButton, resultsContainer, itemDetailContainer, itemDetail
     searchView, watchlistView, seenView, latestView, popularView,
     messageArea, newWatchlistNameInput, createWatchlistBtn,
     watchlistTilesContainer, watchlistDisplayContainer,
-    watchlistItemDetailPanel, watchlistItemDetailTitle, watchlistItemDetailContainer,
+    /* Deprecated watchlist detail variables removed */
+    /* watchlistItemDetailPanel, watchlistItemDetailTitle, watchlistItemDetailContainer,
     watchlistSeasonsEpisodesSection, watchlistRelatedItemsSection, watchlistCollectionItemsSection,
-    watchlistBackButtonContainer,
+    watchlistBackButtonContainer,*/
     seenItemsDisplayContainer,
     latestContentDisplay, latestMoviesSubTab, latestTvShowsSubTab,
     popularContentDisplay, popularMoviesSubTab, popularTvShowsSubTab,
@@ -36,7 +37,7 @@ let searchInput, searchButton, resultsContainer, itemDetailContainer, itemDetail
     overlaySeasonsEpisodesSection,
     overlayRelatedItemsSection, overlayCollectionItemsSection, overlayBackButtonContainer,
     positionIndicator,
-    itemVidsrcPlayerSection, watchlistVidsrcPlayerSection;
+    itemVidsrcPlayerSection;
 
 async function initializeAppState() {
     await loadFirebaseIfNeeded();
@@ -69,14 +70,7 @@ async function initializeAppState() {
     createWatchlistBtn = document.getElementById('createWatchlistBtn');
     watchlistTilesContainer = document.getElementById('watchlistTilesContainer');
     watchlistDisplayContainer = document.getElementById('watchlistDisplayContainer');
-    watchlistItemDetailPanel = document.getElementById('watchlistItemDetailPanel');
-    watchlistItemDetailTitle = document.getElementById('watchlistDetailTitle');
-    watchlistItemDetailContainer = document.getElementById('watchlistDetailContainer');
-    watchlistSeasonsEpisodesSection = document.getElementById('watchlistSeasonsEpisodesSection');
-    watchlistRelatedItemsSection = document.getElementById('watchlistRelatedItemsSection');
-    watchlistCollectionItemsSection = document.getElementById('watchlistCollectionItemsSection');
-    watchlistBackButtonContainer = document.getElementById('watchlistBackButtonContainer');
-    watchlistVidsrcPlayerSection = document.getElementById('watchlistVidsrcPlayerSection');
+    /* Removed obsolete watchlist detail queries */
 
     seenItemsDisplayContainer = document.getElementById('seenItemsDisplayContainer');
 
@@ -110,9 +104,6 @@ async function initializeAppState() {
         searchView, watchlistView, seenView, latestView, popularView,
         messageArea, newWatchlistNameInput, createWatchlistBtn,
         watchlistTilesContainer, watchlistDisplayContainer,
-        watchlistItemDetailPanel, watchlistItemDetailTitle, watchlistItemDetailContainer,
-        watchlistSeasonsEpisodesSection, watchlistRelatedItemsSection, watchlistCollectionItemsSection,
-        watchlistBackButtonContainer,
         seenItemsDisplayContainer,
         latestContentDisplay, latestMoviesSubTab, latestTvShowsSubTab,
         popularContentDisplay, popularMoviesSubTab, popularTvShowsSubTab,
@@ -122,7 +113,7 @@ async function initializeAppState() {
         overlayVidsrcPlayerSection, 
         overlaySeasonsEpisodesSection,
         overlayRelatedItemsSection, overlayCollectionItemsSection, overlayBackButtonContainer,
-        positionIndicator, itemVidsrcPlayerSection, watchlistVidsrcPlayerSection
+        positionIndicator, itemVidsrcPlayerSection
     };
 
     initUiRefs(allElements);

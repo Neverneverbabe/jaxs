@@ -493,11 +493,8 @@ export function closeAllOptionMenus(exceptThisTile = null) {
 }
 
 export function determineActiveWatchlistButtonContainerId() {
-    const detailOverlayEl = document.getElementById('detailOverlay'); // Get element
-    const watchlistViewEl = document.getElementById('watchlistView'); // Get element
-
+    const detailOverlayEl = document.getElementById('detailOverlay');
     if (detailOverlayEl && !detailOverlayEl.classList.contains('hidden')) return 'overlayDetailAddToBtnContainer';
-    if (watchlistViewEl && !watchlistViewEl.classList.contains('hidden-view')) return 'watchlistDetailAddToBtnContainer';
     return 'itemDetailAddToBtnContainer';
 }
 

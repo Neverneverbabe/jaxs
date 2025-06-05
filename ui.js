@@ -16,12 +16,10 @@ import { handleItemSelect } from './handlers.js';
 // DOM Elements (initialized in main.js)
 let messageArea, resultsContainer, itemDetailContainer, itemDetailTitle,
     itemSeasonsEpisodesSection, itemRelatedItemsSection, itemCollectionItemsSection, itemBackButtonContainer,
-    watchlistItemDetailContainer, watchlistItemDetailTitle, watchlistSeasonsEpisodesSection,
-    watchlistRelatedItemsSection, watchlistCollectionItemsSection, watchlistBackButtonContainer,
     overlayDetailContainer, overlayDetailTitle, overlaySeasonsEpisodesSection,
     overlayRelatedItemsSection, overlayCollectionItemsSection, overlayBackButtonContainer,
     detailOverlay, detailOverlayContent, positionIndicator,
-    itemVidsrcPlayerSection, watchlistVidsrcPlayerSection, overlayVidsrcPlayerSection,
+    itemVidsrcPlayerSection, overlayVidsrcPlayerSection,
     latestContentDisplay, popularContentDisplay;
 
 
@@ -34,12 +32,6 @@ export function initUiRefs(elements) {
     itemRelatedItemsSection = elements.itemRelatedItemsSection;
     itemCollectionItemsSection = elements.itemCollectionItemsSection;
     itemBackButtonContainer = elements.itemBackButtonContainer;
-    watchlistItemDetailContainer = elements.watchlistItemDetailContainer;
-    watchlistItemDetailTitle = elements.watchlistItemDetailTitle;
-    watchlistSeasonsEpisodesSection = elements.watchlistSeasonsEpisodesSection;
-    watchlistRelatedItemsSection = elements.watchlistRelatedItemsSection;
-    watchlistCollectionItemsSection = elements.watchlistCollectionItemsSection;
-    watchlistBackButtonContainer = elements.watchlistBackButtonContainer;
     overlayDetailContainer = elements.overlayDetailContainer;
     overlayDetailTitle = elements.overlayDetailTitle;
     overlaySeasonsEpisodesSection = elements.overlaySeasonsEpisodesSection;
@@ -50,9 +42,8 @@ export function initUiRefs(elements) {
     detailOverlayContent = elements.detailOverlayContent;
     positionIndicator = elements.positionIndicator;
     itemVidsrcPlayerSection = elements.itemVidsrcPlayerSection;
-    watchlistVidsrcPlayerSection = elements.watchlistVidsrcPlayerSection;
     overlayVidsrcPlayerSection = elements.overlayVidsrcPlayerSection;
-    latestContentDisplay = elements.latestContentDisplay; 
+    latestContentDisplay = elements.latestContentDisplay;
     popularContentDisplay = elements.popularContentDisplay;
 }
 
@@ -72,7 +63,6 @@ export function showLoading(section = 'main', text = 'Loading...', targetElement
     if (!target) { 
         if (section === 'results') target = resultsContainer;
         else if (section === 'details-item') target = itemDetailContainer;
-        else if (section === 'details-watchlist') target = watchlistItemDetailContainer;
         else if (section === 'details-overlay') target = overlayDetailContainer;
         else if (section === 'watchlistItems') target = document.getElementById('watchlistDisplayContainer'); 
         else if (section === 'seenItemsDisplayContainer') target = document.getElementById('seenItemsDisplayContainer'); 
@@ -89,7 +79,6 @@ export function showMessage(message, type = 'info', section = 'main', targetElem
     if (!target) { 
       if (section === 'results') target = resultsContainer;
       else if (section === 'details-item') target = itemDetailContainer;
-      else if (section === 'details-watchlist') target = watchlistItemDetailContainer;
       else if (section === 'details-overlay') target = overlayDetailContainer;
       else if (section === 'watchlistItems') target = document.getElementById('watchlistDisplayContainer');
       else if (section === 'seenItemsDisplayContainer') target = document.getElementById('seenItemsDisplayContainer');
@@ -373,8 +362,7 @@ export function displaySeasons(seasons, parentShowTmdbId, parentShowImdbId, targ
             const episodeDisplayContainer = document.getElementById(`${targetViewContext}EpisodeDisplayContainer`);
             let playerSection;
             if (targetViewContext === "item") playerSection = itemVidsrcPlayerSection;
-            else if (targetViewContext === "watchlist") playerSection = watchlistVidsrcPlayerSection;
-            else if (targetViewContext === "overlay") playerSection = overlayVidsrcPlayerSection;
+            else playerSection = overlayVidsrcPlayerSection;
 
             fetchEpisodesForSeason(parentShowTmdbId, s.season_number, parentShowImdbId, episodeDisplayContainer, targetViewContext, playerSection);
 
@@ -405,8 +393,7 @@ export function createRelatedItemCard(item, itemType, currentViewContext = "item
     `;
     card.addEventListener('click', () => {
         const calledFromOverlay = currentViewContext === 'overlay';
-        const calledFromWatchlist = currentViewContext === 'watchlist';
-        handleItemSelect(String(item.id), item.title || item.name, itemType, calledFromOverlay, calledFromWatchlist);
+        handleItemSelect(String(item.id), item.title || item.name, itemType, calledFromOverlay);
     });
     appendSeenCheckmark(card, String(item.id)); 
     return card;
