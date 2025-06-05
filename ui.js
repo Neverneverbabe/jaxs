@@ -11,7 +11,6 @@ import {
 import { fetchRecommendations, fetchCollection, fetchEpisodesForSeason } from './api.js';
 import { updateAddToWatchlistButtonState } from './watchlist.js';
 import { updateMarkAsSeenButtonState, appendSeenCheckmark } from './seenList.js';
-import { extractCertification } from './ratingUtils.js';
 import { handleItemSelect } from './handlers.js';
 
 // DOM Elements (initialized in main.js)
@@ -232,11 +231,9 @@ export async function displayItemDetails(imdbId, itemTitleText, detailsObject, i
     const badgesContainer = document.createElement('div');
     badgesContainer.className = 'mb-3 flex flex-wrap items-center';
     if (detailsObject.vote_average) { const ratingBadge = document.createElement('span'); ratingBadge.className = 'detail-badge bg-yellow-500 text-gray-900'; ratingBadge.textContent = `★ ${detailsObject.vote_average.toFixed(1)} (${detailsObject.vote_count} votes)`; badgesContainer.appendChild(ratingBadge); }
-    const certification = extractCertification({ ...detailsObject, item_type: itemType });
-    const ageBadge = document.createElement('span');
-    ageBadge.className = 'detail-badge bg-sky-500 text-white';
-    ageBadge.textContent = `Age: ${certification}`;
-    badgesContainer.appendChild(ageBadge);
+    let certification = 'N/A';
+    if (itemType === 'movie' && detailsObject.release_dates?.results) { const usRelease = detailsObject.release_dates.results.find(r => r.iso_3166_1 === 'US'); if (usRelease?.release_dates) { const certObj = usRelease.release_dates.find(rd => rd.certification && rd.certification !== "" && (rd.type === 3 || rd.type === 4 || rd.type === 5 || rd.type === 6)) || usRelease.release_dates.find(rd => rd.certification && rd.certification !== ""); if (certObj) certification = certObj.certification; } } else if (itemType === 'tv' && detailsObject.content_ratings?.results) { const usRating = detailsObject.content_ratings.results.find(r => r.iso_3166_1 === 'US'); if (usRating?.rating && usRating.rating !== "") certification = usRating.rating; }
+    const ageBadge = document.createElement('span'); ageBadge.className = 'detail-badge bg-sky-500 text-white'; ageBadge.textContent = `Age: ${certification}`; badgesContainer.appendChild(ageBadge);
     if (itemType === 'movie' && detailsObject.runtime) { const runtimeBadge = document.createElement('span'); runtimeBadge.className = 'detail-badge bg-gray-600 text-gray-200'; runtimeBadge.textContent = `Runtime: ${Math.floor(detailsObject.runtime / 60)}h ${detailsObject.runtime % 60}m`; badgesContainer.appendChild(runtimeBadge); } else if (itemType === 'tv' && detailsObject.episode_run_time?.length > 0 && detailsObject.episode_run_time[0] > 0) { const runtimeBadge = document.createElement('span'); runtimeBadge.className = 'detail-badge bg-gray-600 text-gray-200'; runtimeBadge.textContent = `Episode: ~${detailsObject.episode_run_time[0]} min`; badgesContainer.appendChild(runtimeBadge); }
     targetDetailContainerEl.appendChild(badgesContainer);
     if (detailsObject.tagline) { const taglineEl = document.createElement('p'); taglineEl.className = 'text-gray-400 italic mb-2 text-sm'; taglineEl.textContent = detailsObject.tagline; targetDetailContainerEl.appendChild(taglineEl); }

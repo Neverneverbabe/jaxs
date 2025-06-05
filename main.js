@@ -135,10 +135,7 @@ async function initializeAppState() {
                 else if (sel.id === 'ratingFilterSeen') loadAndDisplaySeenItems();
             });
         });
-        const searchRatingFilter = document.getElementById('ratingFilterSearch');
-        const initial = searchRatingFilter
-            ? Array.from(searchRatingFilter.selectedOptions).map(o => o.value)
-            : ['All'];
+        const initial = Array.from(ratingFilters[0].selectedOptions).map(o => o.value);
         updateSelectedCertifications(initial);
     }
 
