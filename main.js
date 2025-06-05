@@ -17,7 +17,7 @@ import {
 window.createAuthFormUI_Global = createAuthFormUI;
 
 // DOM Element Variables
-let searchInput, searchButton, resultsContainer,
+let searchInput, ratingFilter, searchButton, resultsContainer,
     tabSearch, tabWatchlist, tabSeen, tabLatest, tabPopular,
     searchView, watchlistView, seenView, latestView, popularView,
     messageArea, newWatchlistNameInput, createWatchlistBtn,
@@ -39,6 +39,7 @@ async function initializeAppState() {
 
     // Assign DOM Elements
     searchInput = document.getElementById('searchInput');
+    ratingFilter = document.getElementById('ratingFilter');
     searchButton = document.getElementById('searchButton');
     resultsContainer = document.getElementById('resultsContainer');
     itemVidsrcPlayerSection = document.getElementById('itemVidsrcPlayerSection');
@@ -88,7 +89,7 @@ async function initializeAppState() {
     positionIndicator = document.getElementById('positionIndicator');
 
     const allElements = {
-        searchInput, searchButton, resultsContainer,
+        searchInput, ratingFilter, searchButton, resultsContainer,
         tabSearch, tabWatchlist, tabSeen, tabLatest, tabPopular,
         searchView, watchlistView, seenView, latestView, popularView,
         messageArea, newWatchlistNameInput, createWatchlistBtn,

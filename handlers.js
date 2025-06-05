@@ -9,7 +9,8 @@ import {
 } from './ui.js';
 import {
     previousStateForBackButton, updatePreviousStateForBackButton,
-    scrollPositions, updateScrollPosition
+    scrollPositions, updateScrollPosition,
+    updateSelectedCertification
 } from './state.js';
 
 // DOM Elements
@@ -20,7 +21,8 @@ let detailOverlay, detailOverlayContent, searchView, latestView, popularView, wa
     overlaySeasonsEpisodesSection, overlayRelatedItemsSection,
     overlayCollectionItemsSection, overlayVidsrcPlayerSection,
     overlayBackButtonContainer,
-    searchInputGlobal;
+    searchInputGlobal,
+    ratingFilterGlobal;
 
 export function initHandlerRefs(elements) {
     detailOverlay = elements.detailOverlay;
@@ -41,6 +43,7 @@ export function initHandlerRefs(elements) {
     overlayVidsrcPlayerSection = elements.overlayVidsrcPlayerSection;
     overlayBackButtonContainer = elements.overlayBackButtonContainer;
     searchInputGlobal = elements.searchInput;
+    ratingFilterGlobal = elements.ratingFilter;
 }
 
 
@@ -111,11 +114,13 @@ export async function handleSearch() {
     if (!searchInputGlobal) { console.error("Search input not initialized in handlers.js"); return; }
     const query = searchInputGlobal.value.trim();
     const itemType = getSelectedSearchType();
+    const rating = ratingFilterGlobal ? ratingFilterGlobal.value : 'All';
+    updateSelectedCertification(rating);
     if (!query) {
         showToast("Please enter a title.", "error"); // Ensure showToast is available
         return;
     }
     clearItemDetailPanel("item");      // Clear previous item details
     clearSearchResultsPanel();      // Explicitly clear search results for a new search
-    await fetchSearchResults(query, itemType);
+    await fetchSearchResults(query, itemType, rating);
 }
