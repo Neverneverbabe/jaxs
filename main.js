@@ -124,8 +124,24 @@ async function initializeAppState() {
 
     if (createWatchlistBtn) createWatchlistBtn.addEventListener('click', handleCreateWatchlist);
 
+    // Initialize default rating certifications
     updateSelectedCertifications(['All']);
     setupRatingFilters();
+
+    // Additional fallback for select-based filters (if present on page)
+    if (typeof ratingFilters !== 'undefined' && ratingFilters.length > 0) {
+        ratingFilters.forEach(sel => {
+            sel.addEventListener('change', () => {
+                const values = Array.from(sel.selectedOptions).map(o => o.value);
+                updateSelectedCertifications(values);
+                if (sel.id === 'ratingFilterSearch') handleSearch();
+                else if (sel.id === 'ratingFilterWatchlist') displayItemsInSelectedWatchlist();
+                else if (sel.id === 'ratingFilterSeen') loadAndDisplaySeenItems();
+            });
+        });
+        const initial = Array.from(ratingFilters[0].selectedOptions).map(o => o.value);
+        updateSelectedCertifications(initial);
+    }
 
     // Function to handle closing the overlay
     const closeOverlay = () => {
