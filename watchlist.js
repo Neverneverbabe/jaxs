@@ -4,8 +4,9 @@ import { showToast, showLoading, showMessage, clearAllDynamicContent, createBack
 import { smallImageBaseUrl, tileThumbnailPlaceholder } from './config.js';
 import {
     currentUserId, currentSelectedWatchlistName, currentSelectedItemDetails,
-    updateCurrentSelectedWatchlistName
+    updateCurrentSelectedWatchlistName, selectedCertifications
 } from './state.js';
+import { extractCertification } from './ratingUtils.js';
 import { handleItemSelect } from './handlers.js'; // For item click
 import { appendSeenCheckmark } from './seenList.js'; // For displaying seen status on watchlist items
 
@@ -180,7 +181,10 @@ export async function displayItemsInSelectedWatchlist() {
         const docSnap = await getDoc(watchlistRef);
 
         if (docSnap.exists()) {
-            const items = docSnap.data().items || [];
+            let items = docSnap.data().items || [];
+            if (!selectedCertifications.includes('All')) {
+                items = items.filter(it => selectedCertifications.includes(it.certification || 'NR'));
+            }
             if (items.length === 0) {
                 watchlistDisplayContainer.innerHTML = `<p class="text-gray-500 italic col-span-full text-center">Watchlist "${currentSelectedWatchlistName}" is empty.</p>`;
             } else {
@@ -203,10 +207,13 @@ export async function addItemToSpecificFirestoreWatchlist(watchlistName, itemDat
     if (!itemData || !itemData.tmdb_id) { showToast("Cannot add item: Invalid item data.", "error"); return false; }
 
     const itemToAdd = {
-        tmdb_id: String(itemData.tmdb_id), title: itemData.title || itemData.name,
-        item_type: itemData.item_type, poster_path: itemData.poster_path || null,
+        tmdb_id: String(itemData.tmdb_id),
+        title: itemData.title || itemData.name,
+        item_type: itemData.item_type,
+        poster_path: itemData.poster_path || null,
         release_year: (itemData.release_date || itemData.first_air_date || '').substring(0, 4),
-        vote_average: itemData.vote_average || null
+        vote_average: itemData.vote_average || null,
+        certification: extractCertification(itemData)
     };
     try {
         const watchlistRef = doc(db, "users", currentUserId, "watchlists", watchlistName);
