@@ -446,8 +446,7 @@ export async function populateWatchlistManagePopup(popupElement, itemId, itemDat
             tmdb_id: String(itemData.tmdb_id), title: itemData.title || itemData.name,
             item_type: itemData.item_type, poster_path: itemData.poster_path || null,
             release_year: (itemData.release_date || itemData.first_air_date || '').substring(0,4),
-            vote_average: itemData.vote_average || null,
-            certification: extractCertification(itemData)
+            vote_average: itemData.vote_average || null
         };
 
         await setDoc(newWatchlistRef, { name: name, items: [itemToAddForNewList], createdAt: new Date().toISOString(), uid: currentUserId });
