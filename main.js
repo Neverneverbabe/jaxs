@@ -12,7 +12,8 @@ import {
     currentPopularType, updatePopularPage, updatePopularType, 
     previousStateForBackButton, updatePreviousStateForBackButton,
     scrollPositions, // Removed updateScrollPosition as it's used internally in handlers/state
-    updateSelectedCertifications
+    updateSelectedCertifications,
+    selectedCertifications
 } from './state.js';
 
 window.createAuthFormUI_Global = createAuthFormUI;
