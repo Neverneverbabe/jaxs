@@ -373,20 +373,8 @@
                     <button id="searchButton" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg">Search</button>
                 </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div id="resultsSection" class="md:col-span-1 bg-gray-800 p-6 rounded-lg shadow-xl">
-                    <h2 class="section-title">Search Results</h2>
-                    <div id="resultsContainer" class="space-y-3 max-h-[calc(100vh-450px)] md:max-h-[70vh] overflow-y-auto pr-2"><p class="text-gray-500 italic">Search for media.</p></div>
-                </div>
-                <div id="itemDetailSection" class="md:col-span-2 bg-gray-800 p-6 rounded-lg shadow-xl min-h-[400px]">
-                    <div id="itemBackButtonContainer" class="mb-2"></div>
-                    <h2 id="itemDetailTitle" class="section-title">Details & Player</h2>
-                    <div id="itemDetailContainer"><p class="text-gray-500 italic">Select an item.</p></div>
-                    <div id="itemVidsrcPlayerSection" class="mt-4"></div>
-                    <div id="itemSeasonsEpisodesSection" class="mt-4"></div>
-                    <div id="itemRelatedItemsSection" class="mt-6"></div>
-                    <div id="itemCollectionItemsSection" class="mt-6"></div>
-                </div>
+            <div id="resultsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 generic-items-container custom-scrollbar">
+                <p class="text-gray-500 italic col-span-full text-center">Search for media.</p>
             </div>
         </div>
 
@@ -407,19 +395,8 @@
                     </div>
                 </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div id="watchlistDisplayContainer" class="md:col-span-1 bg-gray-800 p-6 rounded-lg shadow-xl space-y-3 max-h-[calc(100vh-450px)] md:max-h-[70vh] overflow-y-auto pr-2">
-                    <p class="text-gray-500 italic col-span-full text-center">Select a watchlist or create one to view items.</p>
-                </div>
-                <div id="watchlistItemDetailPanel" class="md:col-span-2 bg-gray-800 p-6 rounded-lg shadow-xl min-h-[400px]">
-                    <div id="watchlistBackButtonContainer" class="mb-2"></div>
-                    <h2 id="watchlistDetailTitle" class="section-title">Details & Player</h2>
-                    <div id="watchlistDetailContainer"><p class="text-gray-500 italic">Select an item from your watchlist.</p></div>
-                    <div id="watchlistVidsrcPlayerSection" class="mt-4"></div>
-                    <div id="watchlistSeasonsEpisodesSection" class="mt-4"></div>
-                    <div id="watchlistRelatedItemsSection" class="mt-6"></div>
-                    <div id="watchlistCollectionItemsSection" class="mt-6"></div>
-                </div>
+            <div id="watchlistDisplayContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 generic-items-container custom-scrollbar">
+                <p class="text-gray-500 italic col-span-full text-center">Select a watchlist or create one to view items.</p>
             </div>
         </div>
 
