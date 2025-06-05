@@ -10,7 +10,7 @@ import {
 import {
     previousStateForBackButton, updatePreviousStateForBackButton,
     scrollPositions, updateScrollPosition,
-    updateSelectedCertifications
+    selectedCertifications
 } from './state.js';
 
 // DOM Elements
@@ -21,8 +21,7 @@ let detailOverlay, detailOverlayContent, searchView, latestView, popularView, wa
     overlaySeasonsEpisodesSection, overlayRelatedItemsSection,
     overlayCollectionItemsSection, overlayVidsrcPlayerSection,
     overlayBackButtonContainer,
-    searchInputGlobal,
-    ratingFilterGlobals;
+    searchInputGlobal;
 
 export function initHandlerRefs(elements) {
     detailOverlay = elements.detailOverlay;
@@ -43,7 +42,6 @@ export function initHandlerRefs(elements) {
     overlayVidsrcPlayerSection = elements.overlayVidsrcPlayerSection;
     overlayBackButtonContainer = elements.overlayBackButtonContainer;
     searchInputGlobal = elements.searchInput;
-    ratingFilterGlobals = elements.ratingFilters;
 }
 
 
@@ -114,9 +112,7 @@ export async function handleSearch() {
     if (!searchInputGlobal) { console.error("Search input not initialized in handlers.js"); return; }
     const query = searchInputGlobal.value.trim();
     const itemType = getSelectedSearchType();
-    const ratingSelect = document.getElementById('ratingFilterSearch');
-    const selected = ratingSelect ? Array.from(ratingSelect.selectedOptions).map(o => o.value) : ['All'];
-    updateSelectedCertifications(selected);
+    const selected = selectedCertifications;
     if (!query) {
         showToast("Please enter a title.", "error"); // Ensure showToast is available
         return;

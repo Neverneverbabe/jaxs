@@ -18,7 +18,7 @@ import {
 window.createAuthFormUI_Global = createAuthFormUI;
 
 // DOM Element Variables
-let searchInput, ratingFilters, searchButton, resultsContainer,
+let searchInput, searchButton, resultsContainer,
     tabSearch, tabWatchlist, tabSeen, tabLatest, tabPopular,
     searchView, watchlistView, seenView, latestView, popularView,
     messageArea, newWatchlistNameInput, createWatchlistBtn,
@@ -40,7 +40,6 @@ async function initializeAppState() {
 
     // Assign DOM Elements
     searchInput = document.getElementById('searchInput');
-    ratingFilters = document.querySelectorAll('.rating-filter');
     searchButton = document.getElementById('searchButton');
     resultsContainer = document.getElementById('resultsContainer');
     itemVidsrcPlayerSection = document.getElementById('itemVidsrcPlayerSection');
@@ -90,7 +89,7 @@ async function initializeAppState() {
     positionIndicator = document.getElementById('positionIndicator');
 
     const allElements = {
-        searchInput, ratingFilters, searchButton, resultsContainer,
+        searchInput, searchButton, resultsContainer,
         tabSearch, tabWatchlist, tabSeen, tabLatest, tabPopular,
         searchView, watchlistView, seenView, latestView, popularView,
         messageArea, newWatchlistNameInput, createWatchlistBtn,
@@ -125,7 +124,12 @@ async function initializeAppState() {
 
     if (createWatchlistBtn) createWatchlistBtn.addEventListener('click', handleCreateWatchlist);
 
-    if (ratingFilters && ratingFilters.length > 0) {
+    // Initialize default rating certifications
+    updateSelectedCertifications(['All']);
+    setupRatingFilters();
+
+    // Additional fallback for select-based filters (if present on page)
+    if (typeof ratingFilters !== 'undefined' && ratingFilters.length > 0) {
         ratingFilters.forEach(sel => {
             sel.addEventListener('change', () => {
                 const values = Array.from(sel.selectedOptions).map(o => o.value);
@@ -288,3 +292,76 @@ window.handlePopularPageChange = (newPage) => {
 };
 
 document.addEventListener('DOMContentLoaded', initializeAppState);
+
+function setupRatingFilters() {
+    const configs = [
+        {
+            btn: document.getElementById('ratingFilterSearchBtn'),
+            popup: document.getElementById('ratingFilterSearchPopup'),
+            apply: document.getElementById('ratingFilterSearchApply'),
+            action: () => handleSearch()
+        },
+        {
+            btn: document.getElementById('ratingFilterWatchlistBtn'),
+            popup: document.getElementById('ratingFilterWatchlistPopup'),
+            apply: document.getElementById('ratingFilterWatchlistApply'),
+            action: () => displayItemsInSelectedWatchlist()
+        },
+        {
+            btn: document.getElementById('ratingFilterSeenBtn'),
+            popup: document.getElementById('ratingFilterSeenPopup'),
+            apply: document.getElementById('ratingFilterSeenApply'),
+            action: () => loadAndDisplaySeenItems()
+        },
+        {
+            btn: document.getElementById('ratingFilterLatestBtn'),
+            popup: document.getElementById('ratingFilterLatestPopup'),
+            apply: document.getElementById('ratingFilterLatestApply'),
+            action: () => fetchTmdbCategoryContent('latest', currentLatestType, currentLatestCategory, 1)
+        },
+        {
+            btn: document.getElementById('ratingFilterPopularBtn'),
+            popup: document.getElementById('ratingFilterPopularPopup'),
+            apply: document.getElementById('ratingFilterPopularApply'),
+            action: () => fetchTmdbCategoryContent('popular', currentPopularType, 'popular', 1)
+        }
+    ];
+
+    configs.forEach(cfg => {
+        if (!cfg.btn || !cfg.popup || !cfg.apply) return;
+        cfg.btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            cfg.popup.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = selectedCertifications.includes(cb.value);
+            });
+            positionPopup(cfg.btn, cfg.popup);
+            cfg.popup.classList.toggle('hidden');
+        });
+        cfg.apply.addEventListener('click', () => {
+            const values = Array.from(cfg.popup.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            updateSelectedCertifications(values.length ? values : ['All']);
+            cfg.popup.classList.add('hidden');
+            if (cfg.action) cfg.action();
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        configs.forEach(cfg => {
+            if (cfg.popup && !cfg.popup.classList.contains('hidden')) {
+                if (!cfg.popup.contains(e.target) && !cfg.btn.contains(e.target)) {
+                    cfg.popup.classList.add('hidden');
+                }
+            }
+        });
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            configs.forEach(cfg => {
+                if (cfg.popup && !cfg.popup.classList.contains('hidden')) {
+                    cfg.popup.classList.add('hidden');
+                }
+            });
+        }
+    });
+}
