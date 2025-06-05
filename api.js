@@ -27,18 +27,19 @@ export function initApiRefs(elements) {
 }
 
 
-export function buildSearchUrl(query, itemType, certification) {
+export function buildSearchUrl(query, itemType, certifications = []) {
     let url = `${tmdbBaseUrl}/search/${itemType}?api_key=${apiKey}&query=${encodeURIComponent(query)}&include_adult=false`;
-    if (certification && certification !== 'All') {
-        url += `&certification_country=US&certification=${encodeURIComponent(certification)}`;
+    if (certifications && certifications.length > 0 && !(certifications.length === 1 && certifications[0] === 'All')) {
+        const joined = certifications.join('|');
+        url += `&certification_country=US&certification=${encodeURIComponent(joined)}`;
     }
     return url;
 }
 
-export async function fetchSearchResults(query, itemType, certification) {
+export async function fetchSearchResults(query, itemType, certifications = []) {
     showLoading('results', `Searching for "${query}"...`, resultsContainer);
     try {
-        const response = await fetch(buildSearchUrl(query, itemType, certification));
+        const response = await fetch(buildSearchUrl(query, itemType, certifications));
         if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
         const data = await response.json();
         if (data.results && data.results.length > 0) {

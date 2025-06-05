@@ -11,13 +11,14 @@ import {
     currentLatestType, currentLatestCategory, updateLatestPage, updateLatestType, updateLatestCategory,
     currentPopularType, updatePopularPage, updatePopularType, 
     previousStateForBackButton, updatePreviousStateForBackButton,
-    scrollPositions // Removed updateScrollPosition as it's used internally in handlers/state
+    scrollPositions, // Removed updateScrollPosition as it's used internally in handlers/state
+    updateSelectedCertifications
 } from './state.js';
 
 window.createAuthFormUI_Global = createAuthFormUI;
 
 // DOM Element Variables
-let searchInput, ratingFilter, searchButton, resultsContainer,
+let searchInput, ratingFilters, searchButton, resultsContainer,
     tabSearch, tabWatchlist, tabSeen, tabLatest, tabPopular,
     searchView, watchlistView, seenView, latestView, popularView,
     messageArea, newWatchlistNameInput, createWatchlistBtn,
@@ -39,7 +40,7 @@ async function initializeAppState() {
 
     // Assign DOM Elements
     searchInput = document.getElementById('searchInput');
-    ratingFilter = document.getElementById('ratingFilter');
+    ratingFilters = document.querySelectorAll('.rating-filter');
     searchButton = document.getElementById('searchButton');
     resultsContainer = document.getElementById('resultsContainer');
     itemVidsrcPlayerSection = document.getElementById('itemVidsrcPlayerSection');
@@ -89,7 +90,7 @@ async function initializeAppState() {
     positionIndicator = document.getElementById('positionIndicator');
 
     const allElements = {
-        searchInput, ratingFilter, searchButton, resultsContainer,
+        searchInput, ratingFilters, searchButton, resultsContainer,
         tabSearch, tabWatchlist, tabSeen, tabLatest, tabPopular,
         searchView, watchlistView, seenView, latestView, popularView,
         messageArea, newWatchlistNameInput, createWatchlistBtn,
@@ -123,6 +124,17 @@ async function initializeAppState() {
     if (searchInput) searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
 
     if (createWatchlistBtn) createWatchlistBtn.addEventListener('click', handleCreateWatchlist);
+
+    if (ratingFilters && ratingFilters.length > 0) {
+        ratingFilters.forEach(sel => {
+            sel.addEventListener('change', () => {
+                const values = Array.from(sel.selectedOptions).map(o => o.value);
+                updateSelectedCertifications(values);
+            });
+        });
+        const initial = Array.from(ratingFilters[0].selectedOptions).map(o => o.value);
+        updateSelectedCertifications(initial);
+    }
 
     // Function to handle closing the overlay
     const closeOverlay = () => {

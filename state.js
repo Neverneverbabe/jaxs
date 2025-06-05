@@ -10,7 +10,7 @@ export let currentPopularPage = 1;
 export let currentPopularType = 'movie';
 export let previousStateForBackButton = null;
 export let scrollPositions = { latest: 0, popular: 0 };
-export let selectedCertification = 'All';
+export let selectedCertifications = ['All'];
 
 // Functions to update state
 export function updateCurrentSelectedItemDetails(details) {
@@ -29,7 +29,7 @@ export function updatePopularPage(page) { currentPopularPage = page; }
 export function updatePopularType(type) { currentPopularType = type; }
 export function updatePreviousStateForBackButton(state) { previousStateForBackButton = state; }
 export function updateScrollPosition(type, position) { scrollPositions[type] = position; }
-export function updateSelectedCertification(cert) { selectedCertification = cert; }
+export function updateSelectedCertifications(certs) { selectedCertifications = certs; }
 
 // Active season cards (previously window properties)
 export let itemActiveSeasonCard = null;

@@ -363,7 +363,7 @@
                 </div>
                 <div class="flex flex-col sm:flex-row gap-4">
                     <input type="text" id="searchInput" placeholder="Enter title (e.g., Inception, Breaking Bad)" class="flex-grow p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
-                    <select id="ratingFilter" class="p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
+                    <select id="ratingFilterSearch" class="rating-filter p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none" multiple>
                         <option value="All">All</option>
                         <option value="G">G</option>
                         <option value="PG">PG</option>
@@ -394,6 +394,14 @@
                     <div id="watchlistTilesContainer" class="flex flex-wrap gap-3 mb-3 p-1">
                         <p class="text-xs text-gray-400 col-span-full w-full text-center">Sign in to manage watchlists.</p>
                     </div>
+                    <select id="ratingFilterWatchlist" class="rating-filter p-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none" multiple>
+                        <option value="All">All</option>
+                        <option value="G">G</option>
+                        <option value="PG">PG</option>
+                        <option value="PG-13">PG-13</option>
+                        <option value="R">R</option>
+                        <option value="NC-17">NC-17</option>
+                    </select>
                 </div>
             </div>
             <div id="watchlistDisplayContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 generic-items-container custom-scrollbar">
@@ -403,6 +411,14 @@
 
         <div id="seenView" class="hidden-view bg-gray-800 p-6 rounded-lg shadow-xl">
             <h2 class="section-title">Seen Items</h2>
+            <select id="ratingFilterSeen" class="rating-filter mb-4 p-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none" multiple>
+                <option value="All">All</option>
+                <option value="G">G</option>
+                <option value="PG">PG</option>
+                <option value="PG-13">PG-13</option>
+                <option value="R">R</option>
+                <option value="NC-17">NC-17</option>
+            </select>
             <div id="seenItemsDisplayContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 generic-items-container custom-scrollbar">
                 <p class="text-gray-500 italic col-span-full text-center">No items marked as seen yet.</p>
             </div>
@@ -415,6 +431,14 @@
                     <button id="latestTvShowsSubTab" class="sub-tab" data-type="tv" data-category="airing_today">Airing Today TV</button>
                 </div>
             </div>
+            <select id="ratingFilterLatest" class="rating-filter mb-4 p-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none" multiple>
+                <option value="All">All</option>
+                <option value="G">G</option>
+                <option value="PG">PG</option>
+                <option value="PG-13">PG-13</option>
+                <option value="R">R</option>
+                <option value="NC-17">NC-17</option>
+            </select>
             <div id="latestContentDisplay" class="space-y-4 custom-scrollbar"></div>
         </div>
 
@@ -425,6 +449,14 @@
                     <button id="popularTvShowsSubTab" class="sub-tab" data-type="tv" data-category="popular">Popular TV Shows</button>
                 </div>
             </div>
+            <select id="ratingFilterPopular" class="rating-filter mb-4 p-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none" multiple>
+                <option value="All">All</option>
+                <option value="G">G</option>
+                <option value="PG">PG</option>
+                <option value="PG-13">PG-13</option>
+                <option value="R">R</option>
+                <option value="NC-17">NC-17</option>
+            </select>
              <div id="popularContentDisplay" class="space-y-4 custom-scrollbar"></div>
         </div>
 

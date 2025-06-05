@@ -10,7 +10,7 @@ import {
 import {
     previousStateForBackButton, updatePreviousStateForBackButton,
     scrollPositions, updateScrollPosition,
-    updateSelectedCertification
+    updateSelectedCertifications
 } from './state.js';
 
 // DOM Elements
@@ -22,7 +22,7 @@ let detailOverlay, detailOverlayContent, searchView, latestView, popularView, wa
     overlayCollectionItemsSection, overlayVidsrcPlayerSection,
     overlayBackButtonContainer,
     searchInputGlobal,
-    ratingFilterGlobal;
+    ratingFilterGlobals;
 
 export function initHandlerRefs(elements) {
     detailOverlay = elements.detailOverlay;
@@ -43,7 +43,7 @@ export function initHandlerRefs(elements) {
     overlayVidsrcPlayerSection = elements.overlayVidsrcPlayerSection;
     overlayBackButtonContainer = elements.overlayBackButtonContainer;
     searchInputGlobal = elements.searchInput;
-    ratingFilterGlobal = elements.ratingFilter;
+    ratingFilterGlobals = elements.ratingFilters;
 }
 
 
@@ -114,13 +114,14 @@ export async function handleSearch() {
     if (!searchInputGlobal) { console.error("Search input not initialized in handlers.js"); return; }
     const query = searchInputGlobal.value.trim();
     const itemType = getSelectedSearchType();
-    const rating = ratingFilterGlobal ? ratingFilterGlobal.value : 'All';
-    updateSelectedCertification(rating);
+    const ratingSelect = document.getElementById('ratingFilterSearch');
+    const selected = ratingSelect ? Array.from(ratingSelect.selectedOptions).map(o => o.value) : ['All'];
+    updateSelectedCertifications(selected);
     if (!query) {
         showToast("Please enter a title.", "error"); // Ensure showToast is available
         return;
     }
     clearItemDetailPanel("item");      // Clear previous item details
     clearSearchResultsPanel();      // Explicitly clear search results for a new search
-    await fetchSearchResults(query, itemType, rating);
+    await fetchSearchResults(query, itemType, selected);
 }
