@@ -2,7 +2,8 @@
 import { db, firebaseFirestoreFunctions } from './firebase.js';
 import { showToast, showLoading, showMessage, positionPopup } from './ui.js'; // createAuthFormUI is in auth.js
 import { genericItemPlaceholder, smallImageBaseUrl } from './config.js';
-import { currentUserId } from './state.js';
+import { currentUserId, selectedCertifications } from './state.js';
+import { extractCertification } from './ratingUtils.js';
 import { handleItemSelect } from './handlers.js'; // For item click
 
 // DOM Elements
@@ -39,6 +40,7 @@ export async function addItemToSeenList(itemData) {
         poster_path: itemData.poster_path || null,
         release_year: (itemData.release_date || itemData.first_air_date || '').substring(0, 4),
         vote_average: itemData.vote_average || null,
+        certification: extractCertification(itemData),
         seenAt: new Date().toISOString()
     };
     try {
@@ -98,8 +100,14 @@ export async function loadAndDisplaySeenItems() {
             return;
         }
 
-        querySnapshot.forEach((docSnap) => { // Renamed doc
-            const item = docSnap.data();
+        let items = [];
+        querySnapshot.forEach((docSnap) => {
+            items.push(docSnap.data());
+        });
+        if (!selectedCertifications.includes('All')) {
+            items = items.filter(it => selectedCertifications.includes(it.certification || 'NR'));
+        }
+        items.forEach((item) => {
             const card = document.createElement('div');
             card.className = 'generic-item-card cursor-pointer';
             const posterUrl = item.poster_path ? `${smallImageBaseUrl}${item.poster_path}` : genericItemPlaceholder;
@@ -109,7 +117,7 @@ export async function loadAndDisplaySeenItems() {
                 <p class="text-xs text-gray-400">${item.release_year || 'N/A'} (${item.item_type === 'tv' ? 'TV Show' : 'Movie'})</p>
                 ${item.vote_average ? `<p class="text-xs text-yellow-400">★ ${item.vote_average.toFixed(1)}</p>` : ''}
             `;
-            card.addEventListener('click', () => handleItemSelect(String(item.tmdb_id), item.title, item.item_type, true)); // true for calledFromGenericList
+            card.addEventListener('click', () => handleItemSelect(String(item.tmdb_id), item.title, item.item_type, true));
             seenItemsDisplayContainer.appendChild(card);
             appendSeenCheckmark(card, item.tmdb_id);
         });
