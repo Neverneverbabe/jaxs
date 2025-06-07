@@ -1,14 +1,23 @@
 self.addEventListener("install", event => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open("jaxs-cache").then(cache => {
-      return cache.addAll([
-        "/",
+    caches.open("jaxs-cache").then(async cache => {
+      const files = [
         "/app/index.html",
         "/app/appMain.js",
         "/app/manifest.json",
         "/app/icon-192.png"
-      ]);
+      ];
+      await Promise.all(
+        files.map(async file => {
+          try {
+            const response = await fetch(file);
+            if (response.ok) await cache.put(file, response);
+          } catch (err) {
+            console.warn("⚠️ Failed to cache", file, err);
+          }
+        })
+      );
     })
   );
 });
@@ -19,8 +28,6 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
+    caches.match(event.request).then(response => response || fetch(event.request))
   );
 });
