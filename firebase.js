@@ -1,5 +1,6 @@
 // js/firebase.js
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import runtimeConfig from './runtimeConfig.js';
 import {
     getAuth as fbGetAuth, // Renamed to avoid conflict if you have a local getAuth
     createUserWithEmailAndPassword as fbCreateUserWithEmailAndPassword,
@@ -23,7 +24,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAsLscv3km_0ywQFQb-1D3JhoN3pBS_ia8", // IMPORTANT: Keep your actual API key secure
+    apiKey: runtimeConfig.FIREBASE_API_KEY || '',
     authDomain: "watchlist-app-c5ecb.firebaseapp.com",
     projectId: "watchlist-app-c5ecb",
     storageBucket: "watchlist-app-c5ecb.appspot.com",

@@ -1,20 +1,21 @@
 // js/api.js
-import { 
-    showLoading, 
-    showMessage, 
-    displayResults, 
-    displayItemDetails, 
-    displayTmdbCategoryItems, 
-    createRelatedItemCard, 
-    displaySeasons 
+import {
+    showLoading,
+    showMessage,
+    displayResults,
+    displayItemDetails,
+    displayTmdbCategoryItems,
+    createRelatedItemCard,
+    displaySeasons
 } from './ui.js';
+import runtimeConfig from './runtimeConfig.js';
 // Removed: import { appendSeenCheckmark } from './seenList.js'; // ui.js now handles its own appendSeenCheckmark
 import { smallImageBaseUrl, genericItemPlaceholder, stillImageBaseUrl } from './config.js';
 import { currentSelectedItemDetails, updateCurrentSelectedItemDetails, selectedCertifications } from './state.js';
 import { extractCertification } from './ratingUtils.js';
 
 // TMDB API Configuration
-export const apiKey = "e27a888783eeaa67643bd81c5fb4422f"; // Your TMDB API key
+export const apiKey = runtimeConfig.TMDB_API_KEY || '';
 export const tmdbBaseUrl = "https://api.themoviedb.org/3";
 
 // DOM Element references
