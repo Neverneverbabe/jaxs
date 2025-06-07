@@ -3,10 +3,10 @@ self.addEventListener("install", event => {
   event.waitUntil(
     caches.open("jaxs-cache").then(async cache => {
       const files = [
-        "/app/index.html",
-        "/app/appMain.js",
-        "/app/manifest.json",
-        "/app/icon-192.png"
+        "/jaxs/app/index.html",
+        "/jaxs/app/appMain.js",
+        "/jaxs/app/manifest.json",
+        "/jaxs/app/icon-192.png"
       ];
       await Promise.all(
         files.map(async file => {

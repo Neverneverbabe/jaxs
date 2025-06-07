@@ -1,7 +1,7 @@
 {
   "name": "Jaxs App",
   "short_name": "Jaxs",
-  "start_url": "/app/index.html",
+  "start_url": "/jaxs/app/index.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
