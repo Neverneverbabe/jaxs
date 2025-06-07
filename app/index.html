@@ -23,7 +23,203 @@
   </style>
 </head>
 <body>
-  <div id="app-root">Loading...</div>
+  <div class="container mx-auto max-w-6xl relative">
+        <div id="userAuthDropdownContainer">
+            <button id="userAuthIcon" title="Account">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                    <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd" />
+                </svg>
+            </button>
+            <div id="authDropdownMenu" class="hidden"></div>
+        </div>
+        <div id="positionIndicator" class="position-indicator hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+            <span>Position saved</span>
+        </div>
+
+        <div class="flex justify-center border-b border-gray-700 mb-6 mt-8 pt-12">
+            <button id="tabSearch" class="main-tab active">Search</button>
+            <button id="tabWatchlist" class="main-tab">My Watchlists</button>
+            <button id="tabSeen" class="main-tab">Seen</button>
+            <button id="tabLatest" class="main-tab">Latest</button>
+            <button id="tabPopular" class="main-tab">Popular</button>
+        </div>
+
+        <div id="searchView" class="hidden-view bg-gray-800 p-6 rounded-lg shadow-xl">
+            <h2 class="section-title">Search</h2>
+            <div class="mb-6 p-4 bg-gray-700 rounded-lg space-y-4">
+                <div class="flex justify-center mb-4 space-x-4">
+                    <label class="search-type-label"><input type="radio" name="searchType" value="movie" class="sr-only" checked><span>Movies</span></label>
+                    <label class="search-type-label"><input type="radio" name="searchType" value="tv" class="sr-only"><span>TV Shows</span></label>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <input type="text" id="searchInput" placeholder="Enter title (e.g., Inception, Breaking Bad)" class="flex-grow p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
+                    <div class="relative">
+                        <button id="ratingFilterSearchBtn" class="filter-btn" title="Filter by Rating">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                                <path d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2.586a1 1 0 0 1-.293.707l-6.414 6.414A2 2 0 0 0 14 15.414V20l-4-2v-2.586a2 2 0 0 0-.293-1.293L3.293 7.293A1 1 0 0 1 3 6.586V4z"/>
+                            </svg>
+                        </button>
+                        <div id="ratingFilterSearchPopup" class="detail-panel-popup rating-filter-popup hidden">
+                            <div class="rating-options">
+                                <label><input type="checkbox" value="All"> All</label>
+                                <label><input type="checkbox" value="G"> G</label>
+                                <label><input type="checkbox" value="PG"> PG</label>
+                                <label><input type="checkbox" value="PG-13"> PG-13</label>
+                                <label><input type="checkbox" value="R"> R</label>
+                                <label><input type="checkbox" value="NC-17"> NC-17</label>
+                            </div>
+                            <button id="ratingFilterSearchApply" class="filter-popup-apply">Apply</button>
+                        </div>
+                    </div>
+                    <button id="searchButton" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg">Search</button>
+                </div>
+            </div>
+            <div id="resultsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 generic-items-container custom-scrollbar">
+                <p class="text-gray-500 italic col-span-full text-center">Search for media.</p>
+            </div>
+        </div>
+
+        <div id="watchlistView" class="hidden-view bg-gray-800 p-6 rounded-lg shadow-xl">
+            <h2 class="section-title">My Watchlists</h2>
+            <div class="mb-6 p-4 bg-gray-700 rounded-lg space-y-4">
+                <div>
+                    <label for="newWatchlistName" class="block text-sm font-medium text-gray-300 mb-1">Create New Watchlist:</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="newWatchlistName" placeholder="Watchlist Name (e.g., Horror Movies)" class="flex-grow p-2 bg-gray-600 text-white border border-gray-500 rounded-md focus:ring-1 focus:ring-sky-500 outline-none" disabled>
+                        <button id="createWatchlistBtn" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-4 rounded-md transition duration-150" disabled>Create</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Select Watchlist:</label>
+                    <div id="watchlistTilesContainer" class="flex flex-wrap gap-3 mb-3 p-1">
+                        <p class="text-xs text-gray-400 col-span-full w-full text-center">Sign in to manage watchlists.</p>
+                    </div>
+                    <div class="relative inline-block">
+                        <button id="ratingFilterWatchlistBtn" class="filter-btn" title="Filter by Rating">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                                <path d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2.586a1 1 0 0 1-.293.707l-6.414 6.414A2 2 0 0 0 14 15.414V20l-4-2v-2.586a2 2 0 0 0-.293-1.293L3.293 7.293A1 1 0 0 1 3 6.586V4z"/>
+                            </svg>
+                        </button>
+                        <div id="ratingFilterWatchlistPopup" class="detail-panel-popup rating-filter-popup hidden">
+                            <div class="rating-options">
+                                <label><input type="checkbox" value="All"> All</label>
+                                <label><input type="checkbox" value="G"> G</label>
+                                <label><input type="checkbox" value="PG"> PG</label>
+                                <label><input type="checkbox" value="PG-13"> PG-13</label>
+                                <label><input type="checkbox" value="R"> R</label>
+                                <label><input type="checkbox" value="NC-17"> NC-17</label>
+                            </div>
+                            <button id="ratingFilterWatchlistApply" class="filter-popup-apply">Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="watchlistDisplayContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 generic-items-container custom-scrollbar">
+                <p class="text-gray-500 italic col-span-full text-center">Add items to your watchlists.</p>
+            </div>
+        </div>
+
+        <div id="seenView" class="hidden-view bg-gray-800 p-6 rounded-lg shadow-xl">
+            <h2 class="section-title">Seen</h2>
+            <div class="mb-6 p-4 bg-gray-700 rounded-lg space-y-4">
+                <div class="relative inline-block">
+                    <button id="ratingFilterSeenBtn" class="filter-btn" title="Filter by Rating">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                            <path d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2.586a1 1 0 0 1-.293.707l-6.414 6.414A2 2 0 0 0 14 15.414V20l-4-2v-2.586a2 2 0 0 0-.293-1.293L3.293 7.293A1 1 0 0 1 3 6.586V4z"/>
+                        </svg>
+                    </button>
+                    <div id="ratingFilterSeenPopup" class="detail-panel-popup rating-filter-popup hidden">
+                        <div class="rating-options">
+                            <label><input type="checkbox" value="All"> All</label>
+                            <label><input type="checkbox" value="G"> G</label>
+                            <label><input type="checkbox" value="PG"> PG</label>
+                            <label><input type="checkbox" value="PG-13"> PG-13</label>
+                            <label><input type="checkbox" value="R"> R</label>
+                            <label><input type="checkbox" value="NC-17"> NC-17</label>
+                        </div>
+                        <button id="ratingFilterSeenApply" class="filter-popup-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+            <div id="seenItemsDisplayContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 generic-items-container custom-scrollbar">
+                <p class="text-gray-500 italic col-span-full text-center">No items marked as seen yet.</p>
+            </div>
+        </div>
+
+        <div id="latestView" class="hidden-view bg-gray-800 p-6 rounded-lg shadow-xl">
+             <div class="flex justify-between items-center mb-4">
+                <div class="flex border-b border-gray-700">
+                    <button id="latestMoviesSubTab" class="sub-tab active" data-type="movie" data-category="now_playing">Now Playing Movies</button>
+                    <button id="latestTvShowsSubTab" class="sub-tab" data-type="tv" data-category="airing_today">Airing Today TV</button>
+                </div>
+            </div>
+            <div class="relative inline-block mb-4">
+                <button id="ratingFilterLatestBtn" class="filter-btn" title="Filter by Rating">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                        <path d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2.586a1 1 0 0 1-.293.707l-6.414 6.414A2 2 0 0 0 14 15.414V20l-4-2v-2.586a2 2 0 0 0-.293-1.293L3.293 7.293A1 1 0 0 1 3 6.586V4z"/>
+                    </svg>
+                </button>
+                <div id="ratingFilterLatestPopup" class="detail-panel-popup rating-filter-popup hidden">
+                    <div class="rating-options">
+                        <label><input type="checkbox" value="All"> All</label>
+                        <label><input type="checkbox" value="G"> G</label>
+                        <label><input type="checkbox" value="PG"> PG</label>
+                        <label><input type="checkbox" value="PG-13"> PG-13</label>
+                        <label><input type="checkbox" value="R"> R</label>
+                        <label><input type="checkbox" value="NC-17"> NC-17</label>
+                    </div>
+                    <button id="ratingFilterLatestApply" class="filter-popup-apply">Apply</button>
+                </div>
+            </div>
+            <div id="latestContentDisplay" class="space-y-4 custom-scrollbar"></div>
+        </div>
+
+        <div id="popularView" class="hidden-view bg-gray-800 p-6 rounded-lg shadow-xl">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex border-b border-gray-700">
+                    <button id="popularMoviesSubTab" class="sub-tab active" data-type="movie" data-category="popular">Popular Movies</button>
+                    <button id="popularTvShowsSubTab" class="sub-tab" data-type="tv" data-category="popular">Popular TV Shows</button>
+                </div>
+            </div>
+            <div class="relative inline-block mb-4">
+                <button id="ratingFilterPopularBtn" class="filter-btn" title="Filter by Rating">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                        <path d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2.586a1 1 0 0 1-.293.707l-6.414 6.414A2 2 0 0 0 14 15.414V20l-4-2v-2.586a2 2 0 0 0-.293-1.293L3.293 7.293A1 1 0 0 1 3 6.586V4z"/>
+                    </svg>
+                </button>
+                <div id="ratingFilterPopularPopup" class="detail-panel-popup rating-filter-popup hidden">
+                    <div class="rating-options">
+                        <label><input type="checkbox" value="All"> All</label>
+                        <label><input type="checkbox" value="G"> G</label>
+                        <label><input type="checkbox" value="PG"> PG</label>
+                        <label><input type="checkbox" value="PG-13"> PG-13</label>
+                        <label><input type="checkbox" value="R"> R</label>
+                        <label><input type="checkbox" value="NC-17"> NC-17</label>
+                    </div>
+                    <button id="ratingFilterPopularApply" class="filter-popup-apply">Apply</button>
+                </div>
+            </div>
+             <div id="popularContentDisplay" class="space-y-4 custom-scrollbar"></div>
+        </div>
+
+        <div id="detailOverlay" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-[1000]">
+            <div id="detailOverlayContent" class="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative custom-scrollbar">
+                <button id="closeOverlayButton" class="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl">&times;</button>
+                <div id="overlayBackButtonContainer" class="mb-2"></div>
+                <h2 id="overlayDetailTitle" class="section-title">Details & Player</h2>
+                <div id="overlayDetailContainer"><p class="text-gray-500 italic">Loading details...</p></div>
+                <div id="overlayVidsrcPlayerSection" class="mt-4"></div>
+                <div id="overlaySeasonsEpisodesSection" class="mt-4"></div>
+                <div id="overlayRelatedItemsSection" class="mt-6"></div>
+                <div id="overlayCollectionItemsSection" class="mt-6"></div>
+            </div>
+        </div>
+
+        <div id="messageArea" class="fixed bottom-5 right-5 z-50"></div>
+    </div>
   <script type="module" src="appMain.js"></script>
   <script>
     if ("serviceWorker" in navigator) {
