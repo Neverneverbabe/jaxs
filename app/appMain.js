@@ -1,8 +1,8 @@
-import '/jaxs/firebase.js';
-import '/jaxs/config.js';
-import '/jaxs/state.js';
-import '/jaxs/api.js';
-import '/jaxs/watchlist.js';
-import '/jaxs/handlers.js';
-import '/jaxs/ui.js';
-import '/jaxs/main.js';
+import '../firebase.js';
+import '../config.js';
+import '../state.js';
+import '../api.js';
+import '../watchlist.js';
+import '../handlers.js';
+import '../ui.js';
+import '../main.js';
