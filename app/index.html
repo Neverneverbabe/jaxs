@@ -4,38 +4,37 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jaxs App</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#000000">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Jaxs App">
-  <link rel="apple-touch-icon" href="icon-192.png">
 
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #f8f8f8;
-      margin: 0;
-      padding: 2rem;
-      color: #111;
-    }
-    h1 {
-      font-size: 2rem;
-      font-weight: 600;
-    }
-    p {
-      font-size: 1rem;
-      line-height: 1.6;
-    }
-  </style>
+  <!-- PWA & iOS Meta -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Jaxs App" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+
+  <!-- Your real app styling (add others if needed) -->
+  <link rel="stylesheet" href="../style.css" />
 </head>
 <body>
-  <h1> Jaxs App</h1>
-  <p>Welcome! Tap the share button and “Add to Home Screen” to install this like an app.</p>
 
+  <!-- Your app content goes here -->
+  <div id="app-root"></div>
+
+  <!-- Your main scripts (copy others as needed) -->
+  <script src="../config.js"></script>
+  <script src="../firebase.js"></script>
+  <script src="../state.js"></script>
+  <script src="../api.js"></script>
+  <script src="../watchlist.js"></script>
+  <script src="../handlers.js"></script>
+  <script src="../ui.js"></script>
+  <script src="../main.js"></script>
+
+  <!-- Register the service worker -->
   <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js")
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
         .then(() => console.log("✅ Service Worker registered"))
         .catch(err => console.error("❌ Service Worker error:", err));
     }
