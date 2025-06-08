@@ -1,4 +1,4 @@
-import fs from 'fs';
+const fs = require('fs');
 
 describe('service worker offline cache', () => {
   const sw = fs.readFileSync('app/sw.js', 'utf8');
