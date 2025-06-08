@@ -8,6 +8,7 @@ export default {
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
+    module: true,
   },
   module: {
     rules: [
@@ -30,5 +31,14 @@ export default {
     static: {
       directory: path.join(__dirname, 'app'),
     },
+  },
+  experiments: {
+    outputModule: true,
+  },
+  externalsType: 'module',
+  externals: {
+    'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js': 'module https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js',
+    'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js': 'module https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js',
+    'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js': 'module https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js'
   },
 };
