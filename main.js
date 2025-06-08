@@ -1,4 +1,5 @@
 // js/main.js
+import { auth } from "./firebase.js";
 import { auth, firebaseAuthFunctions, loadFirebaseIfNeeded } from './firebase.js';
 import { initApiRefs, fetchTmdbCategoryContent } from './api.js';
 import { initUiRefs, clearAllDynamicContent, showPositionSavedIndicator, positionPopup, createBackButton, clearItemDetailPanel, clearSearchResultsPanel } from './ui.js'; // Added clearItemDetailPanel, clearSearchResultsPanel

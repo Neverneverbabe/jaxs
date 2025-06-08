@@ -1,4 +1,5 @@
 // main.js
+import { auth, firebaseAuthFunctions } from "../firebase.js";
 import { fetchTrendingItems, fetchItemDetails, fetchSearchResults, fetchDiscoveredItems } from './api.js';
 import { displayContentRow, displayItemDetails, updateThemeDependentElements, updateHeroSection, displaySearchResults, populateFilterDropdown, createContentCardHtml, createFolderCardHtml, appendItemsToGrid, getCertification, checkRatingCompatibility } from './ui.js';
 
@@ -243,17 +244,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         if (signInForm) {
-            signInForm.addEventListener('submit', (event) => {
-                event.preventDefault();
-                const email = signInForm.email.value;
-                // const password = signInForm.password.value; // Password would be here
-                console.log(`Sign in attempt with email: ${email}`);
-                alert(`Sign in attempt for ${email}. Check console. (Full auth not implemented)`);
-                // signInModal.style.display = 'none'; // Optionally close modal on submit
-                // document.body.style.overflow = '';
-            });
-        }
+            signInForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = signInForm.email.value;
+    const password = signInForm.password.value;
+
+    try {
+        const { signInWithEmailAndPassword } = firebaseAuthFunctions;
+        const userCred = await signInWithEmailAndPassword(auth, email, password);
+        console.log("✅ Signed in user:", userCred.user);
+        signInModal.style.display = 'none';
+        document.body.style.overflow = '';
+    } catch (err) {
+        console.error("❌ Login failed:", err.message);
+        alert("Login failed: " + err.message);
     }
+});
+
+            };
+   
 
     // Function to populate content for the currently active tab
     async function populateCurrentTabContent() {
@@ -815,4 +824,4 @@ document.addEventListener('DOMContentLoaded', async () => {
             toggleSeenStatus(details, itemType);
         }
     });
-});
+;
