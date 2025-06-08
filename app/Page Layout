@@ -1,0 +1,241 @@
+import React, { useState, useEffect } from 'react';
+
+// Main App component that renders the entire Apple TV-like layout
+const App = () => {
+  // State to manage the current theme mode (true for dark, false for light)
+  const [isDarkMode, setIsDarkMode] = useState(true); // Default to dark mode
+
+  // Function to toggle between dark and light mode
+  const toggleDarkMode = () => {
+    setIsDarkMode(prevMode => !prevMode);
+  };
+
+  // useEffect to dynamically apply Tailwind config when component mounts
+  // This approach is used for self-contained demos where a proper Tailwind build
+  // isn't present, allowing custom colors to be defined via the CDN.
+  useEffect(() => {
+    // Ensure this script runs only once and after the DOM is ready
+    const script = document.createElement('script');
+    script.innerHTML = `
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              inter: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              'science-blue': '#0066CC', // Apple's primary blue accent color
+              'shark': '#1D1D1F',         // Apple's dark gray/almost black for backgrounds
+              'athens-gray': '#F5F5F7',   // Apple's light gray for backgrounds
+            },
+          },
+        },
+      };
+    `;
+    // Append the script to the head or body to ensure it's processed by Tailwind CDN
+    document.head.appendChild(script);
+
+    // Clean up the script when the component unmounts (optional for this demo, but good practice)
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  // Determine base background and text colors based on the current mode
+  const backgroundColor = isDarkMode ? 'bg-shark' : 'bg-athens-gray';
+  const textColor = isDarkMode ? 'text-gray-100' : 'text-gray-900';
+  const headerFooterBg = isDarkMode ? 'bg-gray-950' : 'bg-gray-100'; // Slightly darker/lighter for contrast
+  const headerFooterText = isDarkMode ? 'text-gray-100' : 'text-gray-900';
+  const iconColor = isDarkMode ? 'text-gray-300' : 'text-gray-600';
+  const contentCardBg = isDarkMode ? 'bg-gray-800' : 'bg-gray-200';
+  const contentCardTextColor = isDarkMode ? 'text-gray-200' : 'text-gray-700';
+
+
+  return (
+    // Main container for the application, dynamically styled based on mode
+    <div className={`min-h-screen font-inter antialiased ${backgroundColor} ${textColor}`}>
+      {/* Tailwind CSS CDN script - IMPORTANT: This should be included in the HTML file's head,
+          but is placed here for self-contained React app demonstration in this environment.
+          In a real React project, you'd typically configure Tailwind via PostCSS. */}
+      <script src="https://cdn.tailwindcss.com"></script>
+      {/* Custom CSS for hiding scrollbars - applied globally for demonstration */}
+      <style>
+        {`
+        /* For Webkit browsers (Chrome, Safari) */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* For Firefox */
+        .hide-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        `}
+      </style>
+
+      {/* Header/Navigation Bar */}
+      <header className={`fixed top-0 left-0 right-0 z-50 ${headerFooterBg} bg-opacity-90 backdrop-blur-md p-4 flex items-center justify-between shadow-lg ${headerFooterText}`}>
+        {/* Apple TV Logo/Brand */}
+        <div className="flex items-center space-x-6">
+          <h1 className="text-2xl font-bold tracking-wide">Watch TV</h1> {/* Changed from Apple TV to Watch TV */}
+          {/* Navigation Links */}
+          <nav className="hidden md:flex space-x-6 text-lg">
+            <a href="#" className="hover:text-science-blue transition duration-200 ease-in-out">Watch Now</a>
+            <a href="#" className="hover:text-science-blue transition duration-200 ease-in-out">Watch TV+</a> {/* Changed from Apple TV+ to Watch TV+ */}
+            <a href="#" className="hover:text-science-blue transition duration-200 ease-in-out">Library</a>
+            <a href="#" className="hover:text-science-blue transition duration-200 ease-in-out">Seen</a> {/* Changed from Store to Seen */}
+            <a href="#" className="hover:text-science-blue transition duration-200 ease-in-out">Search</a>
+          </nav>
+        </div>
+        {/* User Profile/Search Icon and Dark/Light Mode Toggle */}
+        <div className="flex items-center space-x-4">
+          {/* Dark/Light Mode Toggle Button */}
+          <button
+            onClick={toggleDarkMode}
+            className={`flex items-center space-x-2 p-2 rounded-full hover:bg-gray-700 focus:outline-none ${iconColor} transition duration-200`}
+            title="Toggle Dark/Light Mode"
+          >
+            {isDarkMode ? (
+              // Sun icon for light mode
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325 5.232l-.707.707M6.364 6.364l-.707-.707m12.728 0l-.707-.707M6.364 17.636l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ) : (
+              // Moon icon for dark mode
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            )}
+          </button>
+          <button className={`${iconColor} hover:text-science-blue focus:outline-none text-lg`}>
+            {/* Simple SVG for a search icon */}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+          <button className={`${iconColor} hover:text-science-blue focus:outline-none text-lg`}>
+            {/* Simple SVG for a user icon */}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="pt-20 pb-8 px-4 md:px-8"> {/* Added padding top to account for fixed header */}
+        {/* Hero Section - Featured Content */}
+        <section className={`relative w-full h-80 md:h-96 lg:h-[500px] bg-gradient-to-br ${isDarkMode ? 'from-purple-800 to-indigo-900' : 'from-blue-200 to-indigo-400'} rounded-lg overflow-hidden flex items-end p-6 mb-12 shadow-xl`}>
+          {/* Background image placeholder */}
+          <img
+            src={`https://placehold.co/1200x600/${isDarkMode ? '3B0764' : 'A0C4FF'}/F3F4F6?text=Featured+Show`}
+            alt="Featured Show"
+            className="absolute inset-0 w-full h-full object-cover opacity-70"
+            onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/1200x600/${isDarkMode ? '3B0764' : 'A0C4FF'}/F3F4F6?text=Fallback+Image`; }}
+          />
+          {/* Overlay content */}
+          <div className={`relative z-10 max-w-lg ${textColor}`}>
+            <h2 className="text-3xl md:text-5xl font-extrabold mb-2 leading-tight drop-shadow-lg">
+              The Epic Series
+            </h2>
+            <p className="text-lg md:text-xl mb-4 drop-shadow-md hidden sm:block">
+              Experience the thrilling saga of ancient heroes and mythical beasts.
+            </p>
+            {/* Using the custom 'science-blue' color for the button */}
+            <button className="bg-science-blue hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+              Watch Now
+            </button>
+          </div>
+        </section>
+
+        {/* Content Rows */}
+        <section className="mb-10">
+          <h3 className={`text-2xl md:text-3xl font-bold mb-5 ${textColor}`}>Trending Now</h3>
+          <div className="flex overflow-x-auto space-x-4 pb-4 hide-scrollbar"> {/* Added hide-scrollbar class */}
+            {/* Generate multiple content cards */}
+            {[...Array(8)].map((_, i) => (
+              <ContentCard
+                key={i}
+                title={`Trending Item ${i + 1}`}
+                imageUrl={`https://placehold.co/200x300/${isDarkMode ? '1C1C1E' : 'F5F5F7'}/${isDarkMode ? 'F3F4F6' : '1D1D1F'}?text=Show+${i + 1}`}
+                isDarkMode={isDarkMode}
+                cardBgColor={contentCardBg}
+                cardTextColor={contentCardTextColor}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-10">
+          <h3 className={`text-2xl md:text-3xl font-bold mb-5 ${textColor}`}>Because You Watched...</h3>
+          <div className="flex overflow-x-auto space-x-4 pb-4 hide-scrollbar"> {/* Added hide-scrollbar class */}
+            {[...Array(8)].map((_, i) => (
+              <ContentCard
+                key={i}
+                title={`Recommended Item ${i + 1}`}
+                imageUrl={`https://placehold.co/200x300/${isDarkMode ? '1C1C1E' : 'F5F5F7'}/${isDarkMode ? 'F3F4F6' : '1D1D1F'}?text=Movie+${i + 1}`}
+                isDarkMode={isDarkMode}
+                cardBgColor={contentCardBg}
+                cardTextColor={contentCardTextColor}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-10">
+          <h3 className={`text-2xl md:text-3xl font-bold mb-5 ${textColor}`}>New Releases</h3>
+          <div className="flex overflow-x-auto space-x-4 pb-4 hide-scrollbar"> {/* Added hide-scrollbar class */}
+            {[...Array(8)].map((_, i) => (
+              <ContentCard
+                key={i}
+                title={`New Release ${i + 1}`}
+                imageUrl={`https://placehold.co/200x300/${isDarkMode ? '1C1C1E' : 'F5F5F7'}/${isDarkMode ? 'F3F4F6' : '1D1D1F'}?text=New+${i + 1}`}
+                isDarkMode={isDarkMode}
+                cardBgColor={contentCardBg}
+                cardTextColor={contentCardTextColor}
+              />
+            ))}
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className={`${headerFooterBg} bg-opacity-70 backdrop-blur-sm p-6 text-center text-sm ${headerFooterText}`}>
+        <p>&copy; {new Date().getFullYear()} Apple Inc. All rights reserved. This is a design concept for educational purposes only.</p>
+        <div className="mt-2 space-x-4">
+          <a href="#" className="hover:text-science-blue transition duration-200">Privacy Policy</a>
+          <a href="#" className="hover:text-science-blue transition duration-200">Terms of Use</a>
+          <a href="#" className="hover:text-science-blue transition duration-200">Support</a>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+// ContentCard component for individual movie/show items in the rows
+const ContentCard = ({ title, imageUrl, isDarkMode, cardBgColor, cardTextColor }) => {
+  return (
+    <div className="flex-shrink-0 w-40 md:w-52 lg:w-64 transform hover:scale-105 transition duration-300 ease-in-out cursor-pointer group">
+      <div className={`relative w-full h-56 md:h-72 lg:h-80 rounded-lg overflow-hidden shadow-lg ${cardBgColor}`}>
+        <img
+          src={imageUrl}
+          alt={title}
+          className="w-full h-full object-cover group-hover:opacity-80 transition duration-300 ease-in-out"
+          onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/200x300/${isDarkMode ? '555' : 'BBB'}/${isDarkMode ? 'FFF' : '333'}?text=Error`; }} // Fallback for image loading errors
+        />
+        {/* Overlay for hover effect or badges */}
+        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
+          {/* Play icon or more info on hover */}
+          <svg className="h-10 w-10 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+          </svg>
+        </div>
+      </div>
+      <p className={`mt-3 text-sm md:text-base font-medium text-center truncate ${cardTextColor}`}>
+        {title}
+      </p>
+    </div>
+  );
+};
+
+export default App;
