@@ -6,8 +6,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default {
   entry: './app/appMain.js',
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
+    filename: 'appMain.js',
+    path: path.resolve(__dirname, 'app'),
     module: true,
   },
   module: {
@@ -18,7 +18,7 @@ export default {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env', '@babel/preset-react'],
+            presets: ['@babel/preset-env'],
           },
         },
       },
