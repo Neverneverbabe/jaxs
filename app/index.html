@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <base href="/jaxs/app/">
   <meta charset="UTF-8" />
@@ -12,18 +12,185 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Jaxs App" />
   <link rel="apple-touch-icon" href="icon-192.png" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            inter: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            'science-blue': '#0066CC',
+            'shark': '#1D1D1F',
+            'athens-gray': '#F5F5F7'
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #f5f5f5;
-      margin: 0;
-      padding: 1rem;
-      color: #111;
-    }
+    /* For Webkit browsers (Chrome, Safari) */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    /* For Firefox */
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body>
-  <div id="root"></div>
-  <script src="../dist/bundle.js"></script>
+<body class="font-inter antialiased">
+  <div id="app" class="min-h-screen bg-shark text-gray-100 dark:bg-athens-gray dark:text-gray-900">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-gray-950 dark:bg-gray-100 bg-opacity-90 backdrop-blur-md p-4 flex items-center justify-between shadow-lg text-gray-100 dark:text-gray-900">
+      <div class="flex items-center space-x-6">
+        <h1 class="text-2xl font-bold tracking-wide">Watch TV</h1>
+        <nav class="hidden md:flex space-x-6 text-lg">
+          <a href="#" class="hover:text-science-blue transition duration-200 ease-in-out">Watch Now</a>
+          <a href="#" class="hover:text-science-blue transition duration-200 ease-in-out">Watch TV+</a>
+          <a href="#" class="hover:text-science-blue transition duration-200 ease-in-out">Library</a>
+          <a href="#" class="hover:text-science-blue transition duration-200 ease-in-out">Seen</a>
+          <a href="#" class="hover:text-science-blue transition duration-200 ease-in-out">Search</a>
+        </nav>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button id="dark-mode-toggle" class="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-700 focus:outline-none text-gray-300 dark:text-gray-600 transition duration-200" title="Toggle Dark/Light Mode">
+          <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325 5.232l-.707.707M6.364 6.364l-.707-.707m12.728 0l-.707-.707M6.364 17.636l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+        <button class="text-gray-300 dark:text-gray-600 hover:text-science-blue focus:outline-none text-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+        <button class="text-gray-300 dark:text-gray-600 hover:text-science-blue focus:outline-none text-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+    <main class="pt-20 pb-8 px-4 md:px-8">
+      <section class="relative w-full h-80 md:h-96 lg:h-[500px] bg-gradient-to-br from-purple-800 to-indigo-900 dark:from-blue-200 dark:to-indigo-400 rounded-lg overflow-hidden flex items-end p-6 mb-12 shadow-xl">
+        <img src="https://placehold.co/1200x600/3B0764/F3F4F6?text=Featured+Show" alt="Featured Show" class="absolute inset-0 w-full h-full object-cover opacity-70">
+        <div class="relative z-10 max-w-lg text-gray-100 dark:text-gray-900">
+          <h2 class="text-3xl md:text-5xl font-extrabold mb-2 leading-tight drop-shadow-lg">The Epic Series</h2>
+          <p class="text-lg md:text-xl mb-4 drop-shadow-md hidden sm:block">Experience the thrilling saga of ancient heroes and mythical beasts.</p>
+          <button class="bg-science-blue hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 shadow-md">Watch Now</button>
+        </div>
+      </section>
+      <section class="mb-10">
+        <h3 class="text-2xl md:text-3xl font-bold mb-5 text-gray-100 dark:text-gray-900">Trending Now</h3>
+        <div class="flex overflow-x-auto space-x-4 pb-4 hide-scrollbar">
+          <div class="flex-shrink-0 w-40 md:w-52 lg:w-64 transform hover:scale-105 transition duration-300 ease-in-out cursor-pointer group">
+            <div class="relative w-full h-56 md:h-72 lg:h-80 rounded-lg overflow-hidden shadow-lg bg-gray-800 dark:bg-gray-200">
+              <img src="https://placehold.co/200x300/1C1C1E/F3F4F6?text=Show+1" alt="Trending Item 1" class="w-full h-full object-cover group-hover:opacity-80 transition duration-300 ease-in-out" onerror="this.onerror=null;this.src='https://placehold.co/200x300/555/FFF?text=Error';">
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
+                <svg class="h-10 w-10 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.55 7.168A1 1 0 008 8v4a1 1 0 001.55.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <p class="mt-3 text-sm md:text-base font-medium text-center truncate text-gray-200 dark:text-gray-700">Trending Item 1</p>
+          </div>
+          <div class="flex-shrink-0 w-40 md:w-52 lg:w-64 transform hover:scale-105 transition duration-300 ease-in-out cursor-pointer group">
+            <div class="relative w-full h-56 md:h-72 lg:h-80 rounded-lg overflow-hidden shadow-lg bg-gray-800 dark:bg-gray-200">
+              <img src="https://placehold.co/200x300/1C1C1E/F3F4F6?text=Show+2" alt="Trending Item 2" class="w-full h-full object-cover group-hover:opacity-80 transition duration-300 ease-in-out" onerror="this.onerror=null;this.src='https://placehold.co/200x300/555/FFF?text=Error';">
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
+                <svg class="h-10 w-10 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.55 7.168A1 1 0 008 8v4a1 1 0 001.55.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <p class="mt-3 text-sm md:text-base font-medium text-center truncate text-gray-200 dark:text-gray-700">Trending Item 2</p>
+          </div>
+          <div class="flex-shrink-0 w-40 md:w-52 lg:w-64 transform hover:scale-105 transition duration-300 ease-in-out cursor-pointer group">
+            <div class="relative w-full h-56 md:h-72 lg:h-80 rounded-lg overflow-hidden shadow-lg bg-gray-800 dark:bg-gray-200">
+              <img src="https://placehold.co/200x300/1C1C1E/F3F4F6?text=Show+3" alt="Trending Item 3" class="w-full h-full object-cover group-hover:opacity-80 transition duration-300 ease-in-out" onerror="this.onerror=null;this.src='https://placehold.co/200x300/555/FFF?text=Error';">
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
+                <svg class="h-10 w-10 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.55 7.168A1 1 0 008 8v4a1 1 0 001.55.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <p class="mt-3 text-sm md:text-base font-medium text-center truncate text-gray-200 dark:text-gray-700">Trending Item 3</p>
+          </div>
+        </div>
+      </section>
+      <section class="mb-10">
+        <h3 class="text-2xl md:text-3xl font-bold mb-5 text-gray-100 dark:text-gray-900">Because You Watched...</h3>
+        <div class="flex overflow-x-auto space-x-4 pb-4 hide-scrollbar">
+          <div class="flex-shrink-0 w-40 md:w-52 lg:w-64 transform hover:scale-105 transition duration-300 ease-in-out cursor-pointer group">
+            <div class="relative w-full h-56 md:h-72 lg:h-80 rounded-lg overflow-hidden shadow-lg bg-gray-800 dark:bg-gray-200">
+              <img src="https://placehold.co/200x300/1C1C1E/F3F4F6?text=Movie+1" alt="Recommended Item 1" class="w-full h-full object-cover group-hover:opacity-80 transition duration-300 ease-in-out" onerror="this.onerror=null;this.src='https://placehold.co/200x300/555/FFF?text=Error';">
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
+                <svg class="h-10 w-10 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.55 7.168A1 1 0 008 8v4a1 1 0 001.55.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <p class="mt-3 text-sm md:text-base font-medium text-center truncate text-gray-200 dark:text-gray-700">Recommended Item 1</p>
+          </div>
+          <div class="flex-shrink-0 w-40 md:w-52 lg:w-64 transform hover:scale-105 transition duration-300 ease-in-out cursor-pointer group">
+            <div class="relative w-full h-56 md:h-72 lg:h-80 rounded-lg overflow-hidden shadow-lg bg-gray-800 dark:bg-gray-200">
+              <img src="https://placehold.co/200x300/1C1C1E/F3F4F6?text=Movie+2" alt="Recommended Item 2" class="w-full h-full object-cover group-hover:opacity-80 transition duration-300 ease-in-out" onerror="this.onerror=null;this.src='https://placehold.co/200x300/555/FFF?text=Error';">
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
+                <svg class="h-10 w-10 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.55 7.168A1 1 0 008 8v4a1 1 0 001.55.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <p class="mt-3 text-sm md:text-base font-medium text-center truncate text-gray-200 dark:text-gray-700">Recommended Item 2</p>
+          </div>
+        </div>
+      </section>
+      <section class="mb-10">
+        <h3 class="text-2xl md:text-3xl font-bold mb-5 text-gray-100 dark:text-gray-900">New Releases</h3>
+        <div class="flex overflow-x-auto space-x-4 pb-4 hide-scrollbar">
+          <div class="flex-shrink-0 w-40 md:w-52 lg:w-64 transform hover:scale-105 transition duration-300 ease-in-out cursor-pointer group">
+            <div class="relative w-full h-56 md:h-72 lg:h-80 rounded-lg overflow-hidden shadow-lg bg-gray-800 dark:bg-gray-200">
+              <img src="https://placehold.co/200x300/1C1C1E/F3F4F6?text=New+1" alt="New Release 1" class="w-full h-full object-cover group-hover:opacity-80 transition duration-300 ease-in-out" onerror="this.onerror=null;this.src='https://placehold.co/200x300/555/FFF?text=Error';">
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
+                <svg class="h-10 w-10 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.55 7.168A1 1 0 008 8v4a1 1 0 001.55.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <p class="mt-3 text-sm md:text-base font-medium text-center truncate text-gray-200 dark:text-gray-700">New Release 1</p>
+          </div>
+          <div class="flex-shrink-0 w-40 md:w-52 lg:w-64 transform hover:scale-105 transition duration-300 ease-in-out cursor-pointer group">
+            <div class="relative w-full h-56 md:h-72 lg:h-80 rounded-lg overflow-hidden shadow-lg bg-gray-800 dark:bg-gray-200">
+              <img src="https://placehold.co/200x300/1C1C1E/F3F4F6?text=New+2" alt="New Release 2" class="w-full h-full object-cover group-hover:opacity-80 transition duration-300 ease-in-out" onerror="this.onerror=null;this.src='https://placehold.co/200x300/555/FFF?text=Error';">
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
+                <svg class="h-10 w-10 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.55 7.168A1 1 0 008 8v4a1 1 0 001.55.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <p class="mt-3 text-sm md:text-base font-medium text-center truncate text-gray-200 dark:text-gray-700">New Release 2</p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="bg-gray-950 dark:bg-gray-100 bg-opacity-70 backdrop-blur-sm p-6 text-center text-sm text-gray-100 dark:text-gray-900">
+      <p>&copy; 2024 Apple Inc. All rights reserved. This is a design concept for educational purposes only.</p>
+      <div class="mt-2 space-x-4">
+        <a href="#" class="hover:text-science-blue transition duration-200">Privacy Policy</a>
+        <a href="#" class="hover:text-science-blue transition duration-200">Terms of Use</a>
+        <a href="#" class="hover:text-science-blue transition duration-200">Support</a>
+      </div>
+    </footer>
+  </div>
+  <script type="module" src="./appMain.js"></script>
+  <script>
+    const toggle = document.getElementById('dark-mode-toggle');
+    const iconSun = document.getElementById('icon-sun');
+    const iconMoon = document.getElementById('icon-moon');
+    toggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      iconSun.classList.toggle('hidden');
+      iconMoon.classList.toggle('hidden');
+    });
+  </script>
 </body>
 </html>

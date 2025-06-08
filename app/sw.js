@@ -8,8 +8,7 @@ self.addEventListener("install", event => {
         "/jaxs/app/index.html",
         "/jaxs/app/appMain.js",
         "/jaxs/app/manifest.json",
-        "/jaxs/app/icon-192.png",
-        "/jaxs/dist/bundle.js"
+        "/jaxs/app/icon-192.png"
       ];
       await Promise.all(
         files.map(async file => {
