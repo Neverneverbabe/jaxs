@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // Main App component that renders the entire Apple TV-like layout
-const App = () => {
+const PageLayout = () => {
   // State to manage the current theme mode (true for dark, false for light)
   const [isDarkMode, setIsDarkMode] = useState(true); // Default to dark mode
 
@@ -238,4 +238,4 @@ const ContentCard = ({ title, imageUrl, isDarkMode, cardBgColor, cardTextColor }
   );
 };
 
-export default App;
+export default PageLayout;
