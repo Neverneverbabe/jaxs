@@ -1,12 +1,20 @@
+const CACHE_NAME = "jaxs-cache-v2";
+
 self.addEventListener("install", event => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open("jaxs-cache").then(async cache => {
+    caches.open(CACHE_NAME).then(async cache => {
       const files = [
         "/jaxs/app/index.html",
         "/jaxs/app/appMain.js",
         "/jaxs/app/manifest.json",
-        "/jaxs/app/icon-192.png"
+        "/jaxs/app/icon-192.png",
+        "/jaxs/app/apple-tv-main/index.html",
+        "/jaxs/app/apple-tv-main/app.css",
+        "/jaxs/app/apple-tv-main/app.js",
+        "/jaxs/app/apple-tv-main/logos/github.svg",
+        "/jaxs/app/apple-tv-main/logos/tailwindcss.svg",
+        "/jaxs/app/apple-tv-main/docs/screenshot.png"
       ];
       await Promise.all(
         files.map(async file => {
@@ -23,7 +31,11 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("activate", event => {
-  event.waitUntil(clients.claim());
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))
+    ).then(() => clients.claim())
+  );
 });
 
 self.addEventListener("fetch", event => {
