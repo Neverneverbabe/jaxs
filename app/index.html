@@ -50,6 +50,10 @@
         }
 
         /* Base styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
@@ -61,6 +65,7 @@
             min-height: 100vh; /* Ensure body takes full viewport height */
             display: flex;
             flex-direction: column;
+            overflow-x: hidden; /* Prevent horizontal scroll */
         }
 
         /* Hide scrollbars for Webkit browsers (Chrome, Safari) */
@@ -97,6 +102,37 @@
             background-color: rgba(var(--header-footer-bg-rgb, 253, 253, 253), 0.9); /* for opacity */
         }
 
+        /* Container for logo and navigation */
+        header #header-main {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 640px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            header #header-main {
+                width: 100%;
+            }
+
+            header #header-main nav {
+                width: 100%;
+                order: 2;
+                margin-top: 0.5rem;
+            }
+
+            header .icon-buttons {
+                width: 100%;
+                justify-content: flex-end;
+                margin-top: 0.5rem;
+            }
+        }
+
 
         header .logo {
             font-size: 1.5rem; /* text-2xl */
@@ -110,6 +146,7 @@
             gap: 1.5rem; /* space-x-6 */
             font-size: 1.125rem; /* text-lg */
             color: var(--text-secondary);
+            flex-wrap: wrap; /* Allow wrapping on small screens */
         }
 
         header nav a {
@@ -759,7 +796,7 @@
 </head>
 <body>
     <header>
-        <div class="flex items-center space-x-6">
+        <div id="header-main" class="flex items-center space-x-6">
             <h1 class="logo">Watch TV</h1>
             <nav id="main-nav">
                 <a href="#" class="tab-link active-nav-link" data-tab="watch-now-tab">Watch TV+</a>
