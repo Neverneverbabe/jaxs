@@ -8,16 +8,14 @@ describe('service worker offline cache', () => {
     expect(match[1]).toBe('jaxs-cache-v2');
   });
 
-  test('caches apple tv ui files', () => {
+  test('caches base app files', () => {
     const filesMatch = sw.match(/const files = \[((?:.|\n)*?)\]/);
     const arr = Function('return [' + filesMatch[1] + ']')();
     expect(arr).toEqual(expect.arrayContaining([
-      '/jaxs/app/apple-tv-main/index.html',
-      '/jaxs/app/apple-tv-main/app.css',
-      '/jaxs/app/apple-tv-main/app.js',
-      '/jaxs/app/apple-tv-main/logos/github.svg',
-      '/jaxs/app/apple-tv-main/logos/tailwindcss.svg',
-      '/jaxs/app/apple-tv-main/docs/screenshot.png'
+      '/jaxs/app/index.html',
+      '/jaxs/app/appMain.js',
+      '/jaxs/app/manifest.json',
+      '/jaxs/app/icon-192.png'
     ]));
   });
 });

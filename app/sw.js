@@ -8,13 +8,7 @@ self.addEventListener("install", event => {
         "/jaxs/app/index.html",
         "/jaxs/app/appMain.js",
         "/jaxs/app/manifest.json",
-        "/jaxs/app/icon-192.png",
-        "/jaxs/app/apple-tv-main/index.html",
-        "/jaxs/app/apple-tv-main/app.css",
-        "/jaxs/app/apple-tv-main/app.js",
-        "/jaxs/app/apple-tv-main/logos/github.svg",
-        "/jaxs/app/apple-tv-main/logos/tailwindcss.svg",
-        "/jaxs/app/apple-tv-main/docs/screenshot.png"
+        "/jaxs/app/icon-192.png"
       ];
       await Promise.all(
         files.map(async file => {
