@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "office-addin-debugging start manifest.xml",
+    "start": "webpack serve --mode development",
     "build": "webpack --mode production",
     "dev-server": "webpack serve --mode development",
     "test": "jest"
