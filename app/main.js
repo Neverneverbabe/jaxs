@@ -824,4 +824,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             toggleSeenStatus(details, itemType);
         }
     });
-;
+
+});
