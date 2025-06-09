@@ -1,4 +1,4 @@
-import { buildSearchUrl } from '../api.js';
+import { buildSearchUrl } from '../api.js'; 
 
 describe('buildSearchUrl', () => {
   test('includes certifications when provided', () => {

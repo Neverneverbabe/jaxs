@@ -1,4 +1,4 @@
-// service-worker.js
+// service-worker.js 
 const CACHE_NAME = 'watch-tv-cache-v2'; // Changed cache version
 const urlsToCache = [
     './', // Caches the root directory, which will typically be index.html

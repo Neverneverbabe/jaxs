@@ -1,4 +1,4 @@
-// js/auth.js
+// js/auth.js 
 import { auth, firebaseAuthFunctions } from './firebase.js';
 import { showToast } from './ui.js';
 import {

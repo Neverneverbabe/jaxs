@@ -1,4 +1,4 @@
-function handleSignOut(userId) {
+function handleSignOut(userId) { 
   // This mimics the onAuthStateChanged handler when the user logs out
   localStorage.removeItem(`mediaFinderLastSelectedWatchlist_${userId}`);
 }
