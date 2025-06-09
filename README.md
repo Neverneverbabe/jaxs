@@ -37,7 +37,7 @@ Run the Jest test suite:
 npm test
 ```
 
-Some environments may require `NODE_OPTIONS=--experimental-vm-modules` for ESM support.
+The test script sets `NODE_OPTIONS=--experimental-vm-modules` to enable ESM support required by Jest.
 
 ## Build
 
