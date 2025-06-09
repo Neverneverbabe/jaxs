@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const librarySelectedFolderMoviesRow = document.getElementById('library-selected-folder-movies-row');
     const signInButton = document.getElementById('sign-in-button'); // User icon in header
     const signInModal = document.getElementById('sign-in-modal');
+    const userIconElement = signInButton ? signInButton.querySelector('i') : null; // Get the <i> element for icon changes
     const signInForm = document.getElementById('sign-in-form');
 
     // Set the current year in the footer
@@ -58,6 +59,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initial theme setup
     let isLightMode = false; // Default to dark mode
     updateThemeDependentElements(isLightMode); // Apply initial theme styling
+
+    // --- Firebase Auth State Change Listener ---
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            // User is signed in
+            console.log("Auth state changed: User signed in - UID:", user.uid);
+            if (userIconElement) {
+                userIconElement.classList.remove('fa-user'); // Assuming default is 'fa-user' or 'fa-user-slash'
+                userIconElement.classList.remove('fa-user-slash');
+                userIconElement.classList.add('fa-user-check'); // Icon indicating signed-in state
+                userIconElement.title = 'Account / Sign Out';
+            }
+            if (signInModal.style.display === 'flex') {
+                 signInModal.style.display = 'none';
+                 document.body.style.overflow = '';
+            }
+            // If other parts of the UI need to refresh based on auth state, trigger that here.
+            // For example: populateCurrentTabContent();
+        } else {
+            // User is signed out
+            console.log("Auth state changed: User signed out");
+            if (userIconElement) {
+                userIconElement.classList.remove('fa-user-check');
+                userIconElement.classList.add('fa-user'); // Icon indicating signed-out state
+                userIconElement.title = 'Sign In';
+            }
+        }
+    });
 
     // Define onCardClick at a scope accessible by populateCurrentTabContent and loadMoreExploreItems
     const onCardClick = async (id, type) => {
@@ -224,8 +253,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Sign-In Modal Logic
     if (signInButton && signInModal) {
         signInButton.addEventListener('click', () => {
-            signInModal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+            if (auth.currentUser) {
+                // If user is signed in, clicking the button will sign them out
+                firebaseAuthFunctions.signOut(auth).catch(error => {
+                    console.error("Sign out error", error);
+                    alert("Error signing out: " + error.message);
+                });
+            } else {
+                // User is not signed in, show sign-in modal
+                signInModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
         });
 
         const signInCloseButton = signInModal.querySelector('.close-button');
@@ -251,10 +289,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         const { signInWithEmailAndPassword } = firebaseAuthFunctions;
-        const userCred = await signInWithEmailAndPassword(auth, email, password);
-        console.log("✅ Signed in user:", userCred.user);
-        signInModal.style.display = 'none';
-        document.body.style.overflow = '';
+                await signInWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged will handle UI updates, including closing the modal and logging.
     } catch (err) {
         console.error("❌ Login failed:", err.message);
         alert("Login failed: " + err.message);
