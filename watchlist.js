@@ -337,6 +337,28 @@ export function displayItemsInSelectedWatchlist() {
     }
 }
 
+export async function loadAndDisplayWatchlistsFromFirestore() {
+    if (!watchlistTilesContainer || !watchlistDisplayContainer) {
+        console.error('Watchlist containers not initialized.');
+        return;
+    }
+
+    if (!currentUserId) {
+        watchlistTilesContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-full w-full text-center">Sign in to manage watchlists.</p>';
+        watchlistDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Sign in to manage your watchlists.</p>';
+        return;
+    }
+
+    if (typeof window.loadUserFirestoreWatchlists === 'function') {
+        await window.loadUserFirestoreWatchlists();
+    } else {
+        console.warn('loadUserFirestoreWatchlists function not found on window');
+    }
+
+    displayWatchlistSelection();
+    await displayItemsInSelectedWatchlist();
+}
+
 // --- After any mutation, refresh the cache ---
 export async function addItemToSpecificFirestoreWatchlist(watchlistName, itemData) {
     if (!currentUserId) { showToast("Please sign in to add items.", "error"); return false; }
