@@ -1,7 +1,7 @@
 // js/watchlist.js 
 import { db, firebaseFirestoreFunctions, auth } from './firebase.js';
 import { showToast, showLoading, showMessage, clearAllDynamicContent, createBackButton, positionPopup } from './ui.js';
-import { smallImageBaseUrl, tileThumbnailPlaceholder } from './config.js';
+import { smallImageBaseUrl, tileThumbnailPlaceholder, genericItemPlaceholder } from './config.js';
 import {
     currentUserId, currentSelectedWatchlistName, currentSelectedItemDetails,
     updateCurrentSelectedWatchlistName, selectedCertifications
@@ -27,6 +27,198 @@ const { getDocs, collection, doc, setDoc, deleteDoc, updateDoc, arrayUnion, arra
 // Use the global cache from main.js
 function getCachedWatchlists() {
     return window.firestoreWatchlistsCache || [];
+}
+
+export function determineActiveWatchlistButtonContainerId() {
+    const detailOverlayEl = document.getElementById('detailOverlay');
+    if (detailOverlayEl && !detailOverlayEl.classList.contains('hidden')) {
+        return 'overlayDetailAddToBtnContainer';
+    }
+    return 'itemDetailAddToBtnContainer';
+}
+
+export function createWatchlistItemCard(item) {
+    const card = document.createElement('div');
+    card.className = 'watchlist-item-card cursor-pointer relative';
+    card.dataset.tmdb_id = String(item.tmdb_id);
+    const posterUrl = item.poster_path ? `${smallImageBaseUrl}${item.poster_path}` : genericItemPlaceholder;
+    const ratingHtml = item.vote_average ? `<p class="text-xs text-yellow-400">★ ${item.vote_average.toFixed(1)}</p>` : '';
+    card.innerHTML = `
+        <img src="${posterUrl}" alt="${item.title}" onerror="this.src='${genericItemPlaceholder}'; this.onerror=null;">
+        <h4 class="text-md font-semibold text-sky-300 truncate mt-2" title="${item.title}">${item.title}</h4>
+        <p class="text-xs text-gray-400">${item.release_year || 'N/A'} (${item.item_type === 'tv' ? 'TV Show' : 'Movie'})</p>
+        ${ratingHtml}
+    `;
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-watchlist-btn absolute top-1 right-1 p-1 bg-gray-700 rounded-full';
+    removeBtn.title = 'Remove from watchlist';
+    removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M9 5a1 1 0 011-1h4a1 1 0 011 1v1h5a1 1 0 110 2h-1v11a2 2 0 01-2 2H6a2 2 0 01-2-2V8H3a1 1 0 110-2h5V5zm2 1v1h2V6h-2z" clip-rule="evenodd"/></svg>';
+    removeBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await removeItemFromSpecificFirestoreWatchlist(currentSelectedWatchlistName, item.tmdb_id);
+    });
+    card.appendChild(removeBtn);
+    card.addEventListener('click', () => handleItemSelect(String(item.tmdb_id), item.title, item.item_type, true));
+    appendSeenCheckmark(card, item.tmdb_id);
+    return card;
+}
+
+export async function updateAddToWatchlistButtonState(itemId, itemData, buttonContainerId) {
+    if (!buttonContainerId) {
+        console.warn('[updateAddToWatchlistButtonState] No buttonContainerId provided.');
+        return;
+    }
+    const container = document.getElementById(buttonContainerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+    const watchlistButton = document.createElement('button');
+    watchlistButton.id = buttonContainerId.replace('Container', 'Button');
+    watchlistButton.title = 'Add to Watchlist';
+    watchlistButton.className = 'watchlist-manage-button p-2 rounded-md';
+    watchlistButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M6 4a2 2 0 012-2h8a2 2 0 012 2v16l-7-3-7 3V4z"/></svg>';
+    container.appendChild(watchlistButton);
+
+    if (currentUserId) {
+        if (isItemInAnyFirestoreWatchlist(itemId)) {
+            watchlistButton.classList.add('in-any-watchlist');
+        }
+
+        let managePopup = document.getElementById(buttonContainerId + 'ManagePopup');
+        if (!managePopup) {
+            managePopup = document.createElement('div');
+            managePopup.id = buttonContainerId + 'ManagePopup';
+            managePopup.className = 'hidden detail-panel-popup';
+            container.appendChild(managePopup);
+        }
+
+        const populateManagePopup = async () => {
+            managePopup.innerHTML = '';
+            const lists = getCachedWatchlists();
+            const listEl = document.createElement('div');
+            listEl.id = 'watchlistManagePopupList';
+            listEl.className = 'detail-panel-popup-list max-h-60 overflow-y-auto custom-scrollbar';
+
+            if (lists.length === 0) {
+                listEl.innerHTML = '<p class="text-gray-400 text-sm p-2">No watchlists.</p>';
+            } else {
+                lists.forEach(wl => {
+                    const row = document.createElement('div');
+                    row.className = 'detail-panel-popup-item flex items-center gap-2 border-b border-gray-600';
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.checked = isItemInSpecificFirestoreWatchlist(wl.id, itemId);
+                    const label = document.createElement('label');
+                    label.textContent = wl.id;
+                    row.appendChild(cb);
+                    row.appendChild(label);
+                    listEl.appendChild(row);
+                    cb.addEventListener('change', async () => {
+                        if (cb.checked) await addItemToSpecificFirestoreWatchlist(wl.id, itemData);
+                        else await removeItemFromSpecificFirestoreWatchlist(wl.id, itemId);
+                        await populateManagePopup();
+                        if (isItemInAnyFirestoreWatchlist(itemId)) watchlistButton.classList.add('in-any-watchlist');
+                        else watchlistButton.classList.remove('in-any-watchlist');
+                    });
+                });
+            }
+
+            managePopup.appendChild(listEl);
+
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.placeholder = 'New watchlist name';
+            newInput.className = 'detail-panel-popup-new-input mt-2 w-full p-1 bg-gray-700 text-white rounded';
+            managePopup.appendChild(newInput);
+            const createBtn = document.createElement('button');
+            createBtn.className = 'detail-panel-popup-create-btn mt-1 bg-green-700 text-white px-2 py-1 rounded';
+            createBtn.textContent = 'Create & Add';
+            createBtn.addEventListener('click', async () => {
+                const newName = newInput.value.trim();
+                if (!newName) return;
+                const newRef = doc(db, 'users', currentUserId, 'watchlists', newName);
+                const snap = await getDoc(newRef);
+                if (!snap.exists()) {
+                    await setDoc(newRef, { name: newName, items: [], createdAt: new Date().toISOString(), uid: currentUserId });
+                }
+                await window.loadUserFirestoreWatchlists();
+                await addItemToSpecificFirestoreWatchlist(newName, itemData);
+                newInput.value = '';
+                await populateManagePopup();
+            });
+            managePopup.appendChild(createBtn);
+        };
+
+        watchlistButton.onclick = async (e) => {
+            e.stopPropagation();
+            if (managePopup.classList.contains('hidden')) {
+                await populateManagePopup();
+                managePopup.classList.remove('hidden');
+                watchlistButton.classList.add('active-popup');
+                positionPopup(watchlistButton, managePopup);
+            } else {
+                managePopup.classList.add('hidden');
+                watchlistButton.classList.remove('active-popup');
+            }
+        };
+    } else {
+        watchlistButton.title = 'Sign in to manage watchlists';
+        let authPopup = document.getElementById(buttonContainerId + 'AuthPopup');
+        if (!authPopup) {
+            authPopup = document.createElement('div');
+            authPopup.id = buttonContainerId + 'AuthPopup';
+            authPopup.className = 'hidden detail-panel-popup';
+            container.appendChild(authPopup);
+        }
+        watchlistButton.onclick = (e) => {
+            e.stopPropagation();
+            if (authPopup.classList.contains('hidden')) {
+                authPopup.classList.remove('hidden');
+                window.createAuthFormUI_Global(authPopup, async () => {
+                    authPopup.classList.add('hidden');
+                    await updateAddToWatchlistButtonState(itemId, itemData, buttonContainerId);
+                });
+                positionPopup(watchlistButton, authPopup);
+            } else {
+                authPopup.classList.add('hidden');
+            }
+        };
+    }
+}
+
+export async function handleRenameWatchlist(watchlistName) {
+    if (!currentUserId) { showToast('You must be signed in to rename a watchlist.', 'error'); return; }
+    if (!watchlistName) return;
+
+    const newName = prompt('Enter a new name for the watchlist:', watchlistName);
+    if (!newName) return;
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === watchlistName) return;
+
+    try {
+        const oldRef = doc(db, 'users', currentUserId, 'watchlists', watchlistName);
+        const oldSnap = await getDoc(oldRef);
+        if (!oldSnap.exists()) { showToast('Watchlist not found.', 'error'); return; }
+        const data = oldSnap.data();
+        const newRef = doc(db, 'users', currentUserId, 'watchlists', trimmed);
+        const newSnap = await getDoc(newRef);
+        if (newSnap.exists()) { showToast('A watchlist with that name already exists.', 'error'); return; }
+        await setDoc(newRef, { ...data, name: trimmed });
+        await deleteDoc(oldRef);
+        await window.loadUserFirestoreWatchlists();
+
+        if (currentSelectedWatchlistName === watchlistName) {
+            updateCurrentSelectedWatchlistName(trimmed);
+            localStorage.setItem(`mediaFinderLastSelectedWatchlist_${currentUserId}`, trimmed);
+            await displayItemsInSelectedWatchlist();
+        }
+
+        await loadAndDisplayWatchlistsFromFirestore();
+        showToast(`Watchlist renamed to "${trimmed}".`, 'success');
+    } catch (err) {
+        console.error('Error renaming watchlist:', err);
+        showToast('Failed to rename watchlist.', 'error');
+    }
 }
 
 // --- Replace Firestore queries with cache where possible ---
