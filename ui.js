@@ -1,4 +1,4 @@
-// js/ui.js
+// js/ui.js 
 import {
     imageBaseUrl, smallImageBaseUrl, stillImageBaseUrl,
     tileThumbnailPlaceholder, genericItemPlaceholder, vidsrcProviders

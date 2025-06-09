@@ -1,4 +1,4 @@
-export function extractCertification(detailsObject) {
+export function extractCertification(detailsObject) { 
     let certification = 'NR';
     if (!detailsObject) return certification;
     const itemType = detailsObject.item_type || detailsObject.media_type || 'movie';

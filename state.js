@@ -1,4 +1,4 @@
-// js/state.js
+// js/state.js 
 export let currentSelectedItemDetails = null;
 export let currentSelectedWatchlistName = null;
 export let currentUserId = null;

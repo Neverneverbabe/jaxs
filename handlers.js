@@ -1,4 +1,4 @@
-// js/handlers.js
+// js/handlers.js 
 import { fetchItemDetails, fetchSearchResults } from './api.js';
 import {
     clearItemDetailPanel, // Use new specific function

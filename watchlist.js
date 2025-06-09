@@ -1,4 +1,4 @@
-// js/watchlist.js
+// js/watchlist.js 
 import { db, firebaseFirestoreFunctions, auth } from './firebase.js';
 import { showToast, showLoading, showMessage, clearAllDynamicContent, createBackButton, positionPopup } from './ui.js';
 import { smallImageBaseUrl, tileThumbnailPlaceholder } from './config.js';

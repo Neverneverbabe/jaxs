@@ -1,4 +1,4 @@
-// js/seenList.js
+// js/seenList.js 
 import { db, firebaseFirestoreFunctions } from './firebase.js';
 import { showToast, showLoading, showMessage, positionPopup } from './ui.js'; // createAuthFormUI is in auth.js
 import { genericItemPlaceholder, smallImageBaseUrl } from './config.js';

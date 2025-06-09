@@ -1,4 +1,4 @@
-// js/config.js
+// js/config.js 
 export const imageBaseUrl = "https://image.tmdb.org/t/p/w300";
 export const smallImageBaseUrl = "https://image.tmdb.org/t/p/w200";
 export const stillImageBaseUrl = "https://image.tmdb.org/t/p/w300";
