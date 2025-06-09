@@ -1,7 +1,7 @@
 // main.js 
 import { auth, firebaseAuthFunctions, db, firebaseFirestoreFunctions } from "../firebase.js";
 import { fetchTrendingItems, fetchItemDetails, fetchSearchResults, fetchDiscoveredItems } from './api.js';
-import { displayContentRow, displayItemDetails, updateThemeDependentElements, updateHeroSection, displaySearchResults, populateFilterDropdown, createContentCardHtml, createFolderCardHtml, appendItemsToGrid, getCertification, checkRatingCompatibility, showSignInModal } from './ui.js';
+import { displayContentRow, displayItemDetails, updateThemeDependentElements, updateHeroSection, displaySearchResults, populateFilterDropdown, createContentCardHtml, appendItemsToGrid, getCertification, checkRatingCompatibility, showSignInModal } from './ui.js';
 
 // Global variables to store fetched data for re-filtering without new API calls
 let cachedTrendingMovies = [];
@@ -996,12 +996,12 @@ async function renderLibraryTabWatchlists() {
     watchlists.forEach(watchlist => {
         const card = document.createElement('div');
         card.className = 'content-card folder-card';
-        card.dataset.folderName = watchlist.id;
         card.style.position = 'relative';
         card.style.display = 'inline-block';
         card.style.marginRight = '1rem';
         card.style.marginBottom = '1rem';
         card.style.width = '10rem';
+        card.dataset.folderName = watchlist.id;
 
         // Thumbnail
         let thumb = '';
