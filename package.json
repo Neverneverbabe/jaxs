@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "office-addin-debugging start manifest.xml",
+    "start": "webpack serve --mode development",
     "build": "webpack --mode production",
-    "dev-server": "webpack serve --mode development",
     "test": "jest"
   },
   "keywords": [],
@@ -15,9 +14,7 @@
   "type": "module",
   "devDependencies": {
     "jest": "^29.7.0",
-    "office-addin-debugging": "^4.3.0",
-    "office-addin-manifest": "^1.8.2",
-    "office-addin-taskpane": "^0.8.6",
+    "jest-environment-jsdom": "^30.0.0-beta.3",
     "webpack": "^5.90.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.0"
