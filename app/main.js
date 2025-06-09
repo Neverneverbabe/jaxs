@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateThemeDependentElements(isLightMode); // Apply initial theme styling
 
     // --- Firebase Auth State Change Listener ---
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged(async (user) => { // Add async here
         if (user) {
             // User is signed in
             console.log("Auth state changed: User signed in - UID:", user.uid);
