@@ -744,10 +744,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         watchlists.forEach(watchlist => {
             // Folder card with delete button
-            const cardDiv = document.createElement('div');
-            cardDiv.innerHTML = createFolderCardHtml(watchlist.id, false, isLightMode);
-            const card = cardDiv.firstElementChild;
+            const card = document.createElement('div');
+            card.className = 'content-card folder-card';
+            card.style.position = 'relative';
+            card.style.display = 'inline-block';
+            card.style.marginRight = '1rem';
+            card.style.marginBottom = '1rem';
+            card.style.width = '10rem';
             card.dataset.folderName = watchlist.id;
+
+            // Thumbnail
+            let thumb = '';
+            if (watchlist.items && watchlist.items.length > 0 && watchlist.items[0].poster_path) {
+                thumb = `<img src="https://image.tmdb.org/t/p/w200${watchlist.items[0].poster_path}" style="width:100%;border-radius:0.5rem;">`;
+            } else {
+                thumb = `<img src="https://placehold.co/150x225/374151/9CA3AF?text=N/A" style="width:100%;border-radius:0.5rem;">`;
+            }
+            card.innerHTML = `
+                ${thumb}
+                <p style="text-align:center;margin-top:0.5rem;font-size:0.9em;">${watchlist.id}</p>
+            `;
 
             // Add delete button
             const deleteBtn = document.createElement('button');
@@ -923,217 +939,4 @@ window.firestoreWatchlistsCache = firestoreWatchlistsCache;
 window.loadUserFirestoreWatchlists = loadUserFirestoreWatchlists;
 window.renderLibraryFolderCards = renderLibraryFolderCards;
 
-// --- Library Tab: Render Watchlists from Firestore ---
-async function renderLibraryTabWatchlists() {
-    const libraryFoldersRow = document.getElementById('library-folders-row');
-    const selectedFolderTitleElement = document.getElementById('selected-folder-title');
-    const librarySelectedFolderMoviesRow = document.getElementById('library-selected-folder-movies-row');
-
-    // Clear previous content
-    if (libraryFoldersRow) libraryFoldersRow.innerHTML = '';
-    if (selectedFolderTitleElement) selectedFolderTitleElement.textContent = '';
-    if (librarySelectedFolderMoviesRow) librarySelectedFolderMoviesRow.innerHTML = '';
-
-    // Check auth
-    if (!window.currentUserId) {
-        if (libraryFoldersRow) libraryFoldersRow.innerHTML = `<p style="color:#888;text-align:center;width:100%;">Sign in to see your watchlists.</p>`;
-        return;
-    }
-
-    // Load cache if needed
-    if (!window.firestoreWatchlistsCache || !Array.isArray(window.firestoreWatchlistsCache)) {
-        await window.loadUserFirestoreWatchlists?.();
-    }
-    const watchlists = window.firestoreWatchlistsCache || [];
-
-    // Add create watchlist UI
-    const createContainer = document.createElement('div');
-    createContainer.style.display = 'flex';
-    createContainer.style.alignItems = 'center';
-    createContainer.style.gap = '0.5rem';
-    createContainer.style.marginRight = '1.5rem';
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.placeholder = 'New Watchlist Name';
-    input.style.padding = '0.5em 1em';
-    input.style.borderRadius = '8px';
-    input.style.border = '1px solid #ccc';
-    input.style.fontSize = '1em';
-    input.style.background = 'var(--card-bg)';
-    input.style.color = 'var(--text-primary)';
-    input.id = 'library-create-watchlist-input';
-
-    const btn = document.createElement('button');
-    btn.textContent = 'Create';
-    btn.style.padding = '0.5em 1.2em';
-    btn.style.borderRadius = '8px';
-    btn.style.border = 'none';
-    btn.style.background = 'var(--science-blue)';
-    btn.style.color = 'white';
-    btn.style.fontWeight = 'bold';
-    btn.style.cursor = 'pointer';
-    btn.id = 'library-create-watchlist-btn';
-
-    createContainer.appendChild(input);
-    createContainer.appendChild(btn);
-    if (libraryFoldersRow) libraryFoldersRow.appendChild(createContainer);
-
-    btn.onclick = async () => {
-        const name = input.value.trim();
-        if (!name) return;
-        await window.handleCreateWatchlistFromLibrary?.(name);
-        input.value = '';
-        await renderLibraryTabWatchlists();
-    };
-
-    if (watchlists.length === 0) {
-        if (libraryFoldersRow) libraryFoldersRow.innerHTML += `<p style="color:#888;text-align:center;width:100%;">No watchlists created yet.</p>`;
-        return;
-    }
-
-    // Render each watchlist as a folder card
-    watchlists.forEach(watchlist => {
-        const card = document.createElement('div');
-        card.className = 'content-card folder-card';
-        card.style.position = 'relative';
-        card.style.display = 'inline-block';
-        card.style.marginRight = '1rem';
-        card.style.marginBottom = '1rem';
-        card.style.width = '10rem';
-        card.dataset.folderName = watchlist.id;
-
-        // Thumbnail
-        let thumb = '';
-        if (watchlist.items && watchlist.items.length > 0 && watchlist.items[0].poster_path) {
-            thumb = `<img src="https://image.tmdb.org/t/p/w200${watchlist.items[0].poster_path}" style="width:100%;border-radius:0.5rem;">`;
-        } else {
-            thumb = `<img src="https://placehold.co/150x225/374151/9CA3AF?text=N/A" style="width:100%;border-radius:0.5rem;">`;
-        }
-        card.innerHTML = `
-            ${thumb}
-            <p style="text-align:center;margin-top:0.5rem;font-size:0.9em;">${watchlist.id}</p>
-        `;
-
-        card.onclick = () => {
-            renderLibraryTabWatchlistItems(watchlist.id);
-            // Highlight selected
-            document.querySelectorAll('.folder-card').forEach(c => c.classList.remove('selected-watchlist-tile'));
-            card.classList.add('selected-watchlist-tile');
-        };
-
-        if (libraryFoldersRow) libraryFoldersRow.appendChild(card);
-    });
-}
-
-// Show items in selected watchlist
-function renderLibraryTabWatchlistItems(folderName) {
-    const selectedFolderTitleElement = document.getElementById('selected-folder-title');
-    const librarySelectedFolderMoviesRow = document.getElementById('library-selected-folder-movies-row');
-    if (!selectedFolderTitleElement || !librarySelectedFolderMoviesRow) return;
-
-    selectedFolderTitleElement.textContent = `Items in "${folderName}"`;
-    librarySelectedFolderMoviesRow.innerHTML = '';
-
-    const watchlist = (window.firestoreWatchlistsCache || []).find(wl => wl.id === folderName);
-    const items = watchlist ? (watchlist.items || []) : [];
-
-    if (items.length === 0) {
-        librarySelectedFolderMoviesRow.innerHTML = `<p style="color:#888;text-align:center;width:100%;">This watchlist is empty.</p>`;
-        return;
-    }
-
-    items.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'content-card';
-        card.style.display = 'inline-block';
-        card.style.marginRight = '1rem';
-        card.style.marginBottom = '1rem';
-        card.style.width = '10rem';
-
-        const poster = item.poster_path
-            ? `https://image.tmdb.org/t/p/w200${item.poster_path}`
-            : 'https://placehold.co/150x225/374151/9CA3AF?text=N/A';
-
-        card.innerHTML = `
-            <img src="${poster}" style="width:100%;border-radius:0.5rem;">
-            <p style="text-align:center;margin-top:0.5rem;font-size:0.9em;">${item.title || item.name}</p>
-            <p style="text-align:center;font-size:0.8em;color:#aaa;">${item.release_year || ''}</p>
-        `;
-
-        card.onclick = () => {
-            // Show item details modal (reuse your modal logic)
-            window.updateSeenButtonState = undefined; // Let modal logic handle seen state
-            window.toggleSeenStatus = undefined;
-            import('./ui.js').then(ui => {
-                ui.displayItemDetails(item, item.item_type || 'movie', document.body.classList.contains('light-mode'));
-            });
-        };
-
-        librarySelectedFolderMoviesRow.appendChild(card);
-    });
-}
-
-// --- Hook into tab switching ---
-const libraryTab = document.getElementById('library-tab');
-if (libraryTab) {
-    // Add Library tab content containers if not present
-    if (!document.getElementById('library-folders-row')) {
-        const foldersRow = document.createElement('div');
-        foldersRow.id = 'library-folders-row';
-        foldersRow.className = 'content-row';
-        libraryTab.appendChild(foldersRow);
-    }
-    if (!document.getElementById('selected-folder-title')) {
-        const title = document.createElement('h3');
-        title.id = 'selected-folder-title';
-        title.className = 'section-title';
-        libraryTab.appendChild(title);
-    }
-    if (!document.getElementById('library-selected-folder-movies-row')) {
-        const moviesRow = document.createElement('div');
-        moviesRow.id = 'library-selected-folder-movies-row';
-        moviesRow.className = 'content-row';
-        libraryTab.appendChild(moviesRow);
-    }
-
-    // When Library tab is activated, render watchlists
-    const navLink = document.querySelector('nav a[data-tab="library-tab"]');
-    if (navLink) {
-        navLink.addEventListener('click', () => {
-            setTimeout(renderLibraryTabWatchlists, 100); // Wait for tab to activate
-        });
-    }
-    // Also render on page load if Library tab is active
-    if (libraryTab.classList.contains('active-tab')) {
-        renderLibraryTabWatchlists();
-    }
-}
-
-// --- Ensure Library tab shows watchlists when activated ---
-document.addEventListener('DOMContentLoaded', () => {
-    const libraryTabBtn = document.querySelector('nav a[data-tab="library-tab"]');
-    if (libraryTabBtn) {
-        libraryTabBtn.addEventListener('click', () => {
-            setTimeout(() => {
-                if (typeof renderLibraryFolderCards === 'function') renderLibraryFolderCards();
-            }, 100);
-        });
-    }
-    // Also render if Library tab is already active on load
-    const libraryTab = document.getElementById('library-tab');
-    if (libraryTab && libraryTab.classList.contains('active-tab')) {
-        if (typeof renderLibraryFolderCards === 'function') renderLibraryFolderCards();
-    }
-});
-
-// Attach sign-in modal to the sign-in button
-document.addEventListener('DOMContentLoaded', () => {
-    const signInButton = document.getElementById('sign-in-button');
-    if (signInButton) {
-        signInButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            showSignInModal();
-        });
-    }
-});
+// --- CLEANUP: Remove duplicate renderLibraryFolderCards definition and keep only one ---
