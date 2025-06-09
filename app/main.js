@@ -1,5 +1,5 @@
 // main.js
-import { auth, firebaseAuthFunctions } from "../firebase.js";
+import { auth, firebaseAuthFunctions, db, firestoreFunctions } from "../firebase.js";
 import { fetchTrendingItems, fetchItemDetails, fetchSearchResults, fetchDiscoveredItems } from './api.js';
 import { displayContentRow, displayItemDetails, updateThemeDependentElements, updateHeroSection, displaySearchResults, populateFilterDropdown, createContentCardHtml, createFolderCardHtml, appendItemsToGrid, getCertification, checkRatingCompatibility } from './ui.js';
 
@@ -8,6 +8,7 @@ let cachedTrendingMovies = [];
 let cachedRecommendedShows = [];
 let cachedNewReleaseMovies = [];
 let cachedSearchResults = []; // Moved from dataset to global for easier access
+let localUserSeenItemsCache = []; // Cache for seen items for the current user
 
 // Global variable for current filter state
 let currentAgeRatingFilter = []; // Default to no filter (empty array means 'All Ratings')
@@ -77,6 +78,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             // If other parts of the UI need to refresh based on auth state, trigger that here.
             // For example: populateCurrentTabContent();
+            await loadUserSeenItems(); // Load seen items from Firestore
+            populateCurrentTabContent(); // Refresh UI with potentially new data
         } else {
             // User is signed out
             console.log("Auth state changed: User signed out");
@@ -85,6 +88,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 userIconElement.classList.add('fa-user'); // Icon indicating signed-out state
                 userIconElement.title = 'Sign In';
             }
+            localUserSeenItemsCache = []; // Clear local cache on sign out
+            populateCurrentTabContent(); // Refresh UI to reflect signed-out state
         }
     });
 
@@ -588,42 +593,85 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateCurrentTabContent(); // Initial population of the active tab
 
     // --- Seen Items Logic ---
-    function getSeenItems() {
-        return JSON.parse(localStorage.getItem('seenItems') || '[]');
+
+    async function loadUserSeenItems() {
+        const user = auth.currentUser;
+        if (user) {
+            try {
+                const seenItemsRef = firestoreFunctions.collection(db, "users", user.uid, "seenItems");
+                const querySnapshot = await firestoreFunctions.getDocs(seenItemsRef);
+                localUserSeenItemsCache = querySnapshot.docs.map(doc => ({ id: parseInt(doc.id), ...doc.data() }));
+                console.log("User seen items loaded from Firestore:", localUserSeenItemsCache);
+            } catch (error) {
+                console.error("Error loading seen items from Firestore:", error);
+                localUserSeenItemsCache = []; // Fallback to empty if error
+            }
+        } else {
+            localUserSeenItemsCache = []; // No user, no seen items from DB
+        }
+    }
+
+    function getSeenItems() { // Now uses the local cache populated from Firestore
+        return localUserSeenItemsCache;
     }
 
-    function saveSeenItems(items) {
-        localStorage.setItem('seenItems', JSON.stringify(items));
-    }
-
-    function isItemSeen(itemId, itemType, itemObjectForContext) { // itemObjectForContext is optional, for debugging or future use
+    function isItemSeen(itemId, itemType) {
         const seenItems = getSeenItems();
         const found = seenItems.some(item => item.id === itemId && item.type === itemType);
         return found;
     }
 
-    function toggleSeenStatus(itemDetails, itemType) {
-        let seenItems = getSeenItems();
-        const itemId = itemDetails.id;
-        const existingItemIndex = seenItems.findIndex(item => item.id === itemId && item.type === itemType);
+    async function toggleSeenStatus(itemDetails, itemType) {
+        const user = auth.currentUser;
+        if (!user) {
+            alert("Please sign in to mark items as seen.");
+            return;
+        }
 
-        if (existingItemIndex > -1) { // Item is already seen, so remove it
-            seenItems.splice(existingItemIndex, 1);
-        } else { // Item is not seen, so add it
-            seenItems.push({
-                id: itemId,
-                type: itemType,
-                title: itemDetails.title || itemDetails.name,
-                poster_path: itemDetails.poster_path // Store full path or just the fragment
-            });
+        const itemId = itemDetails.id;
+        const itemDocRef = firestoreFunctions.doc(db, "users", user.uid, "seenItems", String(itemId));
+
+        try {
+            const docSnap = await firestoreFunctions.getDoc(itemDocRef);
+            if (docSnap.exists()) { // Item is already seen, so remove it
+                await firestoreFunctions.deleteDoc(itemDocRef);
+                localUserSeenItemsCache = localUserSeenItemsCache.filter(item => !(item.id === itemId && item.type === itemType));
+                console.log(`Item ${itemId} removed from seen (Firestore).`);
+            } else { // Item is not seen, so add it
+                const seenItemData = {
+                    // id: itemId, // ID is the document ID
+                    type: itemType,
+                    title: itemDetails.title || itemDetails.name,
+                    poster_path: itemDetails.poster_path,
+                    addedAt: new Date() // Optional: timestamp
+                };
+                await firestoreFunctions.setDoc(itemDocRef, seenItemData);
+                // Add to local cache after successful DB operation
+                localUserSeenItemsCache.push({ id: itemId, ...seenItemData });
+                console.log(`Item ${itemId} added to seen (Firestore).`);
+            }
+        } catch (error) {
+            console.error("Error toggling seen status in Firestore:", error);
+            alert("Error updating seen status. Please try again.");
+            return; // Prevent UI update if DB operation failed
         }
-        saveSeenItems(seenItems);
+
         updateSeenButtonState(itemId, itemType); // Update button in modal if open
         
         // If the "Seen" tab is currently active, refresh its content
         if (document.getElementById('seen-tab').classList.contains('active-tab')) {
             populateCurrentTabContent();
         }
+
+        // Also, refresh any card on the page that represents this item
+        document.querySelectorAll(`.content-card[data-id="${itemId}"][data-type="${itemType}"]`).forEach(card => {
+            const seenIcon = card.querySelector('.seen-toggle-icon');
+            if (seenIcon) {
+                const newSeenStatus = isItemSeen(itemId, itemType);
+                seenIcon.classList.toggle('item-is-seen', newSeenStatus);
+                seenIcon.title = newSeenStatus ? 'Mark as Unseen' : 'Mark as Seen';
+            }
+        });
     }
     
     function updateSeenButtonState(itemId, itemType) {

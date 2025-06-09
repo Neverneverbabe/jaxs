@@ -15,4 +15,4 @@ export const VIDSRC_PROVIDERS = [
     { name: "Vidsrc.in",  movieUrl: "https://vidsrc.in/embed/movie/",  tvUrl: "https://vidsrc.in/embed/tv/" },
     { name: "Vidsrc.net", movieUrl: "https://vidsrc.net/embed/movie/", tvUrl: "https://vidsrc.net/embed/tv/" },
 ];
-
+ 
