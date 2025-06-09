@@ -1,5 +1,5 @@
 // js/main.js 
-import { auth, firebaseAuthFunctions, loadFirebaseIfNeeded } from './firebase.js';
+import { auth, db, firebaseAuthFunctions, firebaseFirestoreFunctions, loadFirebaseIfNeeded } from './firebase.js';
 import { initApiRefs, fetchTmdbCategoryContent } from './api.js';
 import { initUiRefs, clearAllDynamicContent, showPositionSavedIndicator, positionPopup, createBackButton, clearItemDetailPanel, clearSearchResultsPanel } from './ui.js'; // Added clearItemDetailPanel, clearSearchResultsPanel
 import { initAuthRefs, handleAuthStateChanged, createAuthFormUI } from './auth.js';
@@ -17,6 +17,41 @@ import {
 } from './state.js';
 
 window.createAuthFormUI_Global = createAuthFormUI;
+
+// Global cache for user watchlists
+let firestoreWatchlistsCache = [];
+window.firestoreWatchlistsCache = firestoreWatchlistsCache;
+
+// Load watchlists for the current user and cache them
+async function loadUserFirestoreWatchlists() {
+    firestoreWatchlistsCache = [];
+    window.firestoreWatchlistsCache = firestoreWatchlistsCache;
+    const user = auth.currentUser;
+    if (!user) return;
+    try {
+        const { getDocs, collection } = firebaseFirestoreFunctions;
+        const watchlistsColRef = collection(db, 'users', user.uid, 'watchlists');
+        const querySnapshot = await getDocs(watchlistsColRef);
+        firestoreWatchlistsCache = querySnapshot.docs.map(docSnap => {
+            const data = docSnap.data();
+            const items = Array.isArray(data.items) ? data.items : (Array.isArray(data.movies) ? data.movies : []);
+            return {
+                id: docSnap.id,
+                ...data,
+                items
+            };
+        });
+        window.firestoreWatchlistsCache = firestoreWatchlistsCache;
+        console.log('[WATCHLIST] Firestore watchlists loaded:', firestoreWatchlistsCache);
+    } catch (error) {
+        console.error('Error loading Firestore watchlists:', error);
+        firestoreWatchlistsCache = [];
+        window.firestoreWatchlistsCache = firestoreWatchlistsCache;
+    }
+}
+
+// Expose globally for other modules
+window.loadUserFirestoreWatchlists = loadUserFirestoreWatchlists;
 
 // DOM Element Variables
 let searchInput, searchButton, resultsContainer,
