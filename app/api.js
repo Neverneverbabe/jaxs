@@ -1,4 +1,4 @@
-// api.js 
+// api.js  
 import { API_KEY, TMDB_BASE_URL } from './config.js';
 
 /**

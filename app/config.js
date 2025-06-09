@@ -1,4 +1,4 @@
-// config.js
+// config.js 
 
 // TMDB API Key
 // IMPORTANT: This key is sensitive and should ideally be loaded from environment variables

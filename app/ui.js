@@ -643,64 +643,55 @@ export function appendItemsToGrid(gridContainerElement, items, isLightMode, onCa
         window.attachSeenToggleListenersToCards(gridContainerElement);
     }
 }
-/**
- * Populates the filter dropdown with age rating options.
- * @param {HTMLElement} optionsContainerElement - The HTML element for the container where option items will be placed.
- * @param {string[]} temporarySelectionsArray - Array of currently (temporarily) selected rating values.
- */
-export function populateFilterDropdown(optionsContainerElement, temporarySelectionsArray) {
-    const ratings = [
-        { value: '', label: 'All Ratings' },
-        { value: 'G', label: 'G' },
-        { value: 'PG', label: 'PG' },
-        { value: 'PG-13', label: 'PG-13' },
-        { value: 'R', label: 'R' },
-        { value: 'NC-17', label: 'NC-17' }
-    ];
-
-    optionsContainerElement.innerHTML = ratings.map(rating => `
-        <div class="dropdown-item filter-option-item ${temporarySelectionsArray.includes(rating.value) ? 'item-selected' : ''}" data-rating="${rating.value}">
-            ${rating.label}
-            ${temporarySelectionsArray.includes(rating.value) ? '<span class="checkmark">✔</span>' : ''}
-        </div>
-    `).join('');
-}
-
-// Note: getSelectedFilterRating is no longer needed from ui.js as the selection
-// will be handled directly in main.js from the data-rating attribute.
 
 /**
- * Creates the HTML string for a folder card in the Library tab.
- * @param {string} folderName - The name of the folder.
- * @param {boolean} isAddButton - True if this card is the "Add New Folder" button.
- * @param {boolean} isLightMode - True if light mode is active.
- * @returns {string} - The HTML string for the folder card.
+ * Shows the sign-in/sign-up modal.
  */
-export function createFolderCardHtml(folderName, isAddButton = false, isLightMode = false) {
-    const title = isAddButton ? 'Add Folder' : folderName;
-    let cardImageContent;
-
-    if (isAddButton) {
-        cardImageContent = `
-            <div class="image-container" style="background-color: var(--card-bg); display: flex; align-items: center; justify-content: center; aspect-ratio: 2/3; height: 100%;">
-                <i class="fas fa-plus" style="font-size: 2.5rem; color: var(--text-secondary);"></i>
+export function showSignInModal() {
+    const modal = document.getElementById('sign-in-modal');
+    const content = modal.querySelector('.item-detail-modal-content');
+    content.innerHTML = `
+        <h2>Sign In or Sign Up</h2>
+        <form id="auth-form">
+            <input type="email" id="auth-email" placeholder="Email" required style="width:100%;margin-bottom:1em;">
+            <input type="password" id="auth-password" placeholder="Password" required style="width:100%;margin-bottom:1em;">
+            <div style="display:flex;gap:1em;">
+                <button type="submit" id="sign-in-btn" style="flex:1;">Sign In</button>
+                <button type="button" id="sign-up-btn" style="flex:1;">Sign Up</button>
             </div>
-        `;
-    } else {
-        // Using a simple text placeholder for folder icon, can be replaced with an actual icon/image
-        const folderPlaceholderUrl = `https://placehold.co/200x300/${isLightMode ? 'E0E0E0' : '4A4A4A'}/${isLightMode ? '6C6C6C' : 'C2C2C2'}?text=${encodeURIComponent(folderName.substring(0, 2).toUpperCase())}&font=inter`;
-        cardImageContent = `
-            <div class="image-container" style="background-color: var(--card-bg); display: flex; align-items: center; justify-content: center; aspect-ratio: 2/3; height: 100%;">
-                 <img src="${folderPlaceholderUrl}" alt="${folderName}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
-            </div>
-        `;
-    }
-
-    return `
-        <div class="content-card folder-card" ${isAddButton ? 'id="add-new-library-folder-card"' : `data-folder-name="${folderName}"`} style="position: relative;">
-            ${!isAddButton ? `<button class="delete-library-folder-btn" data-folder-name="${folderName}" title="Delete Folder" style="position:absolute; top:5px; right:5px; background:rgba(0,0,0,0.4); color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; z-index:10; display:flex; align-items:center; justify-content:center;">&times;</button>` : ''}
-            ${cardImageContent}
-            <p style="text-align: center; margin-top: 0.5rem; font-size: 0.8rem;">${title}</p>
-        </div>
+        </form>
+        <div id="auth-error" style="color:red;margin-top:1em;"></div>
     `;
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    const authForm = content.querySelector('#auth-form');
+    const signInBtn = content.querySelector('#sign-in-btn');
+    const signUpBtn = content.querySelector('#sign-up-btn');
+    const errorDiv = content.querySelector('#auth-error');
+
+    signInBtn.onclick = async (e) => {
+        e.preventDefault();
+        const email = content.querySelector('#auth-email').value;
+        const password = content.querySelector('#auth-password').value;
+        try {
+            await window.firebaseAuth.signIn(email, password);
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        } catch (err) {
+            errorDiv.textContent = err.message;
+        }
+    };
+    signUpBtn.onclick = async (e) => {
+        e.preventDefault();
+        const email = content.querySelector('#auth-email').value;
+        const password = content.querySelector('#auth-password').value;
+        try {
+            await window.firebaseAuth.signUp(email, password);
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        } catch (err) {
+            errorDiv.textContent = err.message;
+        }
+    };
 }

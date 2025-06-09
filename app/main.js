@@ -1,7 +1,7 @@
 // main.js 
 import { auth, firebaseAuthFunctions, db, firebaseFirestoreFunctions } from "../firebase.js";
 import { fetchTrendingItems, fetchItemDetails, fetchSearchResults, fetchDiscoveredItems } from './api.js';
-import { displayContentRow, displayItemDetails, updateThemeDependentElements, updateHeroSection, displaySearchResults, populateFilterDropdown, createContentCardHtml, createFolderCardHtml, appendItemsToGrid, getCertification, checkRatingCompatibility } from './ui.js';
+import { displayContentRow, displayItemDetails, updateThemeDependentElements, updateHeroSection, displaySearchResults, populateFilterDropdown, createContentCardHtml, createFolderCardHtml, appendItemsToGrid, getCertification, checkRatingCompatibility, showSignInModal } from './ui.js';
 
 // Global variables to store fetched data for re-filtering without new API calls
 let cachedTrendingMovies = [];
@@ -1110,6 +1110,30 @@ if (libraryTab) {
     }
 }
 
-// Expose for debugging
-window.renderLibraryTabWatchlists = renderLibraryTabWatchlists;
-window.renderLibraryTabWatchlistItems = renderLibraryTabWatchlistItems;
+// --- Ensure Library tab shows watchlists when activated ---
+document.addEventListener('DOMContentLoaded', () => {
+    const libraryTabBtn = document.querySelector('nav a[data-tab="library-tab"]');
+    if (libraryTabBtn) {
+        libraryTabBtn.addEventListener('click', () => {
+            setTimeout(() => {
+                if (typeof renderLibraryFolderCards === 'function') renderLibraryFolderCards();
+            }, 100);
+        });
+    }
+    // Also render if Library tab is already active on load
+    const libraryTab = document.getElementById('library-tab');
+    if (libraryTab && libraryTab.classList.contains('active-tab')) {
+        if (typeof renderLibraryFolderCards === 'function') renderLibraryFolderCards();
+    }
+});
+
+// Attach sign-in modal to the sign-in button
+document.addEventListener('DOMContentLoaded', () => {
+    const signInButton = document.getElementById('sign-in-button');
+    if (signInButton) {
+        signInButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSignInModal();
+        });
+    }
+});
