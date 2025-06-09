@@ -828,13 +828,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         // Re-apply selection highlight if a folder is selected
-        if (currentSelectedLibraryFolder) {
-            const selectedCard = libraryFoldersRow.querySelector(`.folder-card[data-folder-name="${currentSelectedLibraryFolder}"]`);
-            if (selectedCard) {
-                selectedCard.style.border = `2px solid var(--science-blue)`;
-            }
-        }
+        if (currentSelectedLibraryFolder) {
+            const selectedCard = libraryFoldersRow.querySelector(`.folder-card[data-folder-name="${currentSelectedLibraryFolder}"]`);
+            if (selectedCard) {
+                selectedCard.style.border = `2px solid var(--science-blue)`;
+            }
+        }
 }
+// Expose globally for other modules (watchlist.js, etc.)
+window.renderLibraryFolderCards = renderLibraryFolderCards;
 
 async function renderMoviesInSelectedFolder(folderName) {
     if (!selectedFolderTitleElement || !librarySelectedFolderMoviesRow) return;
@@ -942,7 +944,7 @@ async function renderMoviesInSelectedFolder(folderName) {
         }
     });
 
-    async function loadUserFirestoreWatchlists() {
+    async function loadUserFirestoreWatchlists() {
         firestoreWatchlistsCache = [];
         window.firestoreWatchlistsCache = firestoreWatchlistsCache;
         const user = auth.currentUser;
@@ -969,8 +971,9 @@ async function renderMoviesInSelectedFolder(folderName) {
             window.firestoreWatchlistsCache = firestoreWatchlistsCache;
         }
     }
+
+    // Expose globally for other modules before they import
+    window.loadUserFirestoreWatchlists = loadUserFirestoreWatchlists;
 });
-window.loadUserFirestoreWatchlists = loadUserFirestoreWatchlists;
-window.renderLibraryFolderCards = renderLibraryFolderCards;
 
 // --- CLEANUP: Remove duplicate renderLibraryFolderCards definition and keep only one ---
