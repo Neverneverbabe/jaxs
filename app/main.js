@@ -941,12 +941,12 @@ async function renderMoviesInSelectedFolder(folderName) {
         }
     });
 
-    async function loadUserFirestoreWatchlists() {
+    async function loadUserFirestoreWatchlists() {
         firestoreWatchlistsCache = [];
         window.firestoreWatchlistsCache = firestoreWatchlistsCache;
         const user = auth.currentUser;
         if (!user) return;
-        try {
+        try {
             const { getDocs, collection } = firebaseFirestoreFunctions;
             const watchlistsColRef = collection(db, "users", user.uid, "watchlists");
             const querySnapshot = await getDocs(watchlistsColRef);
@@ -968,9 +968,11 @@ async function renderMoviesInSelectedFolder(folderName) {
             window.firestoreWatchlistsCache = firestoreWatchlistsCache;
         }
     }
+
+    // Expose helpers globally after they are defined
+    window.firestoreWatchlistsCache = firestoreWatchlistsCache;
+    window.loadUserFirestoreWatchlists = loadUserFirestoreWatchlists;
+    window.renderLibraryFolderCards = renderLibraryFolderCards;
 });
-window.firestoreWatchlistsCache = firestoreWatchlistsCache;
-window.loadUserFirestoreWatchlists = loadUserFirestoreWatchlists;
-window.renderLibraryFolderCards = renderLibraryFolderCards;
 
 // --- CLEANUP: Remove duplicate renderLibraryFolderCards definition and keep only one ---
