@@ -240,20 +240,17 @@ export function displayWatchlistSelection() {
             }
 
             tile.addEventListener('click', async (e) => {
-                if (e.target.closest('.watchlist-tile-options-btn') || e.target.closest('.options-menu')) {
-                    return;
-                }
+                if (e.target.closest('.watchlist-tile-options-btn') || e.target.closest('.options-menu')) return;
                 closeAllOptionMenus();
-                if (watchlistTilesContainer) { // Check if container exists
+                if (watchlistTilesContainer) {
                     watchlistTilesContainer.querySelectorAll('.watchlist-tile').forEach(t => t.classList.remove('selected-watchlist-tile'));
                 }
                 tile.classList.add('selected-watchlist-tile');
                 updateCurrentSelectedWatchlistName(name);
-                if (currentUserId) localStorage.setItem(`mediaFinderLastSelectedWatchlist_${currentUserId}`, name);
-                await displayItemsInSelectedWatchlist();
+                if (currentUserId)
+                    await displayItemsInSelectedWatchlist();
                 if (currentSelectedItemDetails) {
-                    const activeBtnContainerId = determineActiveWatchlistButtonContainerId();
-                    updateAddToWatchlistButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeBtnContainerId);
+                    // Optionally update detail panel if needed
                 }
                 clearAllDynamicContent('watchlist');
             });

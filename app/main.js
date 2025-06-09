@@ -948,10 +948,16 @@ async function renderMoviesInSelectedFolder(folderName) {
             const { getDocs, collection } = firebaseFirestoreFunctions;
             const watchlistsColRef = collection(db, "users", user.uid, "watchlists");
             const querySnapshot = await getDocs(watchlistsColRef);
-            firestoreWatchlistsCache = querySnapshot.docs.map(docSnap => ({
-                id: docSnap.id,
-                ...docSnap.data()
-            }));
+            firestoreWatchlistsCache = querySnapshot.docs.map(docSnap => {
+                const data = docSnap.data();
+                // Support both 'items' and 'movies' fields for compatibility
+                const items = Array.isArray(data.items) ? data.items : (Array.isArray(data.movies) ? data.movies : []);
+                return {
+                    id: docSnap.id,
+                    ...data,
+                    items // always use 'items' in the app
+                };
+            });
             console.log("[WATCHLIST] Firestore watchlists loaded:", firestoreWatchlistsCache);
         } catch (error) {
             console.error("Error loading Firestore watchlists:", error);
