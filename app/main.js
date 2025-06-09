@@ -312,22 +312,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Function to populate content for the currently active tab
     async function populateCurrentTabContent() {
-        console.log("%c[DEBUG] populateCurrentTabContent called", "background: #222; color: #bada55");
-        const activeTabElement = document.querySelector('.tab-content.active-tab');
-        if (!activeTabElement) {
-            console.error("%c[CRITICAL_ERROR] No active tab element found in populateCurrentTabContent. Page will be blank.", "color: red; font-weight: bold;");
-            return; 
-        }
+        console.log("%c[DEBUG] populateCurrentTabContent called", "background: #222; color: #bada55");
+        const activeTabElement = document.querySelector('.tab-content.active-tab');
+        if (!activeTabElement) {
+            console.error("%c[CRITICAL_ERROR] No active tab element found in populateCurrentTabContent. Page will be blank.", "color: red; font-weight: bold;");
+            return; 
+        }
 
-        const activeTabId = activeTabElement.id;
-        // onCardClick is now defined at a higher scope
-        // Expose function to global scope for ui.js to call
-        window.updateSeenButtonState = updateSeenButtonState; 
-        // Expose toggleSeenStatus to be callable from the button in ui.js
-        window.toggleSeenStatus = toggleSeenStatus;
+        const activeTabId = activeTabElement.id;
+        // onCardClick is now defined at a higher scope
+        // Expose function to global scope for ui.js to call
+        window.updateSeenButtonState = updateSeenButtonState; 
+        // Expose toggleSeenStatus to be callable from the button in ui.js
+        window.toggleSeenStatus = toggleSeenStatus;
 
-        // Helper to attach seen toggle listeners to cards
-        const attachSeenToggleListenersToCards = (containerElement) => {
+        // Helper to attach seen toggle listeners to cards
+        const attachSeenToggleListenersToCards = (containerElement) => {
             containerElement.querySelectorAll('.seen-toggle-icon').forEach(icon => {
                 // Remove existing listener to prevent duplicates if re-rendering
                 const newIcon = icon.cloneNode(true);
@@ -441,21 +441,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                     break;
 
-                case 'explore-tab':
-                    // Initial load for explore tab
-                    document.getElementById('explore-grid-container').innerHTML = ''; // Clear previous
-                    exploreCurrentPage = 1;
-                    exploreHasMore = true;
-                    await loadMoreExploreItems();
-                    break;
                 case 'library-tab':
-                    // Remove old controls if they were part of a previous structure
-                    const oldControls = document.getElementById('library-folders-controls');
-                    if (oldControls) oldControls.remove();
-                    const oldList = document.getElementById('library-folders-list');
-                    if (oldList) oldList.remove();
-                    renderLibraryFolderCards();
-                    renderMoviesInSelectedFolder(currentSelectedLibraryFolder);
+                    await renderLibraryFolderCards();
+                    await renderMoviesInSelectedFolder(currentSelectedLibraryFolder);
                     break;
 
                 case 'seen-tab':
@@ -932,3 +920,4 @@ async function renderMoviesInSelectedFolder(folderName) {
 });
 window.firestoreWatchlistsCache = firestoreWatchlistsCache;
 window.loadUserFirestoreWatchlists = loadUserFirestoreWatchlists;
+window.renderLibraryFolderCards = renderLibraryFolderCards;

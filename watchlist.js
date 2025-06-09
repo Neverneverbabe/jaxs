@@ -416,4 +416,56 @@ export async function handleCreateWatchlist() {
 export function toggleOptionsMenu(tileElement, watchlistName) {
     closeAllOptionMenus(tileElement);
     let menu = tileElement.querySelector('.options-menu');
-    if
+    if (!menu) {
+        menu = document.createElement('div');
+        menu.className = 'options-menu';
+        menu.innerHTML = `
+            <div class="option-item" data-action="rename">Rename</div>
+            <div class="option-item" data-action="delete">Delete</div>
+        `;
+        tileElement.appendChild(menu);
+
+        menu.addEventListener('click', async (e) => {
+            const action = e.target.dataset.action;
+            if (action === 'rename') {
+                await handleRenameWatchlist(watchlistName);
+            } else if (action === 'delete') {
+                const confirmed = confirm(`Are you sure you want to delete the watchlist "${watchlistName}"?`);
+                if (confirmed) {
+                    await handleDeleteWatchlist(watchlistName);
+                }
+            }
+        });
+    }
+    menu.classList.toggle('visible');
+}
+
+export function closeAllOptionMenus(exceptTile) {
+    document.querySelectorAll('.watchlist-tile').forEach(tile => {
+        if (tile !== exceptTile) {
+            const menu = tile.querySelector('.options-menu');
+            if (menu) menu.classList.remove('visible');
+        }
+    });
+}
+
+// Expose for Library tab
+window.handleCreateWatchlistFromLibrary = async function(name) {
+    if (!window.currentUserId) {
+        alert("You must be signed in to create a watchlist.");
+        return;
+    }
+    const { doc, getDoc, setDoc } = firebaseFirestoreFunctions;
+    const watchlistRef = doc(db, "users", window.currentUserId, "watchlists", name);
+    const docSnap = await getDoc(watchlistRef);
+    if (docSnap.exists()) {
+        alert(`Watchlist "${name}" already exists.`);
+        return;
+    }
+    await setDoc(watchlistRef, { name, items: [], createdAt: new Date().toISOString(), uid: window.currentUserId });
+    await window.loadUserFirestoreWatchlists();
+    if (window.renderLibraryFolderCards) await window.renderLibraryFolderCards();
+    alert(`Watchlist "${name}" created.`);
+};
+
+window.handleDeleteWatchlist = handleDeleteWatchlist;
