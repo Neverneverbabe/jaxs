@@ -1,5 +1,5 @@
 // main.js
-import { auth, firebaseAuthFunctions, db, firestoreFunctions } from "../firebase.js";
+import { auth, firebaseAuthFunctions, db, firebaseFirestoreFunctions as firestoreFunctions } from "../firebase.js";
 import { fetchTrendingItems, fetchItemDetails, fetchSearchResults, fetchDiscoveredItems } from './api.js';
 import { displayContentRow, displayItemDetails, updateThemeDependentElements, updateHeroSection, displaySearchResults, populateFilterDropdown, createContentCardHtml, createFolderCardHtml, appendItemsToGrid, getCertification, checkRatingCompatibility } from './ui.js';
 
