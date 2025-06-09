@@ -1,5 +1,5 @@
 // main.js
-import { auth, firebaseAuthFunctions, db, firebaseFirestoreFunctions as firestoreFunctions } from "../firebase.js";
+import { auth, firebaseAuthFunctions, db, firebaseFirestoreFunctions } from "../firebase.js";
 import { fetchTrendingItems, fetchItemDetails, fetchSearchResults, fetchDiscoveredItems } from './api.js';
 import { displayContentRow, displayItemDetails, updateThemeDependentElements, updateHeroSection, displaySearchResults, populateFilterDropdown, createContentCardHtml, createFolderCardHtml, appendItemsToGrid, getCertification, checkRatingCompatibility } from './ui.js';
 
@@ -9,6 +9,7 @@ let cachedRecommendedShows = [];
 let cachedNewReleaseMovies = [];
 let cachedSearchResults = []; // Moved from dataset to global for easier access
 let localUserSeenItemsCache = []; // Cache for seen items for the current user
+let firestoreWatchlistsCache = []; // Global cache for Firestore watchlists
 
 // Global variable for current filter state
 let currentAgeRatingFilter = []; // Default to no filter (empty array means 'All Ratings')
@@ -66,6 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (user) {
             // User is signed in
             console.log("Auth state changed: User signed in - UID:", user.uid);
+            window.currentUserId = user.uid;
             if (userIconElement) {
                 userIconElement.classList.remove('fa-user'); // Assuming default is 'fa-user' or 'fa-user-slash'
                 userIconElement.classList.remove('fa-user-slash');
@@ -79,16 +81,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             // If other parts of the UI need to refresh based on auth state, trigger that here.
             // For example: populateCurrentTabContent();
             await loadUserSeenItems(); // Load seen items from Firestore
+            await loadUserFirestoreWatchlists(); // <-- Add this
             populateCurrentTabContent(); // Refresh UI with potentially new data
         } else {
             // User is signed out
             console.log("Auth state changed: User signed out");
+            window.currentUserId = null;
             if (userIconElement) {
                 userIconElement.classList.remove('fa-user-check');
                 userIconElement.classList.add('fa-user'); // Icon indicating signed-out state
                 userIconElement.title = 'Sign In';
             }
             localUserSeenItemsCache = []; // Clear local cache on sign out
+            firestoreWatchlistsCache = []; // <-- Add this
             populateCurrentTabContent(); // Refresh UI to reflect signed-out state
         }
     });
@@ -302,8 +307,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-            } // This closing brace was originally here.
-        }; // This closing brace was originally here and was the culprit.
+            } // This closes `if (signInForm)`
+        } // This closes `if (signInButton && signInModal)`
 
     // Function to populate content for the currently active tab
     async function populateCurrentTabContent() {
@@ -598,8 +603,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const user = auth.currentUser;
         if (user) {
             try {
-                const seenItemsRef = firestoreFunctions.collection(db, "users", user.uid, "seenItems");
-                const querySnapshot = await firestoreFunctions.getDocs(seenItemsRef);
+                const seenItemsRef = firebaseFirestoreFunctions.collection(db, "users", user.uid, "seenItems");
+                const querySnapshot = await firebaseFirestoreFunctions.getDocs(seenItemsRef);
                 localUserSeenItemsCache = querySnapshot.docs.map(doc => ({ id: parseInt(doc.id), ...doc.data() }));
                 console.log("User seen items loaded from Firestore:", localUserSeenItemsCache);
             } catch (error) {
@@ -629,12 +634,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const itemId = itemDetails.id;
-        const itemDocRef = firestoreFunctions.doc(db, "users", user.uid, "seenItems", String(itemId));
+        const itemDocRef = firebaseFirestoreFunctions.doc(db, "users", user.uid, "seenItems", String(itemId));
 
         try {
-            const docSnap = await firestoreFunctions.getDoc(itemDocRef);
+            const docSnap = await firebaseFirestoreFunctions.getDoc(itemDocRef);
             if (docSnap.exists()) { // Item is already seen, so remove it
-                await firestoreFunctions.deleteDoc(itemDocRef);
+                await firebaseFirestoreFunctions.deleteDoc(itemDocRef);
                 localUserSeenItemsCache = localUserSeenItemsCache.filter(item => !(item.id === itemId && item.type === itemType));
                 console.log(`Item ${itemId} removed from seen (Firestore).`);
             } else { // Item is not seen, so add it
@@ -645,7 +650,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     poster_path: itemDetails.poster_path,
                     addedAt: new Date() // Optional: timestamp
                 };
-                await firestoreFunctions.setDoc(itemDocRef, seenItemData);
+                await firebaseFirestoreFunctions.setDoc(itemDocRef, seenItemData);
                 // Add to local cache after successful DB operation
                 localUserSeenItemsCache.push({ id: itemId, ...seenItemData });
                 console.log(`Item ${itemId} added to seen (Firestore).`);
@@ -687,165 +692,162 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // --- Library Tab Helper Functions ---
-    function getLibrary() {
-        return JSON.parse(localStorage.getItem('libraryFolders') || '{}');
-    }
-    function saveLibrary(lib) {
-        localStorage.setItem('libraryFolders', JSON.stringify(lib));
-        // After saving, if the current tab is library, refresh its view.
-        if (document.getElementById('library-tab').classList.contains('active-tab')) {
-            renderLibraryFolderCards(); // Re-render folder cards (e.g., if one was deleted/added)
-            renderMoviesInSelectedFolder(currentSelectedLibraryFolder); // Re-render movies if current folder changed
-        }
-    }
+    // --- Library Tab Helper Functions (Firestore Watchlists version) ---
 
     async function renderLibraryFolderCards() {
         if (!libraryFoldersRow) return;
-        const lib = getLibrary();
-        const folderNames = Object.keys(lib);
+        const watchlists = window.firestoreWatchlistsCache || [];
         libraryFoldersRow.innerHTML = ''; // Clear previous
 
-        if (folderNames.length === 0) {
-            // The "Add New Folder" card will serve as the indicator
-            // libraryFoldersRow.innerHTML = `<p style="color:var(--text-secondary); padding: 1rem;">No folders yet. Click '+' to create one.</p>`;
+        // --- Add Create Watchlist UI ---
+        const createContainer = document.createElement('div');
+        createContainer.style.display = 'flex';
+        createContainer.style.alignItems = 'center';
+        createContainer.style.gap = '0.5rem';
+        createContainer.style.marginRight = '1.5rem';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'New Watchlist Name';
+        input.style.padding = '0.5em 1em';
+        input.style.borderRadius = '8px';
+        input.style.border = '1px solid #ccc';
+        input.style.fontSize = '1em';
+        input.style.background = 'var(--card-bg)';
+        input.style.color = 'var(--text-primary)';
+        input.id = 'library-create-watchlist-input';
+
+        const btn = document.createElement('button');
+        btn.textContent = 'Create';
+        btn.style.padding = '0.5em 1.2em';
+        btn.style.borderRadius = '8px';
+        btn.style.border = 'none';
+        btn.style.background = 'var(--science-blue)';
+        btn.style.color = 'white';
+        btn.style.fontWeight = 'bold';
+        btn.style.cursor = 'pointer';
+        btn.id = 'library-create-watchlist-btn';
+
+        createContainer.appendChild(input);
+        createContainer.appendChild(btn);
+        libraryFoldersRow.appendChild(createContainer);
+
+        // --- Handle Create Watchlist ---
+        btn.onclick = async () => {
+            const name = input.value.trim();
+            if (!name) {
+                alert("Please enter a name for the new watchlist.");
+                return;
+            }
+            btn.disabled = true;
+            try {
+                await window.handleCreateWatchlistFromLibrary(name);
+                input.value = '';
+            } finally {
+                btn.disabled = false;
+            }
+        };
+
+        if (watchlists.length === 0) {
+            libraryFoldersRow.innerHTML += `<p style="color:var(--text-secondary); padding: 1rem;">No watchlists yet. Create one above.</p>`;
+            return;
         }
 
-        folderNames.forEach(name => {
-            libraryFoldersRow.innerHTML += createFolderCardHtml(name, false, isLightMode);
-        });
-        libraryFoldersRow.innerHTML += createFolderCardHtml('', true, isLightMode); // Add "Add New Folder" card
+        watchlists.forEach(watchlist => {
+            // Folder card with delete button
+            const cardDiv = document.createElement('div');
+            cardDiv.innerHTML = createFolderCardHtml(watchlist.id, false, isLightMode);
+            const card = cardDiv.firstElementChild;
+            card.dataset.folderName = watchlist.id;
 
-        // Add event listeners
-        libraryFoldersRow.querySelectorAll('.folder-card').forEach(card => {
-            if (card.id === 'add-new-library-folder-card') {
-                card.addEventListener('click', () => {
-                    const newFolderName = prompt("Enter new folder name:");
-                    if (newFolderName && newFolderName.trim() !== "") {
-                        const trimmedName = newFolderName.trim();
-                        const currentLib = getLibrary();
-                        if (!currentLib[trimmedName]) {
-                            currentLib[trimmedName] = [];
-                            saveLibrary(currentLib); // This will trigger re-render
-                        } else {
-                            alert("Folder already exists!");
-                        }
-                    }
-                });
-            } else {
-                const folderName = card.dataset.folderName;
-                card.addEventListener('click', (e) => {
-                    // Prevent selection if delete button was clicked
-                    if (e.target.classList.contains('delete-library-folder-btn')) return;
-
-                    currentSelectedLibraryFolder = folderName;
-                    renderMoviesInSelectedFolder(folderName);
-                    libraryFoldersRow.querySelectorAll('.folder-card').forEach(fc => fc.style.border = '2px solid transparent');
-                    card.style.border = `2px solid var(--science-blue)`;
-                });
-
-                const deleteBtn = card.querySelector('.delete-library-folder-btn');
-                if (deleteBtn) {
-                    deleteBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        if (confirm(`Are you sure you want to delete the folder "${folderName}"?`)) {
-                            const currentLib = getLibrary();
-                            delete currentLib[folderName];
-                            saveLibrary(currentLib); // This will trigger re-render
-                            if (currentSelectedLibraryFolder === folderName) {
-                                currentSelectedLibraryFolder = null;
-                                renderMoviesInSelectedFolder(null); // Clear movie display
-                            }
-                        }
-                    });
+            // Add delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '🗑';
+            deleteBtn.title = 'Delete Watchlist';
+            deleteBtn.style.position = 'absolute';
+            deleteBtn.style.top = '5px';
+            deleteBtn.style.right = '5px';
+            deleteBtn.style.background = 'rgba(0,0,0,0.4)';
+            deleteBtn.style.color = 'white';
+            deleteBtn.style.border = 'none';
+            deleteBtn.style.borderRadius = '50%';
+            deleteBtn.style.width = '24px';
+            deleteBtn.style.height = '24px';
+            deleteBtn.style.fontSize = '14px';
+            deleteBtn.style.cursor = 'pointer';
+            deleteBtn.onclick = async (e) => {
+                e.stopPropagation();
+                if (confirm(`Delete watchlist "${watchlist.id}"?`)) {
+                    await window.handleDeleteWatchlist(watchlist.id);
+                    renderLibraryFolderCards();
+                    renderMoviesInSelectedFolder(null);
                 }
-            }
+            };
+            card.appendChild(deleteBtn);
+
+            card.addEventListener('click', (e) => {
+                if (e.target === deleteBtn) return;
+                currentSelectedLibraryFolder = watchlist.id;
+                renderMoviesInSelectedFolder(watchlist.id);
+                libraryFoldersRow.querySelectorAll('.folder-card').forEach(fc => fc.style.border = '2px solid transparent');
+                card.style.border = `2px solid var(--science-blue)`;
+            });
+
+            libraryFoldersRow.appendChild(card);
         });
-         // Re-apply selection highlight if a folder is selected
+
+        // Re-apply selection highlight if a folder is selected
         if (currentSelectedLibraryFolder) {
             const selectedCard = libraryFoldersRow.querySelector(`.folder-card[data-folder-name="${currentSelectedLibraryFolder}"]`);
             if (selectedCard) {
                 selectedCard.style.border = `2px solid var(--science-blue)`;
             }
         }
+}
+
+async function renderMoviesInSelectedFolder(folderName) {
+    if (!selectedFolderTitleElement || !librarySelectedFolderMoviesRow) return;
+
+    const onLibraryMovieCardClick = async (id, type) => {
+        try {
+            const details = await fetchItemDetails(id, type);
+            displayItemDetails(details, type, isLightMode);
+        } catch (error) {
+            console.error("Error fetching library item details for modal:", error);
+            alert(`Error loading details: ${error.message}`);
+        }
+    };
+
+    if (!folderName) {
+        selectedFolderTitleElement.textContent = 'Movies in Watchlist';
+        librarySelectedFolderMoviesRow.innerHTML = `<p style="color:var(--text-secondary); padding: 1rem;">Select a watchlist above to see its contents.</p>`;
+        return;
     }
 
-    async function renderMoviesInSelectedFolder(folderName) {
-        if (!selectedFolderTitleElement || !librarySelectedFolderMoviesRow) return;
+    selectedFolderTitleElement.textContent = `Items in "${folderName}"`;
+    const watchlist = (window.firestoreWatchlistsCache || []).find(wl => wl.id === folderName);
+    const items = watchlist ? (watchlist.items || []) : [];
 
-        const onLibraryMovieCardClick = async (id, type) => {
-            try {
-                const details = await fetchItemDetails(id, type);
-                displayItemDetails(details, type, isLightMode);
-            } catch (error) {
-                console.error("Error fetching library item details for modal:", error);
-                alert(`Error loading details: ${error.message}`);
-            }
-        };
+    if (items.length === 0) {
+        librarySelectedFolderMoviesRow.innerHTML = `<p style="color:var(--text-secondary); padding: 1rem;">This watchlist is empty.</p>`;
+    } else {
+        librarySelectedFolderMoviesRow.innerHTML = ''; // Clear previous movies
+        items.forEach(item => {
+            // Ensure item has 'media_type' for createContentCardHtml
+            const displayItem = { ...item, media_type: item.item_type };
+            const cardHtmlString = createContentCardHtml(displayItem, isLightMode, isItemSeen(item.tmdb_id, item.item_type));
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = cardHtmlString;
+            const movieCardElement = tempDiv.firstElementChild;
 
-        if (!folderName) {
-            selectedFolderTitleElement.textContent = 'Movies in Folder';
-            librarySelectedFolderMoviesRow.innerHTML = `<p style="color:var(--text-secondary); padding: 1rem;">Select a folder above to see its contents.</p>`;
-            return;
-        }
-
-        selectedFolderTitleElement.textContent = `Movies in "${folderName}"`;
-        const lib = getLibrary();
-        const moviesInFolder = lib[folderName] || [];
-
-        if (moviesInFolder.length === 0) {
-            librarySelectedFolderMoviesRow.innerHTML = `<p style="color:var(--text-secondary); padding: 1rem;">This folder is empty.</p>`;
-        } else {
-            librarySelectedFolderMoviesRow.innerHTML = ''; // Clear previous movies
-            moviesInFolder.forEach(item => {
-                // Ensure item has 'type' for onLibraryMovieCardClick and 'media_type' for createContentCardHtml
-                const displayItem = { ...item, media_type: item.type };
-                const cardHtmlString = createContentCardHtml(displayItem, isLightMode, isItemSeen(item.id, item.type));
-                
-                const tempDiv = document.createElement('div'); // Create a temporary div to parse the card HTML
-                tempDiv.innerHTML = cardHtmlString;
-                const movieCardElement = tempDiv.firstElementChild;
-
-                // Add click listener to the movie card itself
-                movieCardElement.addEventListener('click', () => onLibraryMovieCardClick(item.id, item.type));
-
-                // Add delete button to this movie card
-                const deleteMovieBtn = document.createElement('button');
-                deleteMovieBtn.innerHTML = '&times;';
-                deleteMovieBtn.className = 'delete-library-movie-btn';
-                deleteMovieBtn.dataset.movieId = item.id;
-                deleteMovieBtn.dataset.folderName = folderName;
-                deleteMovieBtn.style.cssText = `
-                    position:absolute; top:5px; right:5px; background:rgba(255,0,0,0.6);
-                    color:white; border:none; border-radius:50%; width:22px; height:22px;
-                    font-size:14px; cursor:pointer; z-index:10; line-height:20px; text-align:center;
-                    display: flex; align-items: center; justify-content: center;
-                `;
-                deleteMovieBtn.title = "Remove from folder";
-                // Append to image-container which should exist in cardHtmlString
-                const imageContainer = movieCardElement.querySelector('.image-container');
-                if (imageContainer) {
-                    imageContainer.style.position = 'relative'; // Ensure image container can position absolute children
-                    imageContainer.appendChild(deleteMovieBtn);
-                }
-
-                deleteMovieBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (confirm(`Remove "${item.title}" from folder "${folderName}"?`)) {
-                        const currentLib = getLibrary();
-                        if (currentLib[folderName]) {
-                            currentLib[folderName] = currentLib[folderName].filter(m => m.id !== item.id);
-                            saveLibrary(currentLib); // This will trigger re-render of movies
-                        }
-                    }
-                });
-                librarySelectedFolderMoviesRow.appendChild(movieCardElement);
-            });
-            attachSeenToggleListenersToCards(librarySelectedFolderMoviesRow);
-        }
+            movieCardElement.addEventListener('click', () => onLibraryMovieCardClick(item.tmdb_id, item.item_type));
+            librarySelectedFolderMoviesRow.appendChild(movieCardElement);
+        });
+        attachSeenToggleListenersToCards(librarySelectedFolderMoviesRow);
     }
+}
 
-    // --- Explore Tab Infinite Scroll ---
+// --- Explore Tab Infinite Scroll ---
     async function loadMoreExploreItems() {
         if (exploreIsLoading || !exploreHasMore) return;
 
@@ -909,4 +911,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    async function loadUserFirestoreWatchlists() {
+        firestoreWatchlistsCache = [];
+        const user = auth.currentUser;
+        if (!user) return;
+        try {
+            const { getDocs, collection } = firebaseFirestoreFunctions;
+            const watchlistsColRef = collection(db, "users", user.uid, "watchlists");
+            const querySnapshot = await getDocs(watchlistsColRef);
+            firestoreWatchlistsCache = querySnapshot.docs.map(docSnap => ({
+                id: docSnap.id,
+                ...docSnap.data()
+            }));
+            console.log("[WATCHLIST] Firestore watchlists loaded:", firestoreWatchlistsCache);
+        } catch (error) {
+            console.error("Error loading Firestore watchlists:", error);
+            firestoreWatchlistsCache = [];
+        }
+    }
 });
+window.firestoreWatchlistsCache = firestoreWatchlistsCache;
+window.loadUserFirestoreWatchlists = loadUserFirestoreWatchlists;
