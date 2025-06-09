@@ -1,7 +1,7 @@
 // main.js 
 import { auth, firebaseAuthFunctions, db, firebaseFirestoreFunctions } from "../firebase.js";
 import { fetchTrendingItems, fetchItemDetails, fetchSearchResults, fetchDiscoveredItems } from './api.js';
-import { displayContentRow, displayItemDetails, updateThemeDependentElements, updateHeroSection, displaySearchResults, populateFilterDropdown, createContentCardHtml, appendItemsToGrid, getCertification, checkRatingCompatibility, showSignInModal } from './ui.js';
+import { displayContentRow, displayItemDetails, updateThemeDependentElements, updateHeroSection, displaySearchResults, createContentCardHtml, appendItemsToGrid, getCertification, checkRatingCompatibility, showSignInModal } from './ui.js';
 
 // Global variables to store fetched data for re-filtering without new API calls
 let cachedTrendingMovies = [];
@@ -189,7 +189,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Initialize tempSelectedFilters with current applied filters
                 // If currentAgeRatingFilter is empty (All), temp should reflect "All Ratings" selected
                 tempSelectedFilters = currentAgeRatingFilter.length === 0 ? [""] : [...currentAgeRatingFilter];
-                populateFilterDropdown(filterOptionsItemsContainer, tempSelectedFilters);
+                // FIX: Replace populateFilterDropdown with a fallback
+                // Since populateFilterDropdown is not exported from ui.js, replace its usage with a simple fallback inline for now:
+                // Example replacement for the filter dropdown rendering:
+                function simplePopulateFilterDropdown(container, selectedFilters) {
+                    // This is a placeholder. You can style and expand as needed.
+                    container.innerHTML = `
+                        <div class="filter-option-item" data-rating="">All Ratings</div>
+                        <div class="filter-option-item" data-rating="PG">PG</div>
+                        <div class="filter-option-item" data-rating="PG-13">PG-13</div>
+                        <div class="filter-option-item" data-rating="R">R</div>
+                        <div class="filter-option-item" data-rating="NC-17">NC-17</div>
+                    `;
+                    // Highlight selected
+                    container.querySelectorAll('.filter-option-item').forEach(item => {
+                        if (selectedFilters.includes(item.dataset.rating)) {
+                            item.classList.add('selected');
+                        } else {
+                            item.classList.remove('selected');
+                        }
+                    });
+                }
+                // Then, wherever you had populateFilterDropdown(...), replace with:
+                simplePopulateFilterDropdown(filterOptionsItemsContainer, tempSelectedFilters);
                 filterOptionsList.style.display = 'block';
             } else {
                 filterOptionsList.style.display = 'none';
@@ -223,7 +245,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     tempSelectedFilters = [""];
                 }
             }
-            populateFilterDropdown(filterOptionsItemsContainer, tempSelectedFilters); // Re-render options
+            // FIX: Replace populateFilterDropdown with a fallback
+            simplePopulateFilterDropdown(filterOptionsItemsContainer, tempSelectedFilters); // Re-render options
         });
 
         filterApplyBtn.addEventListener('click', () => {
@@ -241,7 +264,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         filterClearBtn.addEventListener('click', () => {
             event.stopPropagation(); // Prevent click from bubbling to document
             tempSelectedFilters = [""]; // Set temporary selection to "All Ratings"
-            populateFilterDropdown(filterOptionsItemsContainer, tempSelectedFilters);
+            // FIX: Replace populateFilterDropdown with a fallback
+            simplePopulateFilterDropdown(filterOptionsItemsContainer, tempSelectedFilters);
         });
 
         // Hide dropdown when clicking outside
