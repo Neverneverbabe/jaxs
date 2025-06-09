@@ -3,9 +3,10 @@ import { fetchItemDetails, fetchSearchResults } from './api.js';
 import {
     clearItemDetailPanel, // Use new specific function
     clearSearchResultsPanel, // Use new specific function
-    showLoading, 
-    createBackButton, 
-    showPositionSavedIndicator
+    showLoading,
+    createBackButton,
+    showPositionSavedIndicator,
+    showToast
 } from './ui.js';
 import {
     previousStateForBackButton, updatePreviousStateForBackButton,
