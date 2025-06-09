@@ -93,7 +93,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 userIconElement.title = 'Sign In';
             }
             localUserSeenItemsCache = []; // Clear local cache on sign out
-            firestoreWatchlistsCache = []; // <-- Add this
+            firestoreWatchlistsCache = [];
+            window.firestoreWatchlistsCache = firestoreWatchlistsCache;
             populateCurrentTabContent(); // Refresh UI to reflect signed-out state
         }
     });
@@ -941,29 +942,32 @@ async function renderMoviesInSelectedFolder(folderName) {
     });
 
     async function loadUserFirestoreWatchlists() {
-        firestoreWatchlistsCache = [];
-        const user = auth.currentUser;
-        if (!user) return;
+        firestoreWatchlistsCache = [];
+        window.firestoreWatchlistsCache = firestoreWatchlistsCache;
+        const user = auth.currentUser;
+        if (!user) return;
         try {
             const { getDocs, collection } = firebaseFirestoreFunctions;
             const watchlistsColRef = collection(db, "users", user.uid, "watchlists");
             const querySnapshot = await getDocs(watchlistsColRef);
-            firestoreWatchlistsCache = querySnapshot.docs.map(docSnap => {
-                const data = docSnap.data();
-                // Support both 'items' and 'movies' fields for compatibility
-                const items = Array.isArray(data.items) ? data.items : (Array.isArray(data.movies) ? data.movies : []);
-                return {
-                    id: docSnap.id,
-                    ...data,
-                    items // always use 'items' in the app
-                };
-            });
-            console.log("[WATCHLIST] Firestore watchlists loaded:", firestoreWatchlistsCache);
-        } catch (error) {
-            console.error("Error loading Firestore watchlists:", error);
-            firestoreWatchlistsCache = [];
-        }
-    }
+            firestoreWatchlistsCache = querySnapshot.docs.map(docSnap => {
+                const data = docSnap.data();
+                // Support both 'items' and 'movies' fields for compatibility
+                const items = Array.isArray(data.items) ? data.items : (Array.isArray(data.movies) ? data.movies : []);
+                return {
+                    id: docSnap.id,
+                    ...data,
+                    items // always use 'items' in the app
+                };
+            });
+            window.firestoreWatchlistsCache = firestoreWatchlistsCache;
+            console.log("[WATCHLIST] Firestore watchlists loaded:", firestoreWatchlistsCache);
+        } catch (error) {
+            console.error("Error loading Firestore watchlists:", error);
+            firestoreWatchlistsCache = [];
+            window.firestoreWatchlistsCache = firestoreWatchlistsCache;
+        }
+    }
 });
 window.firestoreWatchlistsCache = firestoreWatchlistsCache;
 window.loadUserFirestoreWatchlists = loadUserFirestoreWatchlists;
