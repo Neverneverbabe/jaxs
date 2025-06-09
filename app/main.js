@@ -10,6 +10,7 @@ let cachedNewReleaseMovies = [];
 let cachedSearchResults = []; // Moved from dataset to global for easier access
 let localUserSeenItemsCache = []; // Cache for seen items for the current user
 let firestoreWatchlistsCache = []; // Global cache for Firestore watchlists
+window.firestoreWatchlistsCache = firestoreWatchlistsCache;
 
 // Global variable for current filter state
 let currentAgeRatingFilter = []; // Default to no filter (empty array means 'All Ratings')
@@ -969,11 +970,4 @@ async function loadUserFirestoreWatchlists() {
         firestoreWatchlistsCache = [];
         window.firestoreWatchlistsCache = firestoreWatchlistsCache;
     }
-}
 
-// Expose helpers globally
-window.firestoreWatchlistsCache = firestoreWatchlistsCache;
-window.loadUserFirestoreWatchlists = loadUserFirestoreWatchlists;
-window.renderLibraryFolderCards = renderLibraryFolderCards;
-
-// --- CLEANUP: Remove duplicate renderLibraryFolderCards definition and keep only one ---
