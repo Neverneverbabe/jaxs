@@ -75,6 +75,9 @@ Create a production build with webpack:
 npm run build
 ```
 
+The build uses `html-webpack-plugin` to process `index.html` and output it to
+`dist/` with the compiled `bundle.js` automatically injected.
+
 The bundled files will be placed in the `dist/` directory. Serve them with any
 static file server, for example:
 
