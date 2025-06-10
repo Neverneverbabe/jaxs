@@ -1,6 +1,5 @@
 // App/api.js
 import { API_KEY, TMDB_BASE_URL } from './config.js';
-import { getCurrentUser, saveUserData, getUserDataItem, getUserCollection, listenToUserCollection, deleteUserData, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from '../SignIn/firebase_api.js'; // Updated path
 
 /**
  * Fetch trending movies or TV shows.
@@ -64,17 +63,3 @@ export async function fetchDiscoveredItems(mediaType, certificationFilters = [],
     const data = await response.json();
     return data.results || [];
 }
-
-// Re-export Firebase functions from SignIn/firebase_api.js for convenience
-export {
-    createUserWithEmailAndPassword as signUp,
-    signInWithEmailAndPassword as signIn,
-    signOut as signOutUser,
-    onAuthStateChanged as onAuthChange,
-    getCurrentUser,
-    saveUserData,
-    getUserDataItem,
-    getUserCollection,
-    listenToUserCollection,
-    deleteUserData
-};

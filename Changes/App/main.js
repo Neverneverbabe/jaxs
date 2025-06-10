@@ -1,5 +1,6 @@
 // App/main.js
-import { fetchTrendingItems, fetchItemDetails, fetchSearchResults, fetchDiscoveredItems, signUp, signIn, signOutUser, onAuthChange, getCurrentUser, saveUserData, getUserCollection, listenToUserCollection, deleteUserData } from './api.js'; // Firebase functions are now re-exported from ./api.js
+import { fetchTrendingItems, fetchItemDetails, fetchSearchResults, fetchDiscoveredItems } from './api.js';
+import { signUp, signIn, signOutUser, onAuthChange, getCurrentUser, saveUserData, getUserCollection, listenToUserCollection, deleteUserData } from '../SignIn/firebase_api.js'; // Corrected import path for Firebase functions
 import { displayContentRow, displayItemDetails, updateThemeDependentElements, updateHeroSection, displaySearchResults, createContentCardHtml, appendItemsToGrid, getCertification, checkRatingCompatibility, showCustomAlert, hideCustomAlert, showLoadingIndicator, hideLoadingIndicator, updateSeenButtonStateInModal, renderWatchlistOptionsInModal } from './ui.js';
 
 // Global variables to store fetched data for re-filtering without new API calls
@@ -371,7 +372,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             event.stopPropagation();
             const isOpen = filterOptionsList.style.display === 'block';
             if (!isOpen) {
-                tempSelectedFilters = selectedCertifications.length === 0 ? [""] : [...selectedCertifications];
+                tempSelectedFilters = currentAgeRatingFilter.length === 0 ? [""] : [...currentAgeRatingFilter];
                 renderFilterDropdownOptions(filterOptionsItemsContainer, tempSelectedFilters);
                 filterOptionsList.style.display = 'block';
                 positionPopup(filterButton, filterOptionsList);
@@ -410,12 +411,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         filterApplyBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             if (tempSelectedFilters.includes("") || tempSelectedFilters.length === 0) {
-                updateSelectedCertifications([]);
+                currentAgeRatingFilter = [];
             } else {
-                updateSelectedCertifications([...tempSelectedFilters]);
+                currentAgeRatingFilter = [...tempSelectedFilters];
             }
             filterOptionsList.style.display = 'none';
-            filterButton.classList.toggle('filter-active', selectedCertifications.length > 0);
+            filterButton.classList.toggle('filter-active', currentAgeRatingFilter.length > 0);
             populateCurrentTabContent();
         });
 
@@ -433,7 +434,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (filterButton) {
-        filterButton.classList.toggle('filter-active', selectedCertifications.length > 0);
+        filterButton.classList.toggle('filter-active', currentAgeRatingFilter.length > 0);
     }
 
     // Explore Tab Infinite Scroll
@@ -448,7 +449,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (loadingIndicator) loadingIndicator.style.display = 'block';
 
         try {
-            const items = await fetchDiscoveredItems('movie', [], exploreCurrentPage);
+            const items = await fetchDiscoveredItems('movie', currentAgeRatingFilter, exploreCurrentPage);
             cachedExploreItems = cachedExploreItems.concat(items);
 
             if (items.length > 0) {
@@ -755,7 +756,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             showLoadingIndicator('Updating seen status...');
             if (isCurrentlySeen) {
-                await deleteUserData('seenItems', String(itemId));
+                await deleteUserData( 'seenItems', String(itemId));
                 showCustomAlert('Success', `"${itemDetails.title || itemDetails.name}" marked as unseen.`);
             } else {
                 const seenItemData = {
@@ -1109,4 +1110,4 @@ document.addEventListener('DOMContentLoaded', async () => {
             attachSeenToggleListenersToCards(librarySelectedFolderMoviesRow);
         }
     }
-}
+});
