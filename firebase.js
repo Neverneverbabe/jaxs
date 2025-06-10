@@ -1,4 +1,31 @@
 // js/firebase.js
+import {
+    initializeApp,
+    getApps,
+    getApp,
+} from 'firebase/app';
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged,
+} from 'firebase/auth';
+import {
+    getFirestore,
+    collection,
+    getDocs,
+    doc,
+    setDoc,
+    deleteDoc,
+    updateDoc,
+    arrayUnion,
+    arrayRemove,
+    getDoc,
+    query,
+    where,
+} from 'firebase/firestore';
+
 const firebaseConfig = {
     apiKey: "AIzaSyAsLscv3km_0ywQFQb-1D3JhoN3pBS_ia8",
     authDomain: "watchlist-app-c5ecb.firebaseapp.com",
@@ -15,39 +42,35 @@ let firebaseAuthFunctions = {};
 let firebaseFirestoreFunctions = {};
 
 if (typeof process === 'undefined') {
-    const appMod = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-    const authMod = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
-    const fsMod = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-
     let app;
-    if (!appMod.getApps().length) {
-        app = appMod.initializeApp(firebaseConfig);
+    if (!getApps().length) {
+        app = initializeApp(firebaseConfig);
     } else {
-        app = appMod.getApp();
+        app = getApp();
     }
 
-    db = fsMod.getFirestore(app);
-    auth = authMod.getAuth(app);
+    db = getFirestore(app);
+    auth = getAuth(app);
 
     firebaseAuthFunctions = {
-        createUserWithEmailAndPassword: authMod.createUserWithEmailAndPassword,
-        signInWithEmailAndPassword: authMod.signInWithEmailAndPassword,
-        signOut: authMod.signOut,
-        onAuthStateChanged: authMod.onAuthStateChanged
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        signOut,
+        onAuthStateChanged
     };
 
     firebaseFirestoreFunctions = {
-        collection: fsMod.collection,
-        getDocs: fsMod.getDocs,
-        doc: fsMod.doc,
-        setDoc: fsMod.setDoc,
-        deleteDoc: fsMod.deleteDoc,
-        updateDoc: fsMod.updateDoc,
-        arrayUnion: fsMod.arrayUnion,
-        arrayRemove: fsMod.arrayRemove,
-        getDoc: fsMod.getDoc,
-        query: fsMod.query,
-        where: fsMod.where
+        collection,
+        getDocs,
+        doc,
+        setDoc,
+        deleteDoc,
+        updateDoc,
+        arrayUnion,
+        arrayRemove,
+        getDoc,
+        query,
+        where
     };
 } else {
     firebaseAuthFunctions = {

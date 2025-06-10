@@ -1,8 +1,8 @@
 import { jest } from '@jest/globals';
 
-jest.unstable_mockModule('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js', () => ({}), { virtual: true });
-jest.unstable_mockModule('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js', () => ({}), { virtual: true });
-jest.unstable_mockModule('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js', () => ({}), { virtual: true });
+jest.unstable_mockModule('firebase/app', () => ({}), { virtual: true });
+jest.unstable_mockModule('firebase/auth', () => ({}), { virtual: true });
+jest.unstable_mockModule('firebase/firestore', () => ({}), { virtual: true });
 
 jest.unstable_mockModule('../firebase.js', () => ({
   db: {},
