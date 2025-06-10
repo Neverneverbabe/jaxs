@@ -16,16 +16,13 @@ import {
     selectedCertifications
 } from './state.js';
 
-window.createAuthFormUI_Global = createAuthFormUI;
-
 // Global cache for user watchlists
-let firestoreWatchlistsCache = [];
-window.firestoreWatchlistsCache = firestoreWatchlistsCache;
+export let firestoreWatchlistsCache = []; // Export for watchlist.js to use via initWatchlistRefs
 
 // Load watchlists for the current user and cache them
-async function loadUserFirestoreWatchlists() {
-    firestoreWatchlistsCache = [];
-    window.firestoreWatchlistsCache = firestoreWatchlistsCache;
+// Export this function so it can be passed to watchlist.js
+export async function loadUserFirestoreWatchlists() { 
+    firestoreWatchlistsCache.length = 0; // Clear array while keeping reference
     const user = auth.currentUser;
     if (!user) return;
     try {
@@ -33,25 +30,21 @@ async function loadUserFirestoreWatchlists() {
         const watchlistsColRef = collection(db, 'users', user.uid, 'watchlists');
         const querySnapshot = await getDocs(watchlistsColRef);
         firestoreWatchlistsCache = querySnapshot.docs.map(docSnap => {
+        querySnapshot.docs.forEach(docSnap => {
             const data = docSnap.data();
             const items = Array.isArray(data.items) ? data.items : (Array.isArray(data.movies) ? data.movies : []);
-            return {
+            firestoreWatchlistsCache.push({
                 id: docSnap.id,
                 ...data,
                 items
-            };
+            });
         });
-        window.firestoreWatchlistsCache = firestoreWatchlistsCache;
         console.log('[WATCHLIST] Firestore watchlists loaded:', firestoreWatchlistsCache);
     } catch (error) {
         console.error('Error loading Firestore watchlists:', error);
-        firestoreWatchlistsCache = [];
-        window.firestoreWatchlistsCache = firestoreWatchlistsCache;
+        firestoreWatchlistsCache.length = 0; // Clear on error
     }
 }
-
-// Expose globally for other modules
-window.loadUserFirestoreWatchlists = loadUserFirestoreWatchlists;
 
 // DOM Element Variables
 let searchInput, searchButton, resultsContainer,
@@ -145,7 +138,7 @@ async function initializeAppState() {
     initUiRefs(allElements);
     initApiRefs(allElements);
     initAuthRefs(allElements);
-    initWatchlistRefs(allElements);
+    initWatchlistRefs(allElements, firestoreWatchlistsCache, loadUserFirestoreWatchlists); // Pass cache and loader
     initSeenListRefs(allElements);
     initHandlerRefs(allElements);
 

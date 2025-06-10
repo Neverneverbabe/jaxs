@@ -1,5 +1,6 @@
 // ui.js  
 import { TMDB_IMG_BASE_URL, TMDB_BACKDROP_BASE_URL, VIDSRC_PROVIDERS } from './config.js';
+import { auth, firebaseAuthFunctions } from '../firebase.js'; // Import Firebase auth
 
 // --- Modal & Filter DOM References ---
 const itemDetailModal = document.getElementById('item-detail-modal');
@@ -675,14 +676,14 @@ export function showSignInModal() {
         const email = content.querySelector('#auth-email').value;
         const password = content.querySelector('#auth-password').value;
         try {
-            await window.firebaseAuth.signIn(email, password);
+            await firebaseAuthFunctions.signInWithEmailAndPassword(auth, email, password);
             modal.style.display = 'none';
             document.body.style.overflow = '';
         } catch (err) {
             errorDiv.textContent = err.message;
         }
     };
-    signUpBtn.onclick = async (e) => {
+    signUpBtn.addEventListener('click', async (e) => { // Use addEventListener for consistency
         e.preventDefault();
         const email = content.querySelector('#auth-email').value;
         const password = content.querySelector('#auth-password').value;

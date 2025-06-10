@@ -1,6 +1,7 @@
 // js/seenList.js 
 import { db, firebaseFirestoreFunctions } from './firebase.js';
-import { showToast, showLoading, showMessage, positionPopup } from './ui.js'; // createAuthFormUI is in auth.js
+import { showToast, showLoading, showMessage, positionPopup } from './ui.js';
+import { createAuthFormUI } from './auth.js';
 import { genericItemPlaceholder, smallImageBaseUrl } from './config.js';
 import { currentUserId, selectedCertifications } from './state.js';
 import { extractCertification } from './ratingUtils.js';
@@ -13,18 +14,32 @@ export function initSeenListRefs(elements) {
     seenItemsDisplayContainer = elements.seenItemsDisplayContainer;
 }
 
+let localUserSeenItemsCache = new Set();
+
+async function populateSeenItemsCache() {
+    if (!currentUserId) {
+        localUserSeenItemsCache.clear();
+        return;
+    }
+    try {
+        const seenItemsColRef = collection(db, "users", currentUserId, "seenItems");
+        const querySnapshot = await getDocs(seenItemsColRef);
+        localUserSeenItemsCache.clear();
+        querySnapshot.forEach(docSnap => localUserSeenItemsCache.add(docSnap.id));
+    } catch (error) {
+        console.error("Error populating seen items cache:", error);
+        localUserSeenItemsCache.clear(); // Clear cache on error
+    }
+}
+
 const { getDoc, setDoc, deleteDoc, collection, getDocs, doc } = firebaseFirestoreFunctions;
 
-export async function isItemInSeenList(itemId) {
+export function isItemInSeenList(itemId) { // Now synchronous after initial cache load
     if (!currentUserId || !itemId) return false;
-    try {
-        const seenItemRef = doc(db, "users", currentUserId, "seenItems", String(itemId));
-        const docSnap = await getDoc(seenItemRef);
-        return docSnap.exists();
-    } catch (error) {
-        console.error("Error checking if item is in seen list:", error);
-        return false;
-    }
+    // Ensure cache is populated, especially if this is called before loadAndDisplaySeenItems
+    // For simplicity here, assume cache is reasonably up-to-date.
+    // A more robust solution might involve checking a "cache_loaded" flag or returning a Promise.
+    return localUserSeenItemsCache.has(String(itemId));
 }
 
 export async function addItemToSeenList(itemData) {
@@ -46,6 +61,7 @@ export async function addItemToSeenList(itemData) {
     try {
         const seenItemRef = doc(db, "users", currentUserId, "seenItems", itemId);
         await setDoc(seenItemRef, itemToAdd);
+        localUserSeenItemsCache.add(itemId);
         showToast(`"${itemToAdd.title}" marked as seen.`, "success");
         const seenView = document.getElementById('seenView'); // Get element
         if (seenView && !seenView.classList.contains('hidden-view')) await loadAndDisplaySeenItems();
@@ -66,6 +82,7 @@ export async function removeItemFromSeenList(itemId) {
     try {
         const seenItemRef = doc(db, "users", currentUserId, "seenItems", strItemId);
         await deleteDoc(seenItemRef);
+        localUserSeenItemsCache.delete(strItemId);
         showToast("Item unmarked as seen.", "info");
         const seenView = document.getElementById('seenView'); // Get element
         if (seenView && !seenView.classList.contains('hidden-view')) await loadAndDisplaySeenItems();
@@ -85,6 +102,8 @@ export async function loadAndDisplaySeenItems() {
     if (!currentUserId) {
         seenItemsDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Please sign in to view your seen items.</p>';
         return;
+    } else {
+        await populateSeenItemsCache(); // Populate cache when loading seen items view
     }
 
     showLoading('seenItemsDisplayContainer', 'Loading seen items...', seenItemsDisplayContainer);
@@ -127,9 +146,9 @@ export async function loadAndDisplaySeenItems() {
     }
 }
 
-export async function appendSeenCheckmark(cardElement, itemId) {
+export function appendSeenCheckmark(cardElement, itemId) { // Now synchronous
     if (!cardElement || !currentUserId) return; // Check currentUserId
-    if (await isItemInSeenList(itemId)) {
+    if (isItemInSeenList(itemId)) {
         const check = document.createElement('div');
         check.className = 'seen-checkmark';
         check.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd"/></svg>';
@@ -166,7 +185,7 @@ export async function updateMarkAsSeenButtonState(itemId, itemData, buttonContai
     seenButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd" stroke="currentColor" stroke-width="1.5"/></svg>`;
 
     if (currentUserId) {
-        if (await isItemInSeenList(itemId)) {
+        if (isItemInSeenList(itemId)) { // Use synchronous cache check
             seenButton.classList.add('seen');
         }
         seenButton.onclick = async () => {
@@ -196,8 +215,7 @@ export async function updateMarkAsSeenButtonState(itemId, itemData, buttonContai
             e.stopPropagation();
             if (seenAuthPopupElement.classList.contains('hidden')) {
                 seenAuthPopupElement.classList.remove('hidden');
-                // createAuthFormUI from auth.js (need to ensure it's available, e.g. via global or careful import)
-                window.createAuthFormUI_Global(seenAuthPopupElement, async () => {
+                createAuthFormUI(seenAuthPopupElement, async () => { // Use imported function
                     seenAuthPopupElement.classList.add('hidden');
                     await updateMarkAsSeenButtonState(itemId, itemData, buttonContainerId);
                 });

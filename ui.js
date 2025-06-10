@@ -12,6 +12,7 @@ import { fetchRecommendations, fetchCollection, fetchEpisodesForSeason } from '.
 import { updateAddToWatchlistButtonState } from './watchlist.js';
 import { updateMarkAsSeenButtonState, appendSeenCheckmark } from './seenList.js';
 import { extractCertification } from './ratingUtils.js';
+import { createAuthFormUI } from './auth.js'; // For popups that need auth form
 import { handleItemSelect } from './handlers.js';
 
 // DOM Elements (initialized in main.js)
@@ -309,7 +310,6 @@ export function updateVidsrcPlayer(containerEl, itemType, tmdbIdForUrl, imdbIdFo
     containerEl.appendChild(tabsContainer);
     containerEl.appendChild(playerWrapper);
     const urlsContainer = document.createElement('div');
-    urlsContainer.className = 'mt-3 text-xs space-y-1';
     vidsrcProviders.forEach(provider => {
         let directUrlBase = itemType === 'movie' ? provider.movieUrl : provider.tvUrl;
         let directUrl = `${directUrlBase}${tmdbIdForUrl}`;
@@ -317,13 +317,12 @@ export function updateVidsrcPlayer(containerEl, itemType, tmdbIdForUrl, imdbIdFo
             directUrl += `/${season}/${episode}`;
         }
         const urlParagraph = document.createElement('p');
+        urlParagraph.className = 'mt-1 text-xs';
         urlParagraph.innerHTML = `<strong>${provider.name} URL:</strong> <a href="${directUrl}" target="_blank" class="text-sky-400 hover:underline break-all">${directUrl}</a>`;
         urlsContainer.appendChild(urlParagraph);
     });
     containerEl.appendChild(urlsContainer);
 }
-window.updateVidsrcPlayerExternal = updateVidsrcPlayer;
-
 
 export function displaySeasons(seasons, parentShowTmdbId, parentShowImdbId, targetSeasonsEl, targetViewContext = "item") {
     // ... (displaySeasons function remains the same) ...
@@ -346,13 +345,41 @@ export function displaySeasons(seasons, parentShowTmdbId, parentShowImdbId, targ
             <p class="text-xs text-gray-400">${s.episode_count} Episodes</p>
             ${s.air_date ? `<p class="text-xs text-gray-500">${s.air_date.substring(0, 4)}</p>` : ''}
         `;
-        card.addEventListener('click', () => {
+        card.addEventListener('click', async () => {
             const episodeDisplayContainer = document.getElementById(`${targetViewContext}EpisodeDisplayContainer`);
             let playerSection;
             if (targetViewContext === "item") playerSection = itemVidsrcPlayerSection;
             else playerSection = overlayVidsrcPlayerSection;
 
-            fetchEpisodesForSeason(parentShowTmdbId, s.season_number, parentShowImdbId, episodeDisplayContainer, targetViewContext, playerSection);
+            if (!episodeDisplayContainer) {
+                console.error("Episode display container not found:", `${targetViewContext}EpisodeDisplayContainer`);
+                return;
+            }
+            showLoading(`seasons-${targetViewContext}`, `Loading Season ${s.season_number} episodes...`, episodeDisplayContainer);
+
+            try {
+                const seasonDetailsWithEpisodes = await fetchEpisodesForSeason(parentShowTmdbId, s.season_number);
+                episodeDisplayContainer.innerHTML = ''; // Clear previous episodes or loading
+
+                if (seasonDetailsWithEpisodes.episodes && seasonDetailsWithEpisodes.episodes.length > 0) {
+                    const episodesTitle = document.createElement('h4');
+                    episodesTitle.className = 'text-lg font-semibold mb-2 text-sky-300';
+                    episodesTitle.textContent = `${seasonDetailsWithEpisodes.name || `Season ${s.season_number}`} Episodes`;
+                    episodeDisplayContainer.appendChild(episodesTitle);
+
+                    const episodesList = document.createElement('div');
+                    episodesList.className = 'episodes-list space-y-2 pr-2';
+                    seasonDetailsWithEpisodes.episodes.forEach(ep => {
+                        const epCard = createEpisodeCard(ep, playerSection, parentShowTmdbId, parentShowImdbId, s.season_number, targetViewContext);
+                        episodesList.appendChild(epCard);
+                    });
+                    episodeDisplayContainer.appendChild(episodesList);
+                } else {
+                    episodeDisplayContainer.innerHTML = `<p class="text-gray-400">No episodes found for this season.</p>`;
+                }
+            } catch (error) {
+                episodeDisplayContainer.innerHTML = `<p class="text-red-400">Error loading episodes: ${error.message}</p>`;
+            }
 
             const activeCard = getActiveSeasonCard(targetViewContext);
             if(activeCard) activeCard.classList.remove('border-sky-400', 'border-2');
@@ -366,6 +393,29 @@ export function displaySeasons(seasons, parentShowTmdbId, parentShowImdbId, targ
     episodeDisplayContainer.id = `${targetViewContext}EpisodeDisplayContainer`;
     episodeDisplayContainer.className = 'mt-3';
     targetSeasonsEl.appendChild(episodeDisplayContainer);
+}
+
+function createEpisodeCard(ep, playerSection, parentShowTmdbId, parentShowImdbId, seasonNum, targetViewContext) {
+    const card = document.createElement('div');
+    card.className = 'episode-card bg-gray-750 p-3 rounded-md hover:bg-gray-700 cursor-pointer flex space-x-3 items-start';
+    const stillPath = ep.still_path ? `${stillImageBaseUrl}${ep.still_path}` : genericItemPlaceholder.replace('150x225', '120x68');
+    card.innerHTML = `
+        <img src="${stillPath}" alt="Episode ${ep.episode_number}" class="w-28 h-16 object-cover rounded-md flex-shrink-0" onerror="this.src='${genericItemPlaceholder.replace('150x225', '120x68')}'; this.onerror=null;">
+        <div>
+            <h5 class="text-sm font-semibold text-sky-200">Ep ${ep.episode_number}: ${ep.name}</h5>
+            <p class="text-xs text-gray-400">${ep.air_date || ''}</p>
+            <p class="text-xs text-gray-500 mt-1 truncate" title="${ep.overview}">${ep.overview || 'No overview.'}</p>
+        </div>
+    `;
+    card.addEventListener('click', () => {
+        if (playerSection) {
+            updateVidsrcPlayer(playerSection, 'tv', parentShowTmdbId, parentShowImdbId, seasonNum, ep.episode_number);
+            playerSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            console.error("Player section not found for episode click:", `${targetViewContext}VidsrcPlayerSection`);
+        }
+    });
+    return card;
 }
 
 export function createRelatedItemCard(item, itemType, currentViewContext = "item") {

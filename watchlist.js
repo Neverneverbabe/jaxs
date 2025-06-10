@@ -1,5 +1,6 @@
 // js/watchlist.js 
 import { db, firebaseFirestoreFunctions, auth } from './firebase.js';
+import { createAuthFormUI } from './auth.js';
 import { showToast, showLoading, showMessage, clearAllDynamicContent, createBackButton, positionPopup } from './ui.js';
 import { smallImageBaseUrl, tileThumbnailPlaceholder, genericItemPlaceholder } from './config.js';
 import {
@@ -13,20 +14,24 @@ import { appendSeenCheckmark } from './seenList.js'; // For displaying seen stat
 // DOM Elements
 let watchlistTilesContainer, watchlistDisplayContainer, watchlistView,
     newWatchlistNameInput, createWatchlistBtn; // From main.js
+    
+let _firestoreWatchlistsCacheRef = [];
+let _loadUserFirestoreWatchlistsCallback = async () => {};
 
-export function initWatchlistRefs(elements) {
+export function initWatchlistRefs(elements, cacheRef, loadCallback) {
     watchlistTilesContainer = elements.watchlistTilesContainer;
     watchlistDisplayContainer = elements.watchlistDisplayContainer;
     watchlistView = elements.watchlistView;
     newWatchlistNameInput = elements.newWatchlistNameInput;
     createWatchlistBtn = elements.createWatchlistBtn;
+    _firestoreWatchlistsCacheRef = cacheRef;
+    _loadUserFirestoreWatchlistsCallback = loadCallback;
 }
 
 const { getDocs, collection, doc, setDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, getDoc } = firebaseFirestoreFunctions;
 
-// Use the global cache from main.js
 function getCachedWatchlists() {
-    return window.firestoreWatchlistsCache || [];
+    return _firestoreWatchlistsCacheRef || [];
 }
 
 export function determineActiveWatchlistButtonContainerId() {
@@ -137,11 +142,11 @@ export async function updateAddToWatchlistButtonState(itemId, itemData, buttonCo
                 const newName = newInput.value.trim();
                 if (!newName) return;
                 const newRef = doc(db, 'users', currentUserId, 'watchlists', newName);
-                const snap = await getDoc(newRef);
+                const snap = await getDoc(newRef); // No window. here
                 if (!snap.exists()) {
                     await setDoc(newRef, { name: newName, items: [], createdAt: new Date().toISOString(), uid: currentUserId });
                 }
-                await window.loadUserFirestoreWatchlists();
+                await _loadUserFirestoreWatchlistsCallback();
                 await addItemToSpecificFirestoreWatchlist(newName, itemData);
                 newInput.value = '';
                 await populateManagePopup();
@@ -170,11 +175,10 @@ export async function updateAddToWatchlistButtonState(itemId, itemData, buttonCo
             authPopup.className = 'hidden detail-panel-popup';
             container.appendChild(authPopup);
         }
-        watchlistButton.onclick = (e) => {
-            e.stopPropagation();
+        watchlistButton.onclick = (e) => {            e.stopPropagation();
             if (authPopup.classList.contains('hidden')) {
                 authPopup.classList.remove('hidden');
-                window.createAuthFormUI_Global(authPopup, async () => {
+                createAuthFormUI(authPopup, async () => { // Use imported function
                     authPopup.classList.add('hidden');
                     await updateAddToWatchlistButtonState(itemId, itemData, buttonContainerId);
                 });
@@ -204,8 +208,8 @@ export async function handleRenameWatchlist(watchlistName) {
         const newSnap = await getDoc(newRef);
         if (newSnap.exists()) { showToast('A watchlist with that name already exists.', 'error'); return; }
         await setDoc(newRef, { ...data, name: trimmed });
-        await deleteDoc(oldRef);
-        await window.loadUserFirestoreWatchlists();
+        await deleteDoc(oldRef); // No window. here
+        await _loadUserFirestoreWatchlistsCallback();
 
         if (currentSelectedWatchlistName === watchlistName) {
             updateCurrentSelectedWatchlistName(trimmed);
@@ -349,11 +353,7 @@ export async function loadAndDisplayWatchlistsFromFirestore() {
         return;
     }
 
-    if (typeof window.loadUserFirestoreWatchlists === 'function') {
-        await window.loadUserFirestoreWatchlists();
-    } else {
-        console.warn('loadUserFirestoreWatchlists function not found on window');
-    }
+    await _loadUserFirestoreWatchlistsCallback();
 
     displayWatchlistSelection();
     await displayItemsInSelectedWatchlist();
@@ -377,7 +377,7 @@ export async function addItemToSpecificFirestoreWatchlist(watchlistName, itemDat
     try {
         const watchlistRef = doc(db, "users", currentUserId, "watchlists", watchlistName);
         await updateDoc(watchlistRef, { items: arrayUnion(itemToAdd) });
-        await window.loadUserFirestoreWatchlists(); // Refresh cache after mutation
+        await _loadUserFirestoreWatchlistsCallback(); // Refresh cache after mutation
         showToast(`"${itemToAdd.title}" added to ${watchlistName}.`, "success");
         if (currentSelectedWatchlistName === watchlistName && watchlistView && !watchlistView.classList.contains('hidden-view')) {
             await displayItemsInSelectedWatchlist();
@@ -405,7 +405,7 @@ export async function removeItemFromSpecificFirestoreWatchlist(watchlistName, it
             if (itemToRemoveObject) {
                 itemTitleForToast = itemToRemoveObject.title;
                 await updateDoc(watchlistRef, { items: arrayRemove(itemToRemoveObject) });
-                await window.loadUserFirestoreWatchlists(); // Refresh cache after mutation
+                await _loadUserFirestoreWatchlistsCallback(); // Refresh cache after mutation
                 showToast(`"${itemTitleForToast}" removed from ${watchlistName}.`, "info");
                 if (currentSelectedWatchlistName === watchlistName && watchlistView && !watchlistView.classList.contains('hidden-view')) {
                     await displayItemsInSelectedWatchlist();
@@ -431,7 +431,7 @@ export async function handleDeleteWatchlist(watchlistName) {
 
     try {
         await deleteDoc(doc(db, "users", currentUserId, "watchlists", watchlistName));
-        await window.loadUserFirestoreWatchlists(); // Refresh cache after mutation
+        await _loadUserFirestoreWatchlistsCallback(); // Refresh cache after mutation
 
         if (currentSelectedWatchlistName === watchlistName) {
             updateCurrentSelectedWatchlistName(null);
@@ -459,7 +459,7 @@ export async function handleCreateWatchlist() {
         const docSnap = await getDoc(watchlistRef);
         if (docSnap.exists()) { showToast(`Watchlist "${name}" already exists.`, "error"); return; }
         await setDoc(watchlistRef, { name: name, items: [], createdAt: new Date().toISOString(), uid: currentUserId });
-        await window.loadUserFirestoreWatchlists(); // Refresh cache after mutation
+        await _loadUserFirestoreWatchlistsCallback(); // Refresh cache after mutation
         await loadAndDisplayWatchlistsFromFirestore();
         newWatchlistNameInput.value = '';
         showToast(`Watchlist "${name}" created.`, "success");
@@ -503,22 +503,23 @@ export function closeAllOptionMenus(exceptTile) {
 }
 
 // Expose for Library tab
-window.handleCreateWatchlistFromLibrary = async function(name) {
-    if (!window.currentUserId) {
-        alert("You must be signed in to create a watchlist.");
-        return;
-    }
-    const { doc, getDoc, setDoc } = firebaseFirestoreFunctions;
-    const watchlistRef = doc(db, "users", window.currentUserId, "watchlists", name);
-    const docSnap = await getDoc(watchlistRef);
-    if (docSnap.exists()) {
-        alert(`Watchlist "${name}" already exists.`);
-        return;
-    }
-    await setDoc(watchlistRef, { name, items: [], createdAt: new Date().toISOString(), uid: window.currentUserId });
-    await window.loadUserFirestoreWatchlists();
-    if (window.renderLibraryFolderCards) await window.renderLibraryFolderCards();
-    alert(`Watchlist "${name}" created.`);
-};
+// window.handleCreateWatchlistFromLibrary = async function(name) { // This global is for app/main.js
+//     if (!currentUserId) { // Use imported currentUserId
+//         alert("You must be signed in to create a watchlist.");
+//         return;
+//     }
+//     const { doc: fbDoc, getDoc: fbGetDoc, setDoc: fbSetDoc } = firebaseFirestoreFunctions; // Avoid conflict
+//     const watchlistRef = fbDoc(db, "users", currentUserId, "watchlists", name);
+//     const docSnap = await fbGetDoc(watchlistRef);
+//     if (docSnap.exists()) {
+//         alert(`Watchlist "${name}" already exists.`);
+//         return;
+//     }
+//     await fbSetDoc(watchlistRef, { name, items: [], createdAt: new Date().toISOString(), uid: currentUserId });
+//     await _loadUserFirestoreWatchlistsCallback();
+//     // if (window.renderLibraryFolderCards) await window.renderLibraryFolderCards(); // This is app/ specific
+//     alert(`Watchlist "${name}" created.`);
+// };
 
-window.handleDeleteWatchlist = handleDeleteWatchlist;
+// window.handleDeleteWatchlist = handleDeleteWatchlist; // This global is for app/main.js
+// If app/main.js needs these, it should import them or they should be refactored.

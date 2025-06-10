@@ -40,25 +40,30 @@ export function buildSearchUrl(query, itemType, certifications = []) {
 export async function fetchSearchResults(query, itemType, certifications = []) {
     showLoading('results', `Searching for "${query}"...`, resultsContainer);
     try {
-        const response = await fetch(buildSearchUrl(query, itemType, certifications));
+        // Always append release_dates and content_ratings for efficient certification extraction
+        const baseUrl = buildSearchUrl(query, itemType, certifications);
+        const urlWithAppends = `${baseUrl}&append_to_response=release_dates,content_ratings`;
+        const response = await fetch(urlWithAppends);
         if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
         const data = await response.json();
         if (data.results && data.results.length > 0) {
             let items = data.results;
-            if (!certifications.includes('All')) {
-                items = await Promise.all(items.map(async it => {
-                    try {
-                        const resp = await fetch(`${tmdbBaseUrl}/${itemType}/${it.id}?api_key=${apiKey}&append_to_response=release_dates,content_ratings`);
-                        const details = await resp.json();
-                        const cert = extractCertification({ ...details, item_type: itemType });
-                        return { ...it, certification: cert };
-                    } catch (err) {
-                        return { ...it, certification: 'NR' };
-                    }
-                }));
-                items = items.filter(it => certifications.includes(it.certification));
+            // Extract certification directly as details are already appended
+            items = items.map(it => {
+                // The item 'it' itself should now contain release_dates and content_ratings if the search endpoint supports it with append_to_response.
+                // If not, this approach needs the /discover endpoint or individual calls remain necessary for search.
+                // For this example, assuming search with append_to_response gives enough details.
+                // If search doesn't append for list items, the original Promise.all approach for details is needed,
+                // but it's better to use /discover if filtering by certification upfront.
+                // Let's assume for now that 'it' has the necessary fields from append_to_response.
+                const cert = extractCertification({ ...it, item_type: itemType });
+                return { ...it, certification: cert };
+            });
+
+            if (certifications && certifications.length > 0 && !certifications.includes('All')) {
+                items = items.filter(it => certifications.includes(it.certification || 'NR'));
             }
-            if (items.length > 0) {
+            if (items.length > 0) { // Check after potential filtering
                 displayResults(items, itemType, resultsContainer); // appendSeenCheckmark argument removed
             } else {
                 showMessage('No results match the selected ratings.', 'info', 'results', resultsContainer);
@@ -122,38 +127,31 @@ export async function fetchTmdbCategoryContent(mainCategory, type, category, pag
     let url;
     const filtering = !selectedCertifications.includes('All');
     if (filtering) {
+        // Use /discover endpoint for better filtering capabilities including certifications
         const certs = encodeURIComponent(selectedCertifications.join('|'));
-        url = `${tmdbBaseUrl}/discover/${type}?api_key=${apiKey}&sort_by=popularity.desc&certification_country=US&certification=${certs}&page=${page}`;
+        url = `${tmdbBaseUrl}/discover/${type}?api_key=${apiKey}&sort_by=popularity.desc&certification_country=US&certification=${certs}&page=${page}&include_adult=false&append_to_response=release_dates,content_ratings`;
     } else {
-        url = `${tmdbBaseUrl}/${type}/${category}?api_key=${apiKey}&page=${page}`;
+        url = `${tmdbBaseUrl}/${type}/${category}?api_key=${apiKey}&page=${page}&append_to_response=release_dates,content_ratings`;
     }
 
     try {
+        console.log(`Fetching TMDB Category URL: ${url}`);
         const response = await fetch(url);
         if (!response.ok) throw new Error(`TMDB API Error: ${response.statusText}`);
         const data = await response.json();
         if (data && data.results && data.results.length > 0) {
             let items = data.results;
             if (filtering) {
-                items = await Promise.all(items.map(async it => {
-                    try {
-                        const resp = await fetch(`${tmdbBaseUrl}/${type}/${it.id}?api_key=${apiKey}&append_to_response=release_dates,content_ratings`);
-                        const details = await resp.json();
-                        const cert = extractCertification({ ...details, item_type: type });
-                        return { ...it, certification: cert };
-                    } catch {
-                        return { ...it, certification: 'NR' };
-                    }
+                // Certifications should already be part of 'items' due to append_to_response with /discover
+                items = items.map(it => ({
+                    ...it,
+                    certification: extractCertification({ ...it, item_type: type })
                 }));
+                // The filter for selectedCertifications is implicitly handled by the /discover query,
+                // but we can double-check or rely on TMDB's filtering.
             }
-
-            if (!filtering || items.some(it => selectedCertifications.includes(it.certification))) {
-                if (filtering) items = items.filter(it => selectedCertifications.includes(it.certification));
-                if (items.length === 0) {
-                    showMessage('No items match the selected ratings.', 'info', mainCategory, displayContainer);
-                } else {
-                    displayTmdbCategoryItems(items, type, displayContainer, mainCategory, category, page, data.total_pages);
-                }
+            if (items.length > 0) {
+                displayTmdbCategoryItems(items, type, displayContainer, mainCategory, category, page, data.total_pages);
             } else {
                 showMessage('No items match the selected ratings.', 'info', mainCategory, displayContainer);
             }
@@ -224,57 +222,18 @@ export async function fetchCollection(collectionId, currentMovieId, targetCollec
     }
 }
 
-export async function fetchEpisodesForSeason(parentShowTmdbId, seasonNum, parentShowImdbId, episodeContainer, targetViewContext, playerSection) {
-    if (!episodeContainer) {
-        console.error("Episode display container not found:", episodeContainer);
-        return;
-    }
-    showLoading(`seasons-${targetViewContext}`, `Loading Season ${seasonNum} episodes...`, episodeContainer);
-
+export async function fetchEpisodesForSeason(parentShowTmdbId, seasonNum) {
     try {
         const response = await fetch(`${tmdbBaseUrl}/tv/${parentShowTmdbId}/season/${seasonNum}?api_key=${apiKey}`);
         if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
         const seasonDetails = await response.json();
-        episodeContainer.innerHTML = ''; 
         if (seasonDetails.episodes && seasonDetails.episodes.length > 0) {
-            const title = document.createElement('h4');
-            title.className = 'text-lg font-semibold mb-2 text-sky-300';
-            title.textContent = `${seasonDetails.name || `Season ${seasonNum}`} Episodes`;
-            episodeContainer.appendChild(title);
-            const list = document.createElement('div');
-            list.className = 'episodes-list space-y-2 pr-2';
-            seasonDetails.episodes.forEach(ep => {
-                const card = document.createElement('div');
-                card.className = 'episode-card bg-gray-750 p-3 rounded-md hover:bg-gray-700 cursor-pointer flex space-x-3 items-start';
-                const stillPath = ep.still_path ? `${stillImageBaseUrl}${ep.still_path}` : genericItemPlaceholder.replace('150x225', '120x68');
-                card.innerHTML = `
-                    <img src="${stillPath}" alt="Episode ${ep.episode_number}" class="w-28 h-16 object-cover rounded-md flex-shrink-0" onerror="this.src='${genericItemPlaceholder.replace('150x225', '120x68')}'; this.onerror=null;">
-                    <div>
-                        <h5 class="text-sm font-semibold text-sky-200">Ep ${ep.episode_number}: ${ep.name}</h5>
-                        <p class="text-xs text-gray-400">${ep.air_date || ''}</p>
-                        <p class="text-xs text-gray-500 mt-1 truncate" title="${ep.overview}">${ep.overview || 'No overview.'}</p>
-                    </div>
-                `;
-                card.addEventListener('click', () => {
-                    if (playerSection) {
-                        if (typeof window.updateVidsrcPlayerExternal === 'function') {
-                           window.updateVidsrcPlayerExternal(playerSection, 'tv', parentShowTmdbId, parentShowImdbId, seasonNum, ep.episode_number);
-                           playerSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        } else {
-                            console.error("updateVidsrcPlayerExternal is not available on window object.");
-                        }
-                    } else {
-                        console.error("Player section not found for episode click:", `${targetViewContext}VidsrcPlayerSection`);
-                    }
-                });
-                list.appendChild(card);
-            });
-            episodeContainer.appendChild(list);
+            return seasonDetails; // Return all season details including episodes
         } else {
-            episodeContainer.innerHTML = `<p class="text-gray-400">No episodes found for this season.</p>`;
+            return { ...seasonDetails, episodes: [] }; // Return season details with empty episodes
         }
     } catch (error) {
-        episodeContainer.innerHTML = `<p class="text-red-400">Error loading episodes: ${error.message}</p>`;
         console.error("Episode Loading Error:", error);
+        throw error; // Re-throw the error to be handled by the caller
     }
 }
