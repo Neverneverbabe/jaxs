@@ -1,5 +1,6 @@
-// ui.js
+// App/ui.js
 import { TMDB_IMG_BASE_URL, TMDB_BACKDROP_BASE_URL, VIDSRC_PROVIDERS } from './config.js';
+import { getCertification, checkRatingCompatibility } from '../Website/ratingUtils.js'; // Re-using Website's ratingUtils
 
 // --- Global DOM References ---
 const itemDetailModal = document.getElementById('item-detail-modal');
@@ -32,12 +33,6 @@ loadingIndicatorModal.innerHTML = `
 `;
 document.body.appendChild(loadingIndicatorModal);
 
-// CSS for spinner (add this to your <style> block in index.html if not already there)
-// @keyframes spin {
-//     0% { transform: rotate(0deg); }
-//     100% { transform: rotate(360deg); }
-// }
-
 // --- Custom Alert Functions ---
 export function showCustomAlert(title, message, type = 'info') {
     document.getElementById('custom-alert-title').textContent = title;
@@ -52,17 +47,17 @@ export function showCustomAlert(title, message, type = 'info') {
     }
 
     customAlertModal.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Disable background scrolling
+    document.body.style.overflow = 'hidden';
 }
 
 export function hideCustomAlert() {
     customAlertModal.style.display = 'none';
-    document.body.style.overflow = ''; // Re-enable background scrolling
+    document.body.style.overflow = '';
 }
 
 customAlertOkBtn.addEventListener('click', hideCustomAlert);
 customAlertModal.addEventListener('click', (event) => {
-    if (event.target === customAlertModal) { // Clicked on backdrop
+    if (event.target === customAlertModal) {
         hideCustomAlert();
     }
 });
@@ -72,113 +67,29 @@ customAlertModal.addEventListener('click', (event) => {
 export function showLoadingIndicator(message = 'Loading...') {
     document.getElementById('loading-message').textContent = message;
     loadingIndicatorModal.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Disable background scrolling
+    document.body.style.overflow = 'hidden';
 }
 
 export function hideLoadingIndicator() {
     loadingIndicatorModal.style.display = 'none';
-    document.body.style.overflow = ''; // Re-enable background scrolling
+    document.body.style.overflow = '';
 }
 
 
 // --- Modal Event Listeners (Item Detail Modal) ---
 closeModalButton.addEventListener('click', () => {
     itemDetailModal.style.display = 'none';
-    modalContentArea.innerHTML = ''; // Clear content when closing
-    document.body.style.overflow = ''; // Restore body scrolling
+    modalContentArea.innerHTML = '';
+    document.body.style.overflow = '';
 });
 
 itemDetailModal.addEventListener('click', (event) => {
-    // Close modal if clicking outside the content area
     if (event.target === itemDetailModal) {
         itemDetailModal.style.display = 'none';
         modalContentArea.innerHTML = '';
-        document.body.style.overflow = ''; // Restore body scrolling
+        document.body.style.overflow = '';
     }
 });
-
-// --- Helper: Get Certification (Age Rating) ---
-export function getCertification(item) {
-    const itemName = item.title || item.name;
-
-    // For movies, check release_dates (US certification)
-    if (item.media_type === 'movie' && item.release_dates && item.release_dates.results) {
-        const usRelease = item.release_dates.results.find(r => r.iso_3166_1 === 'US');
-        if (usRelease && usRelease.release_dates && usRelease.release_dates.length > 0) {
-            let cert = '';
-            const theatricalRelease = usRelease.release_dates.find(rd => rd.type === 3 && rd.certification);
-            if (theatricalRelease) {
-                cert = theatricalRelease.certification;
-            } else {
-                const anyUSReleaseWithCert = usRelease.release_dates.find(rd => rd.certification);
-                if (anyUSReleaseWithCert) {
-                    cert = anyUSReleaseWithCert.certification;
-                }
-            }
-            if (cert) return cert;
-        }
-    }
-
-    // For TV shows, check content_ratings (US rating)
-    if (item.media_type === 'tv' && item.content_ratings && item.content_ratings.results) {
-        const usRating = item.content_ratings.results.find(r => r.iso_3166_1 === 'US');
-        if (usRating && usRating.rating) {
-            return usRating.rating;
-        }
-    }
-
-    // Fallback for items with no media_type or missing data (e.g., search results)
-    if (item.release_date && item.vote_average) { // Likely a movie
-        if (item.adult) return 'NC-17'; // Simple adult check
-        return 'PG-13'; // Default for uncategorized movies
-    }
-    if (item.first_air_date && item.vote_average) { // Likely a TV show
-        return 'TV-14'; // Default for uncategorized TV shows
-    }
-
-    return 'N/A'; // Default if no certification found
-}
-
-/**
- * Checks if an item's certification is compatible with a selected filter category.
- * An item is compatible if its rating level is less than or equal to the filter's level.
- * @param {string} itemActualCert - The actual certification of the item (e.g., "PG", "TV-14").
- * @param {string|string[]} selectedFilterCategory - The filter category selected by the user (e.g., "PG-13"), or an array of categories.
- * @returns {boolean} - True if compatible, false otherwise.
- */
-export function checkRatingCompatibility(itemActualCert, selectedFilterCategory) {
-    const ratingHierarchy = {
-        'G': 1, 'TV-Y': 1, 'TV-Y7': 1, 'TV-G': 1,
-        'PG': 2, 'TV-PG': 2,
-        'PG-13': 3, 'TV-14': 3,
-        'R': 4, 'TV-MA': 4,
-        'NC-17': 5
-    };
-
-    const itemLevel = ratingHierarchy[itemActualCert];
-
-    if (itemLevel === undefined) {
-        return false; // Item's rating not in our defined hierarchy, or is 'N/A'
-    }
-
-    // Handle single filter category (old behavior) or array of categories (new filter behavior)
-    if (Array.isArray(selectedFilterCategory)) {
-        // If no filter is selected (empty array), all items are compatible
-        if (selectedFilterCategory.length === 0) {
-            return true;
-        }
-        // Check if item's level is compatible with ANY selected filter
-        return selectedFilterCategory.some(filterCat => {
-            const filterLevel = ratingHierarchy[filterCat];
-            return filterLevel !== undefined && itemLevel <= filterLevel;
-        });
-    } else {
-        // Old behavior: single string filter category
-        const filterLevel = ratingHierarchy[selectedFilterCategory];
-        if (filterLevel === undefined) return false;
-        return itemLevel <= filterLevel;
-    }
-}
 
 
 /**
@@ -192,11 +103,10 @@ export function createContentCardHtml(item, isLightMode, isItemSeenFn) {
     const posterPath = item.poster_path ? `${TMDB_IMG_BASE_URL}${item.poster_path}` : '';
     const title = item.title || item.name || 'Untitled';
     const fallbackImageUrl = `https://placehold.co/200x300/${isLightMode ? 'BBB' : '555'}/${isLightMode ? '333' : 'FFF'}?text=${encodeURIComponent(title)}`;
-    const mediaType = item.media_type || (item.title ? 'movie' : 'tv'); // Infer type if not present
+    const mediaType = item.media_type || (item.title ? 'movie' : 'tv');
     const certification = getCertification(item);
     const certificationBadge = certification !== 'N/A' ? `<span class="rating-badge" style="position: absolute; bottom: 8px; left: 8px; background-color: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; z-index: 5;">${certification}</span>` : '';
     
-    // Check seen status using the passed function
     const isSeen = isItemSeenFn(item.id, mediaType);
     const seenIconClass = isSeen ? 'item-is-seen' : '';
     const seenIconTitle = isSeen ? 'Mark as Unseen' : 'Mark as Seen';
@@ -236,11 +146,11 @@ export function displayContentRow(elementId, items, isLightMode, onCardClick, is
         return;
     }
 
-    rowElement.innerHTML = ''; // Clear previous content
+    rowElement.innerHTML = '';
 
     if (items && items.length > 0) {
         items.forEach(item => {
-            if (item.poster_path) { // Only display items with posters
+            if (item.poster_path) {
                 const cardHtml = createContentCardHtml(item, isLightMode, isItemSeenFn);
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = cardHtml;
@@ -248,7 +158,6 @@ export function displayContentRow(elementId, items, isLightMode, onCardClick, is
 
                 if (cardElement) {
                     cardElement.addEventListener('click', (e) => {
-                        // Prevent modal opening if the seen toggle icon was clicked
                         if (e.target.closest('.seen-toggle-icon')) {
                             return;
                         }
@@ -266,7 +175,6 @@ export function displayContentRow(elementId, items, isLightMode, onCardClick, is
         rowElement.innerHTML = `<p style="padding: 1rem; color: var(--text-secondary);">No content found in this category.</p>`;
     }
 
-    // Attach event listeners for seen toggle icons to newly added cards
     if (window.attachSeenToggleListenersToCards) {
         window.attachSeenToggleListenersToCards(rowElement);
     }
@@ -289,14 +197,11 @@ export function displayItemDetails(detailsObject, itemType, isLightMode) {
 
     const fallbackPoster = `https://placehold.co/300x450/${isLightMode ? 'BBB' : '555'}/${isLightMode ? '333' : 'FFF'}?text=No+Poster`;
 
-    // Seen Button - initial state will be set by updateSeenButtonStateInModal
     const seenButtonHtml = `
         <button id="toggle-seen-btn" class="seen-action-button" data-id="${detailsObject.id}" data-type="${itemType}" style="padding: 0.5em 1em; font-size: 0.9em; border-radius: 8px; cursor: pointer; height: fit-content; background-color: var(--card-bg); color: var(--text-primary); border: 1px solid var(--text-secondary);">
             Mark as Seen
         </button>`;
 
-    // Folder Dropdown HTML
-    // The dropdown list content will be rendered by renderWatchlistOptionsInModal
     const folderDropdownHtml = `
         <div class="apple-dropdown" id="add-to-folder-dropdown-modal" style="width: 180px;">
             <div class="dropdown-selected" id="dropdown-selected-text-modal">Add to Watchlist</div>
@@ -306,14 +211,12 @@ export function displayItemDetails(detailsObject, itemType, isLightMode) {
             </div>
         </div>`;
 
-    // Combined Actions Row (Seen button and Folder dropdown)
     const actionsRowHtml = `
         <div class="item-actions-row" style="display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
             ${seenButtonHtml}
             ${folderDropdownHtml}
         </div>`;
 
-    // IMDb Link
     const imdbId = detailsObject.external_ids && detailsObject.external_ids.imdb_id;
     let imdbLinkHtmlSegment;
     if (imdbId) {
@@ -323,7 +226,6 @@ export function displayItemDetails(detailsObject, itemType, isLightMode) {
     }
     const imdbLinkHtml = `<p><strong>IMDb:</strong> ${imdbLinkHtmlSegment}</p>`;
 
-    // Streaming Provider Links
     let streamingLinksHtml = '<p style="margin-bottom: 0.5rem;"><strong>Watch On:</strong></p><div class="streaming-links">';
     if (VIDSRC_PROVIDERS && VIDSRC_PROVIDERS.length > 0) {
         VIDSRC_PROVIDERS.forEach(provider => {
@@ -358,8 +260,8 @@ export function displayItemDetails(detailsObject, itemType, isLightMode) {
         </div>
     </div>
     `;
-    itemDetailModal.style.display = 'flex'; // Show the modal
-    document.body.style.overflow = 'hidden'; // Prevent body scrolling when modal is open
+    itemDetailModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
 
     // The state of the seen button and watchlist options will be updated by main.js
     // after this function is called, as they depend on data loaded in main.js.
@@ -439,7 +341,7 @@ export function renderWatchlistOptionsInModal(currentItemDetails) {
 
     // Toggle dropdown
     dropdownSelectedTextModal.onclick = (event) => {
-        event.stopPropagation(); // Prevent modal from closing
+        event.stopPropagation();
         const isOpen = dropdownListModal.style.display === 'block';
         dropdownListModal.style.display = isOpen ? 'none' : 'block';
         dropdownFooterModal.style.display = isOpen ? 'none' : 'block';
@@ -448,49 +350,35 @@ export function renderWatchlistOptionsInModal(currentItemDetails) {
         }
     };
 
-    // Hide dropdown when clicking outside (using delegation on document for modal)
-    // This is handled by main.js's itemDetailModal click listener for the modal itself
-    // and the specific modalObserver in main.js.
-    // For this dropdown itself, we can add a specific listener on the container.
     const dropdownOutsideClickListener = (event) => {
         if (!dropdownContainerModal.contains(event.target) && dropdownListModal.style.display === 'block') {
             dropdownListModal.style.display = 'none';
             dropdownFooterModal.style.display = 'none';
         }
     };
-    // Ensure listener is added only once to avoid duplicates
-    // Remove it first if it might have been added by a previous modal opening
     document.removeEventListener('click', dropdownOutsideClickListener);
     document.addEventListener('click', dropdownOutsideClickListener);
 
 
     // Handle selection/deselection of watchlists
     dropdownListModal.addEventListener('click', async (e) => {
-        e.stopPropagation(); // Prevent parent modal clicks
+        e.stopPropagation();
         const itemElement = e.target.closest('.dropdown-item');
         if (!itemElement || !itemElement.dataset.folderId) return;
 
         const folderId = itemElement.dataset.folderId;
-        // Call main.js function to handle add/remove from folder (Firestore operation)
-        // main.js exposes this via window.handleAddRemoveItemToFolder
         if (window.handleAddRemoveItemToFolder) {
             await window.handleAddRemoveItemToFolder(folderId, currentItemDetails, currentItemType);
-            // The real-time listener in main.js will trigger updateDropdownDisplay()
-            // to reflect changes automatically after Firestore updates.
         }
     });
 
     // Handle new folder creation
     addNewFolderBtnModal.addEventListener('click', async (e) => {
-        e.stopPropagation(); // Prevent parent modal clicks
-        const newFolderName = prompt("Enter new watchlist name:"); // Consider replacing with custom input modal
+        e.stopPropagation();
+        const newFolderName = prompt("Enter new watchlist name:");
         if (newFolderName && newFolderName.trim() !== "") {
-            // Call main.js function to create new folder (Firestore operation)
-            // main.js exposes this via window.handleCreateLibraryFolder
             if (window.handleCreateLibraryFolder) {
                 await window.handleCreateLibraryFolder(newFolderName.trim());
-                // The real-time listener will trigger updateDropdownDisplay()
-                // to reflect changes automatically after Firestore updates.
             }
         }
     });
@@ -510,7 +398,6 @@ export function updateThemeDependentElements(isLightMode) {
         moonIcon.style.display = isLightMode ? 'inline-block' : 'none';
     }
     if (heroImage) {
-        // Only update if current src is a fallback or default
         if (heroImage.src.includes('placehold.co')) {
              heroImage.src = isLightMode
                 ? 'https://placehold.co/1200x600/A0C4FF/1D1D1F?text=Featured+Show'
@@ -521,12 +408,9 @@ export function updateThemeDependentElements(isLightMode) {
             };
         }
     }
-    // Recalculate header/footer background RGB for opacity
-    // Read the base color from CSS variables then derive RGB
     const headerFooterBgBase = isLightMode ? getComputedStyle(document.documentElement).getPropertyValue('--header-footer-bg-light-rgb') : getComputedStyle(document.documentElement).getPropertyValue('--header-footer-bg-dark-rgb');
     document.documentElement.style.setProperty('--header-footer-bg-rgb', headerFooterBgBase.trim());
-    // Also, ensure text-primary-rgb is set for dynamic rgba hovers
-    const textPrimaryColor = isLightMode ? '0, 0, 0' : '255, 255, 255'; // Black for light mode, white for dark mode
+    const textPrimaryColor = isLightMode ? '0, 0, 0' : '255, 255, 255';
     document.documentElement.style.setProperty('--text-primary-rgb', textPrimaryColor);
 }
 
@@ -546,7 +430,6 @@ export function updateHeroSection(item, isLightMode) {
         if (item.backdrop_path) {
             newHeroImageUrl = `${TMDB_BACKDROP_BASE_URL}${item.backdrop_path}`;
         } else if (item.poster_path) {
-            // Fallback to poster as backdrop if backdrop not available
             newHeroImageUrl = `${TMDB_BACKDROP_BASE_URL}${item.poster_path}`;
         } else {
             newHeroImageUrl = isLightMode ? 'https://placehold.co/1200x600/A0C4FF/1D1D1F?text=Featured+Show' : 'https://placehold.co/1200x600/3B0764/F3F4F6?text=Featured+Show';
@@ -557,7 +440,6 @@ export function updateHeroSection(item, isLightMode) {
             this.src= isLightMode ? 'https://placehold.co/1200x600/A0C4FF/1D1D1F?text=Fallback+Image' : 'https://placehold.co/1200x600/3B0764/F3F4F6?text=Fallback+Image';
         };
     } else if (heroTitle && heroOverview && heroImageElement) {
-        // Fallback content if no item is provided
         heroTitle.textContent = 'Featured Content';
         heroOverview.textContent = 'Discover the latest blockbusters and critically acclaimed series.';
         heroImageElement.src = isLightMode ? 'https://placehold.co/1200x600/A0C4FF/1D1D1F?text=Featured+Show' : 'https://placehold.co/1200x600/3B0764/F3F4F6?text=Featured+Show';
@@ -565,93 +447,5 @@ export function updateHeroSection(item, isLightMode) {
             this.onerror=null;
             this.src= isLightMode ? 'https://placehold.co/1200x600/A0C4FF/1D1D1F?text=Fallback+Image' : 'https://placehold.co/1200x600/3B0764/F3F4F6?text=Fallback+Image';
         };
-    }
-}
-
-/**
- * Displays search results in a grid format.
- * @param {string} elementId - The ID of the HTML element where results will be displayed.
- * @param {Array<object>} items - An array of movie/TV show objects.
- * @param {boolean} isLightMode - True if light mode is active.
- * @param {function} onCardClick - Callback function when a card is clicked.
- * @param {function} isItemSeenFn - Function to check if an item is seen.
- */
-export function displaySearchResults(elementId, items, isLightMode, onCardClick, isItemSeenFn) {
-    const container = document.getElementById(elementId);
-    if (!container) {
-        console.error(`Search results container with ID '${elementId}' not found.`);
-        return;
-    }
-
-    container.innerHTML = ''; // Clear previous results and loading message
-
-    if (items && items.length > 0) {
-        const gridHtml = document.createElement('div');
-        gridHtml.className = 'search-results-grid'; // Apply grid styling
-
-        items.forEach(item => {
-            if (item.poster_path) { // Only display items with posters
-                const cardHtml = createContentCardHtml(item, isLightMode, isItemSeenFn);
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = cardHtml;
-                const cardElement = tempDiv.firstElementChild;
-
-                if (cardElement) {
-                    cardElement.addEventListener('click', (e) => {
-                        if (e.target.closest('.seen-toggle-icon')) return;
-                        const id = parseInt(cardElement.dataset.id);
-                        const type = cardElement.dataset.type;
-                        if (!isNaN(id) && type) onCardClick(id, type);
-                    });
-                    gridHtml.appendChild(cardElement);
-                }
-            }
-        });
-        container.appendChild(gridHtml);
-
-        // Attach listeners for seen toggle icons
-        if (window.attachSeenToggleListenersToCards) {
-            window.attachSeenToggleListenersToCards(gridHtml);
-        }
-
-    } else {
-        container.innerHTML = `<p style="padding: 1rem; color: var(--text-secondary);">No results found.</p>`;
-    }
-}
-
-/**
- * Appends more items to an existing grid container.
- * @param {HTMLElement} gridContainerElement - The HTML element that serves as the grid container.
- * @param {Array<object>} items - An array of movie/TV show objects to append.
- * @param {boolean} isLightMode - True if light mode is active.
- * @param {function} onCardClick - Callback function when a card is clicked.
- * @param {function} isItemSeenFn - Function to check if an item is seen.
- */
-export function appendItemsToGrid(gridContainerElement, items, isLightMode, onCardClick, isItemSeenFn) {
-    if (!gridContainerElement || !items || items.length === 0) {
-        return;
-    }
-
-    items.forEach(item => {
-        if (item.poster_path) { // Only append items with posters
-            const cardHtml = createContentCardHtml(item, isLightMode, isItemSeenFn);
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = cardHtml;
-            const cardElement = tempDiv.firstElementChild;
-
-            if (cardElement) {
-                cardElement.addEventListener('click', (e) => {
-                    if (e.target.closest('.seen-toggle-icon')) return;
-                    const id = parseInt(cardElement.dataset.id);
-                    const type = cardElement.dataset.type;
-                    if (!isNaN(id) && type) onCardClick(id, type);
-                });
-                gridContainerElement.appendChild(cardElement);
-            }
-        }
-    });
-
-    if (window.attachSeenToggleListenersToCards) {
-        window.attachSeenToggleListenersToCards(gridContainerElement);
     }
 }

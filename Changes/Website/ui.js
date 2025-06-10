@@ -1,18 +1,11 @@
-// js/ui.js 
-import {
-    imageBaseUrl, smallImageBaseUrl, stillImageBaseUrl,
-    tileThumbnailPlaceholder, genericItemPlaceholder, vidsrcProviders
-} from './config.js';
-import {
-    previousStateForBackButton, scrollPositions,
-    updatePreviousStateForBackButton,
-    setActiveSeasonCard, getActiveSeasonCard
-} from './state.js';
+// Website/ui.js
+import { smallImageBaseUrl, stillImageBaseUrl, genericItemPlaceholder, vidsrcProviders } from './config.js';
+import { previousStateForBackButton, scrollPositions, updatePreviousStateForBackButton, setActiveSeasonCard, getActiveSeasonCard } from './state.js';
 import { fetchRecommendations, fetchCollection, fetchEpisodesForSeason } from './api.js';
 import { updateAddToWatchlistButtonState } from './watchlist.js';
 import { updateMarkAsSeenButtonState, appendSeenCheckmark } from './seenList.js';
 import { extractCertification } from './ratingUtils.js';
-import { createAuthFormUI } from './auth.js'; // For popups that need auth form
+import { createAuthFormUI } from '../SignIn/auth.js'; // Updated path
 import { handleItemSelect } from './handlers.js';
 
 // DOM Elements (initialized in main.js)
@@ -22,7 +15,6 @@ let messageArea, resultsContainer,
     detailOverlay, detailOverlayContent, positionIndicator,
     itemVidsrcPlayerSection, overlayVidsrcPlayerSection,
     latestContentDisplay, popularContentDisplay;
-
 
 export function initUiRefs(elements) {
     messageArea = elements.messageArea;
@@ -87,7 +79,6 @@ export function showMessage(message, type = 'info', section = 'main', targetElem
     }
 }
 
-// Clears only the detail panel for a given context
 export function clearItemDetailPanel(targetViewContext = "item") {
     const detailContainer = document.getElementById(targetViewContext + 'DetailContainer');
     const detailTitleEl = document.getElementById(targetViewContext + 'DetailTitle');
@@ -110,21 +101,18 @@ export function clearItemDetailPanel(targetViewContext = "item") {
     if (backBtnContainer) backBtnContainer.innerHTML = '';
 }
 
-// Clears only the search results panel
 export function clearSearchResultsPanel() {
     if (resultsContainer) {
         resultsContainer.innerHTML = '<p class="text-gray-500 italic">Search for media.</p>';
     }
 }
 
-// This function is kept for broad clearing if needed, but more specific functions above are preferred.
 export function clearAllDynamicContent(targetViewContext = "item") {
     clearItemDetailPanel(targetViewContext);
-    if (targetViewContext === "item") { // Only clear search results if specifically clearing the main item view fully
+    if (targetViewContext === "item") {
         clearSearchResultsPanel();
     }
 }
-
 
 export function showPositionSavedIndicator() {
     if (!positionIndicator) return;
@@ -162,7 +150,7 @@ export function createBackButton(originContext) {
         } else if (originContext === 'watchlistItemsList') {
             clearItemDetailPanel('watchlist'); 
         } else if (originContext === 'searchList') {
-            clearItemDetailPanel('item'); // This will ONLY clear the item detail, search results are not touched here.
+            clearItemDetailPanel('item');
         }
         updatePreviousStateForBackButton(null);
     };
@@ -177,7 +165,6 @@ export function displayResults(items, itemType, resContainer) {
         return;
     }
 
-    // resContainer already has grid classes from index.html
     items.forEach(item => {
         const title = item.title || item.name;
         const posterPath = item.poster_path;
@@ -204,7 +191,6 @@ export async function displayItemDetails(imdbId, itemTitleText, detailsObject, i
     targetDetailContainerEl, targetSeasonsEl, targetRelatedEl, targetCollectionEl,
     targetPlayerEl, targetViewContext = "item"
 ) {
-    // ... (displayItemDetails function content remains the same as the last fully provided version)
     if (!targetDetailContainerEl) { console.error("displayItemDetails: targetDetailContainerEl is null"); return; }
     targetDetailContainerEl.innerHTML = '';
     const titleBookmarkWrapper = document.createElement('div');
@@ -264,7 +250,6 @@ export async function displayItemDetails(imdbId, itemTitleText, detailsObject, i
 }
 
 export function updateVidsrcPlayer(containerEl, itemType, tmdbIdForUrl, imdbIdForDisplay, season = null, episode = null) {
-    // ... (updateVidsrcPlayer function remains the same) ...
      if (!containerEl) return;
     containerEl.innerHTML = '';
     let playingTxt = itemType === 'tv' ? "Entire Series" : "Movie";
@@ -325,7 +310,6 @@ export function updateVidsrcPlayer(containerEl, itemType, tmdbIdForUrl, imdbIdFo
 }
 
 export function displaySeasons(seasons, parentShowTmdbId, parentShowImdbId, targetSeasonsEl, targetViewContext = "item") {
-    // ... (displaySeasons function remains the same) ...
     if (!targetSeasonsEl) return;
     targetSeasonsEl.innerHTML = '';
     if (!seasons || seasons.length === 0) return;
@@ -359,7 +343,7 @@ export function displaySeasons(seasons, parentShowTmdbId, parentShowImdbId, targ
 
             try {
                 const seasonDetailsWithEpisodes = await fetchEpisodesForSeason(parentShowTmdbId, s.season_number);
-                episodeDisplayContainer.innerHTML = ''; // Clear previous episodes or loading
+                episodeDisplayContainer.innerHTML = '';
 
                 if (seasonDetailsWithEpisodes.episodes && seasonDetailsWithEpisodes.episodes.length > 0) {
                     const episodesTitle = document.createElement('h4');
@@ -419,7 +403,6 @@ function createEpisodeCard(ep, playerSection, parentShowTmdbId, parentShowImdbId
 }
 
 export function createRelatedItemCard(item, itemType, currentViewContext = "item") {
-    // ... (createRelatedItemCard function remains the same, calls appendSeenCheckmark) ...
     const card = document.createElement('div');
     card.className = 'related-item-card bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-600 flex-shrink-0 w-[150px]';
     card.dataset.id = String(item.id); 
@@ -438,9 +421,13 @@ export function createRelatedItemCard(item, itemType, currentViewContext = "item
 }
 
 export function displayTmdbCategoryItems(items, itemType, container, mainCategory, category, currentPage, totalPages) {
-    // ... (displayTmdbCategoryItems function remains the same, calls appendSeenCheckmark) ...
     if (!container) return;
     container.innerHTML = '';
+    if (!items || items.length === 0) {
+        showMessage("No results found.", 'info', 'results', container);
+        return;
+    }
+
     const itemsGrid = document.createElement('div');
     itemsGrid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 generic-items-container';
     items.forEach(item => {
@@ -489,49 +476,35 @@ export function displayTmdbCategoryItems(items, itemType, container, mainCategor
     container.appendChild(paginationDiv);
 }
 
-// --- REVISED positionPopup function ---
 export function positionPopup(button, popup) {
     if (!button || !popup) {
         console.warn("positionPopup called with null button or popup.");
         return;
     }
 
-    const buttonContainer = popup.parentElement; // Popup is child of button's container
+    const buttonContainer = popup.parentElement;
     if (!buttonContainer) {
         console.warn("Popup has no parent container for positioning.");
         return;
     }
-    // Ensure buttonContainer is the positioning context, or its offsetParent is.
-    // The popup itself is position:absolute, its parent (buttonContainer) is position:relative.
 
-    const popupBuffer = 8; // Small buffer from edges
+    const popupBuffer = 8;
 
-    // Apply initial CSS-driven position relative to buttonContainer
-    // This makes it drop down, aligned left with the button container
-    popup.style.left = '0px';
-    popup.style.right = 'auto'; 
-    popup.style.top = `${button.offsetHeight + 3}px`; // A small gap below the button
-
-    // Temporarily make popup measurable to get its dimensions based on content and initial CSS
     const initialDisplay = popup.style.display;
     const initialVisibility = popup.style.visibility;
     const wasHiddenByClass = popup.classList.contains('hidden');
 
     if (wasHiddenByClass) popup.classList.remove('hidden');
     popup.style.display = 'block';
-    popup.style.visibility = 'hidden'; // Keep it invisible but measurable
+    popup.style.visibility = 'hidden';
 
     let popupWidth = popup.offsetWidth;
     let popupHeight = popup.offsetHeight;
     
-    // If measurement fails (e.g. no content yet), try to use min-width from CSS if possible, or a default.
-    // The class .detail-panel-popup has min-width: 250px;
     if (popupWidth < 50 && popup.classList.contains('detail-panel-popup')) {
-        popupWidth = 250; // Use CSS min-width as a fallback if offsetWidth is too small
+        popupWidth = 250;
     }
 
-
-    // Restore original state before calculating final position
     if (wasHiddenByClass && !popup.classList.contains('hidden')) {
         popup.classList.add('hidden');
     }
@@ -544,17 +517,16 @@ export function positionPopup(button, popup) {
         return;
     }
 
-    // Get viewport-relative coordinates of the buttonContainer (the popup's positioning parent)
     const containerRect = buttonContainer.getBoundingClientRect();
 
-    // Calculate initial desired viewport-relative coordinates for the popup's top-left
     let desiredViewportLeft = containerRect.left + parseFloat(popup.style.left || 0);
     let desiredViewportTop = containerRect.top + parseFloat(popup.style.top || 0);
 
     let viewportLeftBoundary, viewportRightBoundary, viewportTopBoundary, viewportBottomBoundary;
 
+    const detailOverlayEl = document.getElementById('detailOverlay');
     const overlayContentEl = document.getElementById('detailOverlayContent');
-    const isInOverlay = detailOverlay && !detailOverlay.classList.contains('hidden') &&
+    const isInOverlay = detailOverlayEl && !detailOverlayEl.classList.contains('hidden') &&
                         overlayContentEl && !overlayContentEl.classList.contains('hidden') &&
                         overlayContentEl.contains(button);
 
@@ -564,7 +536,7 @@ export function positionPopup(button, popup) {
         viewportRightBoundary = overlayRect.right - popupBuffer;
         viewportTopBoundary = overlayRect.top + popupBuffer;
         viewportBottomBoundary = overlayRect.bottom - popupBuffer;
-    } else { // Main page context
+    } else {
         viewportLeftBoundary = popupBuffer;
         viewportRightBoundary = window.innerWidth - popupBuffer;
         viewportTopBoundary = popupBuffer;
@@ -574,27 +546,18 @@ export function positionPopup(button, popup) {
     let finalStyleLeft = parseFloat(popup.style.left || 0);
     let finalStyleTop = parseFloat(popup.style.top || 0);
 
-    // --- Horizontal Adjustment ---
-    // If the initially styled popup (left-aligned with container) overflows right:
     if (desiredViewportLeft + popupWidth > viewportRightBoundary) {
-        // Try aligning popup's right edge with buttonContainer's right edge
         finalStyleLeft = buttonContainer.offsetWidth - popupWidth; 
-        // Recalculate desired viewport left based on this new style.left
         desiredViewportLeft = containerRect.left + finalStyleLeft;
     }
 
-    // Ensure it doesn't go off the left edge of the viewport container
     if (desiredViewportLeft < viewportLeftBoundary) {
         finalStyleLeft += (viewportLeftBoundary - desiredViewportLeft);
     }
     
-    // --- Vertical Adjustment ---
-    // If placing below makes it overflow bottom edge:
     if (desiredViewportTop + popupHeight > viewportBottomBoundary) {
-        // Try placing above the button (relative to buttonContainer)
-        finalStyleTop = -popupHeight - 3; // Place above button with a small gap
+        finalStyleTop = -popupHeight - 3;
     }
-    // Ensure it doesn't go off the top edge
     const newPopupViewportTop = containerRect.top + finalStyleTop;
     if (newPopupViewportTop < viewportTopBoundary) {
         finalStyleTop += (viewportTopBoundary - newPopupViewportTop);
@@ -602,5 +565,5 @@ export function positionPopup(button, popup) {
 
     popup.style.left = `${Math.round(finalStyleLeft)}px`;
     popup.style.top = `${Math.round(finalStyleTop)}px`;
-    popup.style.right = 'auto'; // Important: if we set left, clear right
+    popup.style.right = 'auto';
 }

@@ -14,7 +14,7 @@ jest.unstable_mockModule('../firebase.js', () => ({
 }));
 
 // Import the specific function being tested directly
-const { loadUserFirestoreWatchlists } = await import('../main.js');
+const { loadUserFirestoreWatchlists } = await import('../Changes/Website/main.js');
 
 describe('main.js global functions', () => {
   test('loadUserFirestoreWatchlists is defined', () => { // Changed test description for clarity

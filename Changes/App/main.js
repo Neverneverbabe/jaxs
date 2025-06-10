@@ -1,41 +1,6 @@
-// main.js
-// Import API functions including TMDB and new Firebase functions
-import {
-    fetchTrendingItems,
-    fetchItemDetails,
-    fetchSearchResults,
-    fetchDiscoveredItems,
-    signUp,       // Firebase Auth: Sign up
-    signIn,       // Firebase Auth: Sign in
-    signOutUser,  // Firebase Auth: Sign out
-    onAuthChange, // Firebase Auth: Listener for auth state changes
-    getCurrentUser, // Firebase Auth: Get current user object
-    saveUserData,   // Firestore: Save / Update document
-    getUserDataItem, // Firestore: Get single document
-    getUserCollection, // Firestore: Get all documents in a collection
-    listenToUserCollection, // Firestore: Real-time listener for a collection
-    deleteUserData, // Firestore: Delete document
-    getUserId       // Get current user ID (Firebase UID or anonymous UUID)
-} from './api.js'; // ALL Firebase interaction now comes from api.js
-
-// Import UI functions
-import {
-    displayContentRow,
-    displayItemDetails,
-    updateThemeDependentElements,
-    updateHeroSection,
-    displaySearchResults,
-    createContentCardHtml,
-    appendItemsToGrid,
-    getCertification,
-    checkRatingCompatibility,
-    showCustomAlert, // Using a simple custom alert for now
-    hideCustomAlert,
-    showLoadingIndicator,
-    hideLoadingIndicator,
-    updateSeenButtonStateInModal, // New UI function for modal seen button
-    renderWatchlistOptionsInModal // New UI function for modal watchlist dropdown
-} from './ui.js';
+// App/main.js
+import { fetchTrendingItems, fetchItemDetails, fetchSearchResults, fetchDiscoveredItems, signUp, signIn, signOutUser, onAuthChange, getCurrentUser, saveUserData, getUserCollection, listenToUserCollection, deleteUserData } from './api.js'; // Firebase functions are now re-exported from ./api.js
+import { displayContentRow, displayItemDetails, updateThemeDependentElements, updateHeroSection, displaySearchResults, createContentCardHtml, appendItemsToGrid, getCertification, checkRatingCompatibility, showCustomAlert, hideCustomAlert, showLoadingIndicator, hideLoadingIndicator, updateSeenButtonStateInModal, renderWatchlistOptionsInModal } from './ui.js';
 
 // Global variables to store fetched data for re-filtering without new API calls
 let cachedTrendingMovies = [];
@@ -61,7 +26,7 @@ const SEARCH_DEBOUNCE_DELAY = 500; // milliseconds
 document.addEventListener('DOMContentLoaded', async () => {
     // PWA: Service Worker registration
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js') // Path to service-worker.js
+        navigator.serviceWorker.register('service-worker.js')
             .then((registration) => {
                 console.log('Service Worker registered with scope:', registration.scope);
             })
@@ -116,29 +81,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateThemeDependentElements(isLightMode); // Apply initial theme styling
 
     // --- Firebase Auth State Change Listener ---
-    // Listen for auth state changes to update profile UI and load user data
-    onAuthChange(async (user) => { // This onAuthChange is from api.js
-        updateProfileMenuUI(user); // Update profile dropdown
+    onAuthChange(async (user) => {
+        updateProfileMenuUI(user);
         if (user) {
             console.log("Auth state changed: User signed in - UID:", user.uid, "Display Name:", user.displayName);
             await loadUserSeenItems(); // Load seen items from Firestore
             await loadUserFirestoreWatchlists(); // Load watchlists from Firestore
-            // Close auth modal if it was open
             if (authModal.style.display === 'flex') {
                 closeAuthModal();
             }
         } else {
             console.log("Auth state changed: User signed out");
-            // Clear local caches on sign out
             localUserSeenItemsCache = [];
             firestoreWatchlistsCache = [];
         }
-        populateCurrentTabContent(); // Refresh UI with potentially new data based on auth state
+        populateCurrentTabContent();
     });
 
     // --- Core Functions ---
-
-    // Define onCardClick at a scope accessible by populateCurrentTabContent and loadMoreExploreItems
     const onCardClick = async (id, type) => {
         try {
             showLoadingIndicator('Fetching item details...');
@@ -146,7 +106,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const details = await fetchItemDetails(id, type);
             console.log("Fetched details:", details);
             displayItemDetails(details, type, isLightMode); // This function opens the item detail modal
-            // After modal is displayed, update the seen button and watchlist options
             updateSeenButtonStateInModal(details.id, type, isItemSeen);
             renderWatchlistOptionsInModal(details);
         } catch (error) {
@@ -157,19 +116,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // Function to switch tabs
     function switchTab(tabId) {
-        // Hide all tab content
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.classList.remove('active-tab');
         });
-        // Show the selected tab
         const activeTab = document.getElementById(tabId);
         if (activeTab) {
             activeTab.classList.add('active-tab');
         }
 
-        // Update active navigation link styling
         document.querySelectorAll('#main-nav a').forEach(link => {
             link.classList.remove('active-nav-link');
         });
@@ -178,20 +133,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             activeNavLink.classList.add('active-nav-link');
         }
 
-        // Special handling for Watch Now tab's hero section visibility
         const watchNowTab = document.getElementById('watch-now-tab');
         const heroSection = watchNowTab.querySelector('.hero-section');
         if (tabId === 'watch-now-tab') {
-            heroSection.style.display = 'flex'; // Show hero section
+            if (heroSection) heroSection.style.display = 'flex';
         } else {
-            heroSection.style.display = 'none'; // Hide hero section for other tabs
+            if (heroSection) heroSection.style.display = 'none';
         }
 
-        // Trigger content population based on the active tab
         populateCurrentTabContent();
     }
 
-    // Function to populate content for the currently active tab
     async function populateCurrentTabContent() {
         console.log("%c[DEBUG] populateCurrentTabContent called", "background: #222; color: #bada55");
         const activeTabElement = document.querySelector('.tab-content.active-tab');
@@ -202,22 +154,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const activeTabId = activeTabElement.id;
 
-        // Helper to attach seen toggle listeners to cards
-        // This function needs to be defined globally or passed if used in UI creation functions
         window.attachSeenToggleListenersToCards = (containerElement) => {
             containerElement.querySelectorAll('.seen-toggle-icon').forEach(icon => {
-                // Remove existing listener to prevent duplicates if re-rendering
                 const newIcon = icon.cloneNode(true);
                 icon.parentNode.replaceChild(newIcon, icon);
 
                 newIcon.addEventListener('click', async (e) => {
-                    e.stopPropagation(); // Prevent card click (modal opening)
+                    e.stopPropagation();
                     const card = newIcon.closest('.content-card');
                     const itemId = parseInt(card.dataset.id);
                     const itemType = card.dataset.type;
 
                     try {
-                        const details = await fetchItemDetails(itemId, itemType); // Fetch details for consistent data
+                        const details = await fetchItemDetails(itemId, itemType);
                         await toggleSeenStatus(details, itemType);
                         const newSeenStatus = isItemSeen(itemId, itemType);
                         newIcon.classList.toggle('item-is-seen', newSeenStatus);
@@ -233,18 +182,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             switch (activeTabId) {
                 case 'watch-now-tab':
-                    // Update loading messages
                     document.getElementById('trending-now-row').innerHTML = '<p class="loading-message">Loading trending movies...</p>';
                     document.getElementById('recommended-row').innerHTML = '<p class="loading-message">Loading recommended content...</p>';
                     document.getElementById('new-releases-row').innerHTML = '<p class="loading-message">Loading new releases...</p>';
 
-                    // Fetch (if not cached) and display trending movies for "Trending Now"
                     if (cachedTrendingMovies.length === 0) {
                         console.log("Fetching trending movies...");
                         cachedTrendingMovies = await fetchTrendingItems('movie', 'week');
                         console.log("Trending Movies fetched:", cachedTrendingMovies);
                     }
-                    // Filter based on age rating
                     const filteredTrending = currentAgeRatingFilter.length > 0
                         ? cachedTrendingMovies.filter(item => checkRatingCompatibility(getCertification(item), currentAgeRatingFilter))
                         : cachedTrendingMovies;
@@ -253,16 +199,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         document.getElementById('trending-now-row').innerHTML = `<p style="padding: 1rem; color: var(--text-secondary);">No items matched your filter.</p>`;
                     }
 
-
-                    // Set the first trending movie as the hero section content
-                    const heroSourceList = (filteredTrending.length > 0) ? filteredTrending : cachedTrendingMovies; // Use filtered or original if filtered is empty
+                    const heroSourceList = (filteredTrending.length > 0) ? filteredTrending : cachedTrendingMovies;
                     if (heroSourceList.length > 0) {
                         updateHeroSection(heroSourceList[0], isLightMode);
                     } else {
-                        updateHeroSection(null, isLightMode); // Fallback if no content
+                        updateHeroSection(null, isLightMode);
                     }
 
-                    // Fetch (if not cached) and display trending TV shows for "Because You Watched..."
                     if (cachedRecommendedShows.length === 0) {
                         console.log("Fetching trending TV shows...");
                         cachedRecommendedShows = await fetchTrendingItems('tv', 'week');
@@ -276,8 +219,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         document.getElementById('recommended-row').innerHTML = `<p style="padding: 1rem; color: var(--text-secondary);">No items matched your filter.</p>`;
                     }
 
-
-                    // Fetch (if not cached) and display daily trending movies for "New Releases"
                     if (cachedNewReleaseMovies.length === 0) {
                         console.log("Fetching daily trending movies...");
                         cachedNewReleaseMovies = await fetchTrendingItems('movie', 'day');
@@ -291,10 +232,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                         document.getElementById('new-releases-row').innerHTML = `<p style="padding: 1rem; color: var(--text-secondary);">No items matched your filter.</p>`;
                     }
 
-                    // Attach event listeners for seen toggle icons on all rows
                     attachSeenToggleListenersToCards(document.getElementById('trending-now-row'));
                     attachSeenToggleListenersToCards(document.getElementById('recommended-row'));
                     attachSeenToggleListenersToCards(document.getElementById('new-releases-row'));
+                    break;
+
+                case 'explore-tab':
+                    const exploreGrid = document.getElementById('explore-grid-container');
+                    if (exploreCurrentPage === 1 && exploreGrid.innerHTML.trim() === "") { // Only load if first time or cleared
+                        exploreGrid.innerHTML = '<p class="loading-message">Loading movies for you...</p>';
+                        exploreHasMore = true;
+                        exploreIsLoading = false; // Reset loading state
+                        await loadMoreExploreItems();
+                    } else {
+                        // Re-render existing items with new filter if present
+                        const filteredExploreItems = currentAgeRatingFilter.length > 0
+                            ? cachedExploreItems.filter(item => checkRatingCompatibility(getCertification(item), currentAgeRatingFilter))
+                            : cachedExploreItems;
+                        displaySearchResults('explore-grid-container', filteredExploreItems, isLightMode, onCardClick, isItemSeen);
+                    }
                     break;
 
                 case 'library-tab':
@@ -304,16 +260,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 case 'seen-tab':
                     const seenContentDiv = document.getElementById('seen-content');
-                    const seenItems = getSeenItems(); // Now uses the local cache populated from Firestore
-                    seenContentDiv.innerHTML = ''; // Clear previous content
+                    const seenItems = getSeenItems();
+                    seenContentDiv.innerHTML = '';
 
                     if (seenItems.length === 0) {
                         seenContentDiv.innerHTML = `<p style="padding: 1rem; color: var(--text-secondary);">No items marked as seen yet.</p>`;
                     } else {
                         const gridContainer = document.createElement('div');
-                        gridContainer.className = 'search-results-grid'; // Reuse search grid styling
+                        gridContainer.className = 'search-results-grid';
 
-                        // Apply filter to seen items
                         const filteredSeenItems = currentAgeRatingFilter.length > 0
                             ? seenItems.filter(item => checkRatingCompatibility(getCertification(item), currentAgeRatingFilter))
                             : seenItems;
@@ -322,20 +277,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                             seenContentDiv.innerHTML = `<p style="padding: 1rem; color: var(--text-secondary);">No seen items matched the selected filter.</p>`;
                         } else {
                             filteredSeenItems.forEach(item => {
-                                // Ensure item has media_type for createContentCardHtml
-                                const displayItem = { ...item, media_type: item.type, poster_path: item.poster_path }; // Ensure poster_path is included
-                                gridContainer.innerHTML += createContentCardHtml(displayItem, isLightMode, isItemSeen); // All items here are seen
+                                const displayItem = { ...item, media_type: item.type, poster_path: item.poster_path };
+                                gridContainer.innerHTML += createContentCardHtml(displayItem, isLightMode, isItemSeen);
                             });
                             seenContentDiv.appendChild(gridContainer);
-                            attachSeenToggleListenersToCards(gridContainer); // Attach listeners for seen icons
+                            attachSeenToggleListenersToCards(gridContainer);
                         }
                     }
                     break;
 
                 case 'search-tab':
-                    // If a search was performed previously, re-display results with current filter
                     if (searchInput.value.trim().length >= 3 && cachedSearchResults.length > 0) {
-                        performSearch(true); // Re-render with new filter
+                        performSearch(true);
                     } else {
                         searchResultsContainer.innerHTML = `<p style="color: var(--text-secondary);">Start typing to find movies and TV shows!</p>`;
                     }
@@ -346,7 +299,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (error) {
             console.error("Error populating active tab content:", error);
-            const contentContainer = activeTabElement; // Fallback to the active tab div
+            const contentContainer = activeTabElement;
             contentContainer.innerHTML = `
                 <section class="content-section" style="text-align: center; margin-top: 50px; padding: 20px; border-radius: 10px; background-color: var(--card-bg); box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
                     <h3 style="color: var(--text-primary); font-size: 1.875rem; margin-bottom: 1rem;">Content Loading Error</h3>
@@ -365,11 +318,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Event Listeners ---
-
-    // Attach click listeners to navigation links
     mainNav.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', (event) => {
-            event.preventDefault(); // Prevent default link behavior
+            event.preventDefault();
             const tabId = event.target.dataset.tab;
             if (tabId) {
                 switchTab(tabId);
@@ -377,7 +328,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // Add event listener for the header search icon button
     const headerSearchButton = document.querySelector('.icon-buttons button[data-tab="search-tab"]');
     if (headerSearchButton) {
         headerSearchButton.addEventListener('click', (event) => {
@@ -387,19 +337,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Toggle Dark/Light Mode
     themeToggleBtn.addEventListener('click', () => {
         body.classList.toggle('light-mode');
         isLightMode = body.classList.contains('light-mode');
         updateThemeDependentElements(isLightMode);
-        // After theme changes, re-populate content to update placeholder images if needed
-        populateCurrentTabContent(); // Re-populate active tab content with new theme
+        populateCurrentTabContent();
     });
 
     // Filter Dropdown Logic & State
-    let tempSelectedFilters = []; // Holds selections before "Apply"
+    let tempSelectedFilters = [];
 
-    // Helper for filter dropdown rendering (moved inline here for simplicity as it was a missing UI export)
     function renderFilterDropdownOptions(container, selectedFilters) {
         container.innerHTML = `
             <div class="dropdown-item filter-option-item" data-rating="">All Ratings <span class="checkmark">✔</span></div>
@@ -412,7 +359,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         container.querySelectorAll('.filter-option-item').forEach(item => {
             const ratingValue = item.dataset.rating;
             if (selectedFilters.includes(ratingValue) || (selectedFilters.length === 0 && ratingValue === "")) {
-                item.classList.add('item-selected'); // Use item-selected for multi-select
+                item.classList.add('item-selected');
             } else {
                 item.classList.remove('item-selected');
             }
@@ -421,97 +368,134 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (filterButton && filterOptionsList && filterOptionsItemsContainer && filterApplyBtn && filterClearBtn) {
         filterButton.addEventListener('click', (event) => {
-            event.stopPropagation(); // Prevent click from immediately closing due to outside click listener
+            event.stopPropagation();
             const isOpen = filterOptionsList.style.display === 'block';
             if (!isOpen) {
-                // Initialize tempSelectedFilters with current applied filters
-                tempSelectedFilters = currentAgeRatingFilter.length === 0 ? [""] : [...currentAgeRatingFilter];
+                tempSelectedFilters = selectedCertifications.length === 0 ? [""] : [...selectedCertifications];
                 renderFilterDropdownOptions(filterOptionsItemsContainer, tempSelectedFilters);
                 filterOptionsList.style.display = 'block';
+                positionPopup(filterButton, filterOptionsList);
             } else {
                 filterOptionsList.style.display = 'none';
             }
         });
 
         filterOptionsItemsContainer.addEventListener('click', (event) => {
-            event.stopPropagation(); // Prevent click from bubbling to document
+            event.stopPropagation();
             const target = event.target.closest('.filter-option-item');
             if (!target || target.dataset.rating === undefined) return;
 
             const ratingValue = target.dataset.rating;
 
-            if (ratingValue === "") { // Clicked "All Ratings"
+            if (ratingValue === "") {
                 tempSelectedFilters = [""];
             } else {
-                // Remove "All Ratings" if a specific rating is chosen
                 const allRatingsIndex = tempSelectedFilters.indexOf("");
                 if (allRatingsIndex > -1) {
                     tempSelectedFilters.splice(allRatingsIndex, 1);
                 }
-                // Toggle the specific rating
                 const index = tempSelectedFilters.indexOf(ratingValue);
                 if (index > -1) {
                     tempSelectedFilters.splice(index, 1);
                 } else {
                     tempSelectedFilters.push(ratingValue);
                 }
-                // If all specific ratings are deselected, revert to "All Ratings"
                 if (tempSelectedFilters.length === 0) {
                     tempSelectedFilters = [""];
                 }
             }
-            renderFilterDropdownOptions(filterOptionsItemsContainer, tempSelectedFilters); // Re-render options
-        });
-
-        filterApplyBtn.addEventListener('click', (event) => {
-            event.stopPropagation(); // Prevent click from bubbling to document
-            if (tempSelectedFilters.includes("") || tempSelectedFilters.length === 0) {
-                currentAgeRatingFilter = []; // Apply "All Ratings"
-            } else {
-                currentAgeRatingFilter = [...tempSelectedFilters];
-            }
-            filterOptionsList.style.display = 'none';
-            filterButton.classList.toggle('filter-active', currentAgeRatingFilter.length > 0);
-            populateCurrentTabContent(); // Re-populate with new applied filters
-        });
-
-        filterClearBtn.addEventListener('click', (event) => {
-            event.stopPropagation(); // Prevent click from bubbling to document
-            tempSelectedFilters = [""]; // Set temporary selection to "All Ratings"
             renderFilterDropdownOptions(filterOptionsItemsContainer, tempSelectedFilters);
         });
 
-        // Hide dropdown when clicking outside
+        filterApplyBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            if (tempSelectedFilters.includes("") || tempSelectedFilters.length === 0) {
+                updateSelectedCertifications([]);
+            } else {
+                updateSelectedCertifications([...tempSelectedFilters]);
+            }
+            filterOptionsList.style.display = 'none';
+            filterButton.classList.toggle('filter-active', selectedCertifications.length > 0);
+            populateCurrentTabContent();
+        });
+
+        filterClearBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            tempSelectedFilters = [""];
+            renderFilterDropdownOptions(filterOptionsItemsContainer, tempSelectedFilters);
+        });
+
         document.addEventListener('click', (event) => {
             if (filterOptionsList.style.display === 'block' && !filterOptionsList.contains(event.target) && event.target !== filterButton && !filterButton.contains(event.target)) {
                 filterOptionsList.style.display = 'none';
             }
         });
     }
-    // Initial state for filter button (e.g., if a filter is loaded from localStorage in the future)
+
     if (filterButton) {
-        filterButton.classList.toggle('filter-active', currentAgeRatingFilter.length > 0);
+        filterButton.classList.toggle('filter-active', selectedCertifications.length > 0);
     }
 
-    // Explore Tab Scroll Listener
-    window.addEventListener('scroll', handleInfiniteScroll);
+    // Explore Tab Infinite Scroll
+    const exploreGridContainer = document.getElementById('explore-grid-container');
+    let cachedExploreItems = [];
+
+    async function loadMoreExploreItems() {
+        if (exploreIsLoading || !exploreHasMore) return;
+
+        exploreIsLoading = true;
+        const loadingIndicator = document.getElementById('explore-loading-indicator');
+        if (loadingIndicator) loadingIndicator.style.display = 'block';
+
+        try {
+            const items = await fetchDiscoveredItems('movie', [], exploreCurrentPage);
+            cachedExploreItems = cachedExploreItems.concat(items);
+
+            if (items.length > 0) {
+                const itemsToDisplay = currentAgeRatingFilter.length > 0
+                    ? items.filter(item => {
+                        const cert = getCertification(item);
+                        return currentAgeRatingFilter.some(filterCategory => checkRatingCompatibility(cert, filterCategory));
+                    })
+                    : items;
+                appendItemsToGrid(exploreGridContainer, itemsToDisplay, isLightMode, onCardClick, isItemSeen);
+                exploreCurrentPage++;
+                if (items.length < 20) {
+                    exploreHasMore = false;
+                }
+            } else {
+                exploreHasMore = false;
+            }
+        } catch (error) {
+            console.error("Error loading more explore items:", error);
+            showCustomAlert('Error', `Failed to load more content for Explore: ${error.message}`);
+        } finally {
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+            exploreIsLoading = false;
+        }
+    }
+
+    window.addEventListener('scroll', () => {
+        const exploreTab = document.getElementById('explore-tab');
+        if (!exploreTab || !exploreTab.classList.contains('active-tab')) return;
+
+        if ((window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 300) {
+            loadMoreExploreItems();
+        }
+    });
 
     // --- Profile Menu and Auth Modal Logic ---
-
-    // Toggle profile dropdown visibility
     profileMenuButton.addEventListener('click', (event) => {
-        event.stopPropagation(); // Prevent document click from immediately closing
+        event.stopPropagation();
         profileDropdown.classList.toggle('show');
     });
 
-    // Close profile dropdown when clicking outside
     document.addEventListener('click', (event) => {
         if (!profileMenuContainer.contains(event.target) && profileDropdown.classList.contains('show')) {
             profileDropdown.classList.remove('show');
         }
     });
 
-    // Update profile menu UI based on authentication state
     function updateProfileMenuUI(user) {
         if (user) {
             profileStatus.textContent = `Signed in as ${user.displayName || user.email}`;
@@ -526,22 +510,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Open Auth Modal in specified mode ('signin' or 'signup')
     function openAuthModal(mode) {
         authModal.style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // Disable scrolling on body
+        document.body.style.overflow = 'hidden';
         setAuthModalMode(mode);
     }
 
-    // Close Auth Modal
     function closeAuthModal() {
         authModal.style.display = 'none';
-        document.body.style.overflow = ''; // Re-enable scrolling
-        // Clear form fields when closing
+        document.body.style.overflow = '';
         authForm.reset();
     }
 
-    // Set Auth Modal mode (Sign In or Sign Up)
     function setAuthModalMode(mode) {
         if (mode === 'signup') {
             authModalTitle.textContent = 'Sign Up';
@@ -562,13 +542,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Auth Modal Event Listeners
     profileSignInBtn.addEventListener('click', () => openAuthModal('signin'));
     profileSignUpBtn.addEventListener('click', () => openAuthModal('signup'));
     profileSignOutBtn.addEventListener('click', async () => {
         try {
-            await signOutUser(); // signOutUser is from api.js
-            profileDropdown.classList.remove('show'); // Hide dropdown on sign out
+            await signOutUser();
+            profileDropdown.classList.remove('show');
             showCustomAlert('Success', 'You have been signed out.');
         } catch (error) {
             console.error("Error signing out:", error);
@@ -578,7 +557,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     authModalCloseButton.addEventListener('click', closeAuthModal);
     authModal.addEventListener('click', (event) => {
-        if (event.target === authModal) { // Clicked on the backdrop
+        if (event.target === authModal) {
             closeAuthModal();
         }
     });
@@ -586,7 +565,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     authSwitchLink.addEventListener('click', () => {
         const currentMode = authModalTitle.textContent === 'Sign In' ? 'signin' : 'signup';
         setAuthModalMode(currentMode === 'signin' ? 'signup' : 'signin');
-        authForm.reset(); // Clear form fields when switching mode
+        authForm.reset();
     });
 
     authForm.addEventListener('submit', async (event) => {
@@ -608,43 +587,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                     showCustomAlert('Error', 'Passwords do not match.');
                     return;
                 }
-                await signUp(name, email, password); // signUp is from api.js
+                await signUp(name, email, password);
                 showCustomAlert('Success', 'Account created successfully! You are now signed in.');
             } else { // signin
-                await signIn(email, password); // signIn is from api.js
+                await signIn(email, password);
                 showCustomAlert('Success', 'Signed in successfully!');
             }
-            closeAuthModal(); // onAuthChange listener will handle further UI updates
+            closeAuthModal();
         } catch (error) {
             console.error("Authentication error:", error);
             let errorMessage = "An unknown error occurred.";
-            // Firebase specific error messages
             if (error.code) {
                 switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = 'The email address is already in use by another account.';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = 'The email address is not valid.';
-                        break;
-                    case 'auth/operation-not-allowed':
-                        errorMessage = 'Email/password accounts are not enabled. Contact support.';
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = 'The password is too weak. Please use at least 6 characters.';
-                        break;
-                    case 'auth/user-disabled':
-                        errorMessage = 'This user account has been disabled.';
-                        break;
+                    case 'auth/email-already-in-use': errorMessage = 'The email address is already in use by another account.'; break;
+                    case 'auth/invalid-email': errorMessage = 'The email address is not valid.'; break;
+                    case 'auth/operation-not-allowed': errorMessage = 'Email/password accounts are not enabled. Contact support.'; break;
+                    case 'auth/weak-password': errorMessage = 'The password is too weak. Please use at least 6 characters.'; break;
+                    case 'auth/user-disabled': errorMessage = 'This user account has been disabled.'; break;
                     case 'auth/user-not-found':
-                    case 'auth/wrong-password':
-                        errorMessage = 'Invalid email or password.';
-                        break;
-                    case 'auth/network-request-failed':
-                        errorMessage = 'Network error. Please check your internet connection.';
-                        break;
-                    default:
-                        errorMessage = `Authentication failed: ${error.message}`;
+                    case 'auth/wrong-password': errorMessage = 'Invalid email or password.'; break;
+                    case 'auth/network-request-failed': errorMessage = 'Network error. Please check your internet connection.'; break;
+                    default: errorMessage = `Authentication failed: ${error.message}`;
                 }
             } else {
                 errorMessage = error.message;
@@ -662,13 +625,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!reRenderOnly && query.length < 3) {
             searchResultsContainer.innerHTML = `<p style="color: var(--text-secondary);">Please enter at least 3 characters to search.</p>`;
-            // Clear cached results if query is too short for a new search
             cachedSearchResults = [];
             return;
         }
 
         if (reRenderOnly && cachedSearchResults.length > 0) {
-            // Use cached results and re-display with current filter
             const filteredResults = currentAgeRatingFilter.length > 0
                 ? cachedSearchResults.filter(item => checkRatingCompatibility(getCertification(item), currentAgeRatingFilter))
                 : cachedSearchResults;
@@ -676,15 +637,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (filteredResults.length === 0 && currentAgeRatingFilter.length > 0) {
                 searchResultsContainer.innerHTML = `<p style="padding: 1rem; color: var(--text-secondary);">No items from your search matched the selected filter.</p>`;
             }
-            // Attach seen toggle listeners to newly displayed cards
-            attachSeenToggleListenersToCards(searchResultsContainer);
             return;
-        } else if (!reRenderOnly) { // New search
+        } else if (!reRenderOnly) {
             searchResultsContainer.innerHTML = `<p class="loading-message">Searching for "${query}"...</p>`;
             try {
                 showLoadingIndicator('Searching...');
                 console.log(`Fetching search results for query: "${query}"`);
-                const results = await fetchSearchResults(query, 'multi'); // Search both movies and TV shows
+                const results = await fetchSearchResults(query, 'multi');
                 cachedSearchResults = results;
                 console.log("Search results fetched:", cachedSearchResults);
 
@@ -698,9 +657,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else if (results.length === 0) {
                     searchResultsContainer.innerHTML = `<p style="padding: 1rem; color: var(--text-secondary);">No results found for "${query}".</p>`;
                 }
-                // Attach seen toggle listeners to newly displayed cards
-                attachSeenToggleListenersToCards(searchResultsContainer);
-
             } catch (error) {
                 console.error("Error performing search:", error);
                 searchResultsContainer.innerHTML = `<p style="color: var(--text-secondary);">Error searching for content. Please try again. Error: ${error.message}</p>`;
@@ -710,57 +666,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Live Search Input Event Listener (debounced)
     searchInput.addEventListener('input', () => {
-        clearTimeout(searchTimer); // Clear previous timer
+        clearTimeout(searchTimer);
         searchTimer = setTimeout(() => {
-            performSearch(false); // Perform new search after delay
+            performSearch(false);
         }, SEARCH_DEBOUNCE_DELAY);
     });
 
-    // Keep the search button click for immediate search if user prefers
     searchButton.addEventListener('click', () => {
-        clearTimeout(searchTimer); // Clear any pending debounced search
+        clearTimeout(searchTimer);
         performSearch(false);
     });
 
-    // Initial load: show Watch Now tab and populate its content
-    switchTab('watch-now-tab');
+    // --- Seen Items Logic ---
+    let unsubscribeSeenItems = null;
 
-
-    // --- Seen Items Logic (Firestore Integration) ---
-
-    // Listener for real-time updates to seenItems
-    let unsubscribeSeenItems = null; // To store the unsubscribe function
-
-    onAuthChange((user) => { // This onAuthChange is from api.js
-        // Unsubscribe from previous listener if exists
+    onAuthChange((user) => {
         if (unsubscribeSeenItems) {
             unsubscribeSeenItems();
             unsubscribeSeenItems = null;
         }
 
         if (user) {
-            // Subscribe to seenItems collection for the current user
-            // This is getUserCollection, not listenToUserCollection. Need to ensure correct one.
-            // Correction: `listenToUserCollection` is the correct function for real-time.
             unsubscribeSeenItems = listenToUserCollection('seenItems', (items) => {
                 localUserSeenItemsCache = items;
                 console.log("Real-time Seen Items update:", localUserSeenItemsCache);
-                // Only re-render the 'Seen' tab if it's currently active
                 if (document.getElementById('seen-tab').classList.contains('active-tab')) {
                     populateCurrentTabContent();
                 }
-                // Also update any open item detail modal
                 const modal = document.getElementById('item-detail-modal');
                 if (modal.style.display === 'flex') {
-                    const currentItemId = parseInt(modal.querySelector('#toggle-seen-btn')?.dataset.id);
-                    const currentItemType = modal.querySelector('#toggle-seen-btn')?.dataset.type;
-                    if (currentItemId && currentItemType) {
-                        updateSeenButtonStateInModal(currentItemId, currentItemType, isItemSeen);
+                    const currentItemData = modal.querySelector('#toggle-seen-btn')?.dataset;
+                    if (currentItemData) {
+                        updateSeenButtonStateInModal(parseInt(currentItemData.id), currentItemData.type, isItemSeen);
                     }
                 }
-                // Update seen icons on visible cards across all active tabs/rows
                 document.querySelectorAll('.content-card').forEach(card => {
                     const itemId = parseInt(card.dataset.id);
                     const itemType = card.dataset.type;
@@ -773,18 +713,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             });
         } else {
-            localUserSeenItemsCache = []; // Clear cache if no user
+            localUserSeenItemsCache = [];
         }
     });
 
     async function loadUserSeenItems() {
-        // This function is still useful for initial load or if the listener is not yet active
-        // But the real-time listener will keep localUserSeenItemsCache updated.
-        // For now, we'll just ensure it fetches once if needed.
-        const user = getCurrentUser(); // getCurrentUser is from api.js
-        if (user && localUserSeenItemsCache.length === 0) { // Only fetch if not already populated by listener
+        const user = getCurrentUser();
+        if (user && localUserSeenItemsCache.length === 0) {
              try {
-                const items = await getUserCollection('seenItems'); // getUserCollection is from api.js
+                const items = await getUserCollection('seenItems');
                 localUserSeenItemsCache = items;
                 console.log("Initial load: User seen items from Firestore:", localUserSeenItemsCache);
             } catch (error) {
@@ -796,7 +733,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function getSeenItems() { // Now uses the local cache populated from Firestore
+    function getSeenItems() {
         return localUserSeenItemsCache;
     }
 
@@ -806,7 +743,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function toggleSeenStatus(itemDetails, itemType) {
-        const user = getCurrentUser(); // getCurrentUser is from api.js
+        const user = getCurrentUser();
         if (!user) {
             showCustomAlert('Info', "Please sign in to mark items as seen.");
             return;
@@ -817,25 +754,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             showLoadingIndicator('Updating seen status...');
-            if (isCurrentlySeen) { // Item is already seen, so remove it
-                await deleteUserData('seenItems', String(itemId)); // deleteUserData is from api.js
+            if (isCurrentlySeen) {
+                await deleteUserData('seenItems', String(itemId));
                 showCustomAlert('Success', `"${itemDetails.title || itemDetails.name}" marked as unseen.`);
-            } else { // Item is not seen, so add it
+            } else {
                 const seenItemData = {
                     type: itemType,
                     title: itemDetails.title || itemDetails.name,
                     poster_path: itemDetails.poster_path,
-                    backdrop_path: itemDetails.backdrop_path, // Include for hero section
+                    backdrop_path: itemDetails.backdrop_path,
                     overview: itemDetails.overview,
                     release_date: itemDetails.release_date || itemDetails.first_air_date,
                     vote_average: itemDetails.vote_average,
-                    addedAt: new Date() // Use client-side timestamp for now, Firestore handles serverTimestamp
+                    addedAt: new Date()
                 };
-                await saveUserData('seenItems', String(itemId), seenItemData); // saveUserData is from api.js
+                await saveUserData('seenItems', String(itemId), seenItemData);
                 showCustomAlert('Success', `"${itemDetails.title || itemDetails.name}" marked as seen.`);
             }
-            // The real-time listener will automatically update localUserSeenItemsCache
-            // and trigger UI updates. No need for manual cache manipulation here.
         } catch (error) {
             console.error("Error toggling seen status in Firestore:", error);
             showCustomAlert('Error', `Error updating seen status: ${error.message}`);
@@ -844,33 +779,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Expose toggleSeenStatus to be callable from the button in ui.js (modal)
     window.toggleSeenStatus = toggleSeenStatus;
 
-
     // --- Library Tab Functions (Firestore Watchlists) ---
+    let unsubscribeWatchlists = null;
 
-    // Listener for real-time updates to watchlists
-    let unsubscribeWatchlists = null; // To store the unsubscribe function
-
-    onAuthChange((user) => { // This onAuthChange is from api.js
-        // Unsubscribe from previous listener if exists
+    onAuthChange((user) => {
         if (unsubscribeWatchlists) {
             unsubscribeWatchlists();
             unsubscribeWatchlists = null;
         }
 
         if (user) {
-            // Subscribe to watchlists collection for the current user
-            unsubscribeWatchlists = listenToUserCollection('watchlists', (watchlists) => { // listenToUserCollection is from api.js
+            unsubscribeWatchlists = listenToUserCollection('watchlists', (watchlists) => {
                 firestoreWatchlistsCache = watchlists;
                 console.log("Real-time Watchlists update:", firestoreWatchlistsCache);
-                // Only re-render the 'Library' tab if it's currently active
                 if (document.getElementById('library-tab').classList.contains('active-tab')) {
-                    renderLibraryFolderCards(); // Re-render folder cards
-                    renderMoviesInSelectedFolder(currentSelectedLibraryFolder); // Re-render movies in currently selected folder
+                    renderLibraryFolderCards();
+                    renderMoviesInSelectedFolder(currentSelectedLibraryFolder);
                 }
-                 // If item detail modal is open, re-render its watchlist options
                 const modal = document.getElementById('item-detail-modal');
                 if (modal.style.display === 'flex') {
                     const currentItemData = modal.querySelector('#toggle-seen-btn')?.dataset;
@@ -880,20 +807,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         } else {
-            firestoreWatchlistsCache = []; // Clear cache if no user
+            firestoreWatchlistsCache = [];
         }
     });
 
     async function loadUserFirestoreWatchlists() {
-        // Similar to seen items, this is for initial load if listener not active
-        const user = getCurrentUser(); // getCurrentUser is from api.js
+        const user = getCurrentUser();
         if (user && firestoreWatchlistsCache.length === 0) {
             try {
-                const watchlists = await getUserCollection('watchlists'); // getUserCollection is from api.js
+                const watchlists = await getUserCollection('watchlists');
                 firestoreWatchlistsCache = watchlists.map(docData => ({
                     id: docData.id,
                     name: docData.name,
-                    items: Array.isArray(docData.items) ? docData.items : [], // Ensure 'items' is an array
+                    items: Array.isArray(docData.items) ? docData.items : [],
                     createdAt: docData.createdAt,
                     updatedAt: docData.updatedAt
                 }));
@@ -908,7 +834,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function handleCreateLibraryFolder(folderName) {
-        const user = getCurrentUser(); // getCurrentUser is from api.js
+        const user = getCurrentUser();
         if (!user) {
             showCustomAlert('Info', "Please sign in to create watchlists.");
             return;
@@ -919,7 +845,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Check if folder already exists in cache (optimistic check)
         if (firestoreWatchlistsCache.some(wl => wl.name === trimmedName)) {
             showCustomAlert('Info', `Watchlist "${trimmedName}" already exists.`);
             return;
@@ -927,18 +852,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             showLoadingIndicator('Creating watchlist...');
-            // Firestore auto-generates doc ID, so we don't need a specific docId here.
-            // Firestore security rules for this collection will enforce user ownership.
             const newWatchlistData = {
                 name: trimmedName,
-                items: [] // Initialize with empty array
+                items: []
             };
-            // Use addDoc to create a new document with an auto-generated ID
-            // We use a simple ID generator here to ensure uniqueness while Firebase provides its own ID.
-            // This is effectively `addDoc`, but using `setDoc` with a custom ID for consistency.
-            await saveUserData('watchlists', `watchlist-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, newWatchlistData); // saveUserData is from api.js
+            await saveUserData('watchlists', `watchlist-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, newWatchlistData);
             showCustomAlert('Success', `Watchlist "${trimmedName}" created successfully!`);
-            // UI will update via the real-time listener
         } catch (error) {
             console.error("Error creating watchlist:", error);
             showCustomAlert('Error', `Failed to create watchlist: ${error.message}`);
@@ -948,12 +867,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function handleDeleteLibraryFolder(folderId, folderName) {
-        const user = getCurrentUser(); // getCurrentUser is from api.js
+        const user = getCurrentUser();
         if (!user) {
             showCustomAlert('Info', "Please sign in to delete watchlists.");
             return;
         }
-        // Using window.confirm temporarily, ideally replace with custom modal
         const confirmDelete = window.confirm(`Are you sure you want to delete the watchlist "${folderName}" and all its items? This cannot be undone.`);
         if (!confirmDelete) {
             return;
@@ -961,13 +879,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             showLoadingIndicator('Deleting watchlist...');
-            await deleteUserData('watchlists', folderId); // deleteUserData is from api.js
+            await deleteUserData('watchlists', folderId);
             showCustomAlert('Success', `Watchlist "${folderName}" deleted successfully!`);
             if (currentSelectedLibraryFolder === folderId) {
-                currentSelectedLibraryFolder = null; // Deselect if it was the one deleted
-                renderMoviesInSelectedFolder(null); // Clear movie display
+                currentSelectedLibraryFolder = null;
+                renderMoviesInSelectedFolder(null);
             }
-            // UI will update via the real-time listener
         } catch (error) {
             console.error("Error deleting watchlist:", error);
             showCustomAlert('Error', `Failed to delete watchlist: ${error.message}`);
@@ -977,7 +894,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function handleAddRemoveItemToFolder(folderId, itemDetails, itemType) {
-        const user = getCurrentUser(); // getCurrentUser is from api.js
+        const user = getCurrentUser();
         if (!user) {
             showCustomAlert('Info', "Please sign in to add/remove items from watchlists.");
             return;
@@ -995,26 +912,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             let updatedItems;
             if (itemInFolderIndex > -1) {
-                // Item exists, remove it
                 updatedItems = watchlist.items.filter((_, index) => index !== itemInFolderIndex);
                 showCustomAlert('Success', `"${itemDetails.title || itemDetails.name}" removed from "${watchlist.name}".`);
             } else {
-                // Item does not exist, add it
                 const itemData = {
                     tmdb_id: itemDetails.id,
-                    item_type: itemType, // media_type can be 'movie' or 'tv'
+                    item_type: itemType,
                     title: itemDetails.title || itemDetails.name,
-                    poster_path: itemDetails.poster_path, // Save the full URL or relative path if needed
+                    poster_path: itemDetails.poster_path,
                     addedAt: new Date()
                 };
                 updatedItems = [...watchlist.items, itemData];
                 showCustomAlert('Success', `"${itemDetails.title || itemDetails.name}" added to "${watchlist.name}".`);
             }
 
-            // Save the updated watchlist document back to Firestore
-            await saveUserData('watchlists', folderId, { items: updatedItems }); // saveUserData is from api.js
-            // The real-time listener will handle updating firestoreWatchlistsCache
-            // and re-rendering the Library tab if active.
+            await saveUserData('watchlists', folderId, { items: updatedItems });
         } catch (error) {
             console.error("Error adding/removing item from folder:", error);
             showCustomAlert('Error', `Failed to update watchlist: ${error.message}`);
@@ -1023,19 +935,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Expose these functions globally so ui.js can call them back
     window.handleAddRemoveItemToFolder = handleAddRemoveItemToFolder;
     window.handleCreateLibraryFolder = handleCreateLibraryFolder;
-
 
     async function renderLibraryFolderCards() {
         if (!libraryFoldersRow) return;
 
-        libraryFoldersRow.innerHTML = ''; // Clear previous
+        libraryFoldersRow.innerHTML = '';
 
-        // Create Watchlist UI (always present in library tab)
         const createContainer = document.createElement('div');
-        createContainer.className = 'flex items-center gap-2 mr-6'; // Tailwind-like classes
+        createContainer.className = 'flex items-center gap-2 mr-6';
         createContainer.innerHTML = `
             <input type="text" id="library-create-watchlist-input" placeholder="New Watchlist Name"
                 style="padding: 0.5em 1em; border-radius: 8px; border: 1px solid var(--border-color, #333); font-size: 1em; background: var(--card-bg); color: var(--text-primary);">
@@ -1073,10 +982,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         firestoreWatchlistsCache.forEach(folder => {
-            // Check if folder has items, and if the first item has a poster_path
             const firstItemPoster = folder.items && folder.items.length > 0 && folder.items[0].poster_path
                 ? (folder.items[0].poster_path.startsWith('http') ? folder.items[0].poster_path : `https://image.tmdb.org/t/p/w200${folder.items[0].poster_path}`)
-                : "https://placehold.co/150x225/374151/9CA3AF?text=Folder"; // Placeholder for empty or no-poster folders
+                : "https://placehold.co/150x225/374151/9CA3AF?text=Folder";
 
             const card = document.createElement('div');
             card.className = 'content-card folder-card';
@@ -1085,15 +993,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             card.style.marginRight = '1rem';
             card.style.marginBottom = '1rem';
             card.style.width = '10rem';
-            card.dataset.folderId = folder.id; // Use Firestore document ID
-            card.dataset.folderName = folder.name; // Use folder name for display
+            card.dataset.folderId = folder.id;
+            card.dataset.folderName = folder.name;
 
             card.innerHTML = `
                 <img src="${firstItemPoster}" style="width:100%; height:14rem; object-fit: cover; border-radius:0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
                 <p style="text-align:center; margin-top:0.5rem; font-size:0.9em; font-weight:500; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${folder.name} (${folder.items.length})</p>
             `;
 
-            // Add delete button
             const deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = '🗑';
             deleteBtn.title = 'Delete Watchlist';
@@ -1116,20 +1023,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             card.addEventListener('click', (e) => {
                 if (e.target === deleteBtn) return;
-                currentSelectedLibraryFolder = folder.id; // Use ID for selection
+                currentSelectedLibraryFolder = folder.id;
                 renderMoviesInSelectedFolder(folder.id);
                 libraryFoldersRow.querySelectorAll('.folder-card').forEach(fc => {
                     fc.style.border = '2px solid transparent';
                     fc.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
                 });
                 card.style.border = `2px solid var(--science-blue)`;
-                card.style.boxShadow = `0 0 0 2px var(--science-blue), 0 4px 6px -1px rgba(0, 0, 0, 0.1)`; // Add blue ring
+                card.style.boxShadow = `0 0 0 2px var(--science-blue), 0 4px 6px -1px rgba(0, 0, 0, 0.1)`;
             });
 
             libraryFoldersRow.appendChild(card);
         });
 
-        // Re-apply selection highlight if a folder is selected
         if (currentSelectedLibraryFolder) {
             const selectedCard = libraryFoldersRow.querySelector(`.folder-card[data-folder-id="${currentSelectedLibraryFolder}"]`);
             if (selectedCard) {
@@ -1142,22 +1048,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function renderMoviesInSelectedFolder(folderId) {
         if (!selectedFolderTitleElement || !librarySelectedFolderMoviesRow) return;
 
-        const onLibraryMovieCardClick = async (id, type) => {
-            try {
-                showLoadingIndicator('Fetching item details...');
-                const details = await fetchItemDetails(id, type);
-                displayItemDetails(details, type, isLightMode);
-                // After modal is displayed, update the seen button and watchlist options
-                updateSeenButtonStateInModal(details.id, type, isItemSeen);
-                renderWatchlistOptionsInModal(details);
-            } catch (error) {
-                console.error("Error fetching library item details for modal:", error);
-                showCustomAlert('Error', `Error loading details: ${error.message}`);
-            } finally {
-                hideLoadingIndicator();
-            }
-        };
-
         if (!folderId) {
             selectedFolderTitleElement.textContent = 'Items in Folder';
             librarySelectedFolderMoviesRow.innerHTML = `<p style="color:var(--text-secondary); padding: 1rem;">Select a watchlist above to see its contents.</p>`;
@@ -1168,7 +1058,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!selectedWatchlist) {
             selectedFolderTitleElement.textContent = 'Items in Folder';
             librarySelectedFolderMoviesRow.innerHTML = `<p style="color:var(--text-secondary); padding: 1rem;">Watchlist not found or has been deleted.</p>`;
-            currentSelectedLibraryFolder = null; // Clear selection
+            currentSelectedLibraryFolder = null;
             return;
         }
 
@@ -1178,11 +1068,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (items.length === 0) {
             librarySelectedFolderMoviesRow.innerHTML = `<p style="color:var(--text-secondary); padding: 1rem;">This watchlist is empty.</p>`;
         } else {
-            librarySelectedFolderMoviesRow.innerHTML = ''; // Clear previous movies
+            librarySelectedFolderMoviesRow.innerHTML = '';
             items.forEach(item => {
-                // Ensure item has 'media_type' for createContentCardHtml
                 const displayItem = {
-                    id: item.tmdb_id, // Ensure we use tmdb_id for the card's data-id
+                    id: item.tmdb_id,
                     media_type: item.item_type,
                     title: item.title,
                     poster_path: item.poster_path
@@ -1192,17 +1081,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 tempDiv.innerHTML = cardHtmlString;
                 const movieCardElement = tempDiv.firstElementChild;
 
-                // Attach click listener for item details
-                movieCardElement.addEventListener('click', () => onLibraryMovieCardClick(item.tmdb_id, item.item_type));
+                movieCardElement.addEventListener('click', () => onCardClick(item.tmdb_id, item.item_type));
 
-                // Add "Remove from Folder" button
                 const removeBtn = document.createElement('button');
-                removeBtn.innerHTML = '🗑'; // Trashcan icon for remove
+                removeBtn.innerHTML = '🗑';
                 removeBtn.title = 'Remove from Watchlist';
                 removeBtn.style.position = 'absolute';
                 removeBtn.style.bottom = '5px';
                 removeBtn.style.right = '5px';
-                removeBtn.style.background = 'rgba(255, 0, 0, 0.6)'; // Red background
+                removeBtn.style.background = 'rgba(255, 0, 0, 0.6)';
                 removeBtn.style.color = 'white';
                 removeBtn.style.border = 'none';
                 removeBtn.style.borderRadius = '50%';
@@ -1210,101 +1097,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 removeBtn.style.height = '24px';
                 removeBtn.style.fontSize = '14px';
                 removeBtn.style.cursor = 'pointer';
-                removeBtn.style.zIndex = '10'; // Ensure it's above other elements
+                removeBtn.style.zIndex = '10';
                 removeBtn.onclick = async (e) => {
-                    e.stopPropagation(); // Prevent card click
-                    await handleAddRemoveItemToFolder(folderId, displayItem, item.item_type); // Use same function to remove
+                    e.stopPropagation();
+                    await handleAddRemoveItemToFolder(folderId, displayItem, item.item_type);
                 };
-                movieCardElement.querySelector('.image-container').appendChild(removeBtn); // Add to image container
+                movieCardElement.querySelector('.image-container').appendChild(removeBtn);
 
                 librarySelectedFolderMoviesRow.appendChild(movieCardElement);
             });
             attachSeenToggleListenersToCards(librarySelectedFolderMoviesRow);
         }
     }
-
-
-    // --- Explore Tab Infinite Scroll ---
-    async function loadMoreExploreItems() {
-        if (exploreIsLoading || !exploreHasMore) return;
-
-        exploreIsLoading = true;
-        const loadingIndicator = document.getElementById('explore-loading-indicator');
-        if (loadingIndicator) loadingIndicator.style.display = 'block';
-
-        try {
-            console.log(`[Explore] Fetching page ${exploreCurrentPage} with API filters: []`);
-            const items = await fetchDiscoveredItems('movie', [], exploreCurrentPage);
-            console.log("[Explore] Fetched items from API:", items);
-
-            if (items.length > 0) {
-                const exploreGrid = document.getElementById('explore-grid-container');
-                // Apply client-side filter before appending
-                const itemsToDisplay = currentAgeRatingFilter.length > 0
-                    ? items.filter(item => {
-                        const cert = getCertification(item);
-                        return currentAgeRatingFilter.some(filterCategory => checkRatingCompatibility(cert, filterCategory));
-                    })
-                    : items;
-                console.log("[Explore] Items after client-side filtering (if any):", itemsToDisplay);
-
-                appendItemsToGrid(exploreGrid, itemsToDisplay, isLightMode, onCardClick, isItemSeen);
-                exploreCurrentPage++;
-                if (items.length < 20) { // Assuming TMDB returns 20 items per page by default
-                    exploreHasMore = false;
-                }
-            } else {
-                exploreHasMore = false; // No more items to load
-                console.log("[Explore] No more items to load from API.");
-            }
-        } catch (error) {
-            console.error("Error loading more explore items:", error);
-            showCustomAlert('Error', `Failed to load more content for Explore: ${error.message}`);
-        } finally {
-            hideLoadingIndicator();
-        }
-    }
-
-    function handleInfiniteScroll() {
-        const exploreTab = document.getElementById('explore-tab');
-        if (!exploreTab || !exploreTab.classList.contains('active-tab')) return;
-
-        // Check if scrolled to near bottom
-        if ((window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 300) {
-            loadMoreExploreItems();
-        }
-    }
-
-    // Attach event listener for the dynamically added "Toggle Seen" button and Watchlist options in the modal
-    // Use event delegation on a static parent (itemDetailModal)
-    document.getElementById('item-detail-modal').addEventListener('click', async (event) => {
-        if (event.target.id === 'toggle-seen-btn') {
-            const itemId = parseInt(event.target.dataset.id);
-            const itemType = event.target.dataset.type;
-            const details = await fetchItemDetails(itemId, itemType); // Fetch details to pass to toggleSeenStatus
-            toggleSeenStatus(details, itemType);
-        }
-        // These are handled by specific functions in ui.js which now call window.handleAddRemoveItemToFolder
-        // else if (event.target.classList.contains('add-to-watchlist-btn')) { // This specific class might not exist anymore
-        //     const folderId = event.target.dataset.folderId;
-        //     const itemId = parseInt(event.target.dataset.id);
-        //     const itemType = event.target.dataset.type;
-
-        //     // Get the item details from the currently open modal
-        //     const modalContentArea = document.getElementById('modal-content-area');
-        //     const title = modalContentArea.querySelector('h2').textContent;
-        //     const posterPath = modalContentArea.querySelector('.details-grid .poster').src; // Get the full URL
-
-        //     const itemDetails = {
-        //         id: itemId,
-        //         type: itemType, // This needs to be media_type for TMDB or custom 'type'
-        //         title: title,
-        //         poster_path: posterPath // Save the full URL or relative path if needed
-        //     };
-        //     await handleAddRemoveItemToFolder(folderId, itemDetails, itemType);
-        //     // After adding/removing, re-render the watchlists in the modal to update checkmarks
-        //     renderWatchlistOptionsInModal(itemDetails); // Call a function to re-render options in modal
-        // }
-    });
-
-});
+}

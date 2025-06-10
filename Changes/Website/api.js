@@ -1,32 +1,17 @@
-// js/api.js 
-import { 
-    showLoading, 
-    showMessage, 
-    displayResults, 
-    displayItemDetails, 
-    displayTmdbCategoryItems, 
-    createRelatedItemCard, 
-    displaySeasons 
-} from './ui.js';
-// Removed: import { appendSeenCheckmark } from './seenList.js'; // ui.js now handles its own appendSeenCheckmark
-import { smallImageBaseUrl, genericItemPlaceholder, stillImageBaseUrl } from './config.js';
+// Website/api.js
+import { apiKey, tmdbBaseUrl, smallImageBaseUrl, genericItemPlaceholder, stillImageBaseUrl } from './config.js';
+import { showLoading, showMessage, displayResults, displayItemDetails, displayTmdbCategoryItems, createRelatedItemCard, displaySeasons } from './ui.js';
 import { currentSelectedItemDetails, updateCurrentSelectedItemDetails, selectedCertifications } from './state.js';
 import { extractCertification } from './ratingUtils.js';
 
-// TMDB API Configuration
-export const apiKey = "e27a888783eeaa67643bd81c5fb4422f"; // Your TMDB API key
-export const tmdbBaseUrl = "https://api.themoviedb.org/3";
-
-// DOM Element references
+// DOM Element references (still needed for direct UI manipulation in this file)
 let resultsContainer, latestContentDisplay, popularContentDisplay;
-
 
 export function initApiRefs(elements) {
     resultsContainer = elements.resultsContainer;
     latestContentDisplay = elements.latestContentDisplay;
     popularContentDisplay = elements.popularContentDisplay;
 }
-
 
 export function buildSearchUrl(query, itemType, certifications = []) {
     let url = `${tmdbBaseUrl}/search/${itemType}?api_key=${apiKey}&query=${encodeURIComponent(query)}&include_adult=false`;
@@ -40,7 +25,6 @@ export function buildSearchUrl(query, itemType, certifications = []) {
 export async function fetchSearchResults(query, itemType, certifications = []) {
     showLoading('results', `Searching for "${query}"...`, resultsContainer);
     try {
-        // Always append release_dates and content_ratings for efficient certification extraction
         const baseUrl = buildSearchUrl(query, itemType, certifications);
         const urlWithAppends = `${baseUrl}&append_to_response=release_dates,content_ratings`;
         const response = await fetch(urlWithAppends);
@@ -48,14 +32,7 @@ export async function fetchSearchResults(query, itemType, certifications = []) {
         const data = await response.json();
         if (data.results && data.results.length > 0) {
             let items = data.results;
-            // Extract certification directly as details are already appended
             items = items.map(it => {
-                // The item 'it' itself should now contain release_dates and content_ratings if the search endpoint supports it with append_to_response.
-                // If not, this approach needs the /discover endpoint or individual calls remain necessary for search.
-                // For this example, assuming search with append_to_response gives enough details.
-                // If search doesn't append for list items, the original Promise.all approach for details is needed,
-                // but it's better to use /discover if filtering by certification upfront.
-                // Let's assume for now that 'it' has the necessary fields from append_to_response.
                 const cert = extractCertification({ ...it, item_type: itemType });
                 return { ...it, certification: cert };
             });
@@ -63,8 +40,8 @@ export async function fetchSearchResults(query, itemType, certifications = []) {
             if (certifications && certifications.length > 0 && !certifications.includes('All')) {
                 items = items.filter(it => certifications.includes(it.certification || 'NR'));
             }
-            if (items.length > 0) { // Check after potential filtering
-                displayResults(items, itemType, resultsContainer); // appendSeenCheckmark argument removed
+            if (items.length > 0) {
+                displayResults(items, itemType, resultsContainer);
             } else {
                 showMessage('No results match the selected ratings.', 'info', 'results', resultsContainer);
             }
@@ -115,7 +92,6 @@ export async function fetchItemDetails(itemId, itemType, targetElements) {
     }
 }
 
-
 export async function fetchTmdbCategoryContent(mainCategory, type, category, page) {
     const displayContainer = mainCategory === 'latest' ? latestContentDisplay : popularContentDisplay;
     if (!displayContainer) {
@@ -127,7 +103,6 @@ export async function fetchTmdbCategoryContent(mainCategory, type, category, pag
     let url;
     const filtering = !selectedCertifications.includes('All');
     if (filtering) {
-        // Use /discover endpoint for better filtering capabilities including certifications
         const certs = encodeURIComponent(selectedCertifications.join('|'));
         url = `${tmdbBaseUrl}/discover/${type}?api_key=${apiKey}&sort_by=popularity.desc&certification_country=US&certification=${certs}&page=${page}&include_adult=false&append_to_response=release_dates,content_ratings`;
     } else {
@@ -142,13 +117,10 @@ export async function fetchTmdbCategoryContent(mainCategory, type, category, pag
         if (data && data.results && data.results.length > 0) {
             let items = data.results;
             if (filtering) {
-                // Certifications should already be part of 'items' due to append_to_response with /discover
                 items = items.map(it => ({
                     ...it,
                     certification: extractCertification({ ...it, item_type: type })
                 }));
-                // The filter for selectedCertifications is implicitly handled by the /discover query,
-                // but we can double-check or rely on TMDB's filtering.
             }
             if (items.length > 0) {
                 displayTmdbCategoryItems(items, type, displayContainer, mainCategory, category, page, data.total_pages);
@@ -228,12 +200,12 @@ export async function fetchEpisodesForSeason(parentShowTmdbId, seasonNum) {
         if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
         const seasonDetails = await response.json();
         if (seasonDetails.episodes && seasonDetails.episodes.length > 0) {
-            return seasonDetails; // Return all season details including episodes
+            return seasonDetails;
         } else {
-            return { ...seasonDetails, episodes: [] }; // Return season details with empty episodes
+            return { ...seasonDetails, episodes: [] };
         }
     } catch (error) {
         console.error("Episode Loading Error:", error);
-        throw error; // Re-throw the error to be handled by the caller
+        throw error;
     }
 }

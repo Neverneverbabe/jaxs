@@ -1,6 +1,6 @@
 // js/watchlist.js 
-import { db, firebaseFirestoreFunctions, auth } from './firebase.js';
-import { createAuthFormUI } from './auth.js';
+import { db, firebaseFirestoreFunctions, auth } from '../SignIn/firebase.js';
+import { createAuthFormUI } from '../SignIn/auth.js';
 import { showToast, showLoading, showMessage, clearAllDynamicContent, createBackButton, positionPopup } from './ui.js';
 import { smallImageBaseUrl, tileThumbnailPlaceholder, genericItemPlaceholder } from './config.js';
 import {

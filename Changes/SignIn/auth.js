@@ -1,25 +1,24 @@
-// js/auth.js 
-import { auth, firebaseAuthFunctions } from './firebase.js';
-import { showToast } from './ui.js';
-import {
-    updateCurrentUserId, currentUserId,
-    updateCurrentSelectedWatchlistName,
-    currentSelectedItemDetails // For updating button states on auth change
-} from './state.js';
-import { loadAndDisplayWatchlistsFromFirestore, updateAddToWatchlistButtonState, determineActiveWatchlistButtonContainerId } from './watchlist.js'; // For UI updates on auth change
-import { loadAndDisplaySeenItems, updateMarkAsSeenButtonState, determineActiveSeenButtonContainerId } from './seenList.js'; // For UI updates on auth change
+// SignIn/auth.js
+import { auth } from './firebase.js'; // Firebase auth instance
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from './firebase_api.js'; // Direct Firebase API calls
+import { showToast } from '../Website/ui.js'; // Example: Path might need adjustment depending on Website/App UI structure
+import { updateCurrentUserId, currentUserId, updateCurrentSelectedWatchlistName } from '../Website/state.js'; // Example: path might need adjustment
+import { loadAndDisplayWatchlistsFromFirestore, updateAddToWatchlistButtonState, determineActiveWatchlistButtonContainerId } from '../Website/watchlist.js'; // Example: path might need adjustment
+import { loadAndDisplaySeenItems, updateMarkAsSeenButtonState, determineActiveSeenButtonContainerId } from '../Website/seenList.js'; // Example: path might need adjustment
 
-// DOM Elements - these will be initialized in main.js and passed or imported
+// DOM Elements (initialized in main.js and passed or imported from each app/website's context)
 let authDropdownMenu, newWatchlistNameInput, createWatchlistBtn,
     watchlistTilesContainer, watchlistDisplayContainer, seenItemsDisplayContainer;
+let currentSelectedItemDetails; // This needs to be passed or accessed from calling context
 
-export function initAuthRefs(elements) {
+export function initAuthRefs(elements, itemDetailsRef) {
     authDropdownMenu = elements.authDropdownMenu;
     newWatchlistNameInput = elements.newWatchlistNameInput;
     createWatchlistBtn = elements.createWatchlistBtn;
     watchlistTilesContainer = elements.watchlistTilesContainer;
     watchlistDisplayContainer = elements.watchlistDisplayContainer;
     seenItemsDisplayContainer = elements.seenItemsDisplayContainer;
+    currentSelectedItemDetails = itemDetailsRef; // Reference to the currentSelectedItemDetails from state.js
 }
 
 export function isValidEmail(email) {
@@ -29,7 +28,7 @@ export function isValidEmail(email) {
 
 export function createAuthFormUI(parentElement, onSuccessCallback) {
     if (!parentElement) return;
-    parentElement.innerHTML = ''; // Clear previous content
+    parentElement.innerHTML = '';
 
     const instructionText = document.createElement('p');
     instructionText.className = 'text-sm text-gray-300 mb-3';
@@ -60,7 +59,7 @@ export function createAuthFormUI(parentElement, onSuccessCallback) {
         if (!email || !password) { showToast("Email and password required.", "error"); return; }
         if (!isValidEmail(email)) { showToast("Invalid email format.", "error"); return; }
         try {
-            await firebaseAuthFunctions.signInWithEmailAndPassword(auth, email, password);
+            await signInWithEmailAndPassword(auth, email, password); // Use shared API
             showToast("Signed in!", "success");
             if (onSuccessCallback) onSuccessCallback();
         } catch (error) {
@@ -78,7 +77,7 @@ export function createAuthFormUI(parentElement, onSuccessCallback) {
         if (!email || !password) { showToast("Email and password required.", "error"); return; }
         if (!isValidEmail(email)) { showToast("Invalid email format.", "error"); return; }
         try {
-            await firebaseAuthFunctions.createUserWithEmailAndPassword(auth, email, password);
+            await createUserWithEmailAndPassword(auth, email, password); // Use shared API
             showToast("Signed up! You are now logged in.", "success");
             if (onSuccessCallback) onSuccessCallback();
         } catch (error) {
@@ -91,10 +90,9 @@ export function createAuthFormUI(parentElement, onSuccessCallback) {
 
 export function updateAuthDropdownUI(user) {
     if (!authDropdownMenu) return;
-    authDropdownMenu.innerHTML = ''; // Clear it once at the beginning
+    authDropdownMenu.innerHTML = '';
 
     if (user) {
-        // Logged-in UI
         const userInfo = document.createElement('div');
         userInfo.className = 'auth-dropdown-status';
         userInfo.textContent = `Logged in as: ${user.email}`;
@@ -105,9 +103,9 @@ export function updateAuthDropdownUI(user) {
         signOutDropdownButton.textContent = 'Sign Out';
         signOutDropdownButton.addEventListener('click', async () => {
             try {
-                const oldUserId = currentUserId; // Get user ID before sign out
-                await firebaseAuthFunctions.signOut(auth);
-                localStorage.removeItem(`mediaFinderLastSelectedWatchlist_${oldUserId}`); // Clear last selected for this user
+                const oldUserId = currentUserId;
+                await signOut(auth); // Use shared API
+                localStorage.removeItem(`mediaFinderLastSelectedWatchlist_${oldUserId}`);
                 showToast("Signed out successfully.", "info");
                 if (authDropdownMenu) authDropdownMenu.classList.add('hidden');
             } catch (error) {
@@ -116,40 +114,32 @@ export function updateAuthDropdownUI(user) {
         });
         authDropdownMenu.appendChild(signOutDropdownButton);
     } else {
-        // Logged-out UI: Use the new helper function
         createAuthFormUI(authDropdownMenu, () => {
-            // On success from main dropdown, just close it.
-            // onAuthStateChanged will handle updating the UI.
             if (authDropdownMenu) authDropdownMenu.classList.add('hidden');
         });
     }
 }
 
 export async function handleAuthStateChanged(user, elements) {
-    // elements is an object containing all necessary DOM element references
-    // This is an example of how to pass dependencies if not importing them directly
-    // For this refactor, we'll assume elements needed are initialized via initAuthRefs or globally accessible for now
-
     updateAuthDropdownUI(user);
     if (user) {
         updateCurrentUserId(user.uid);
         if (newWatchlistNameInput) newWatchlistNameInput.disabled = false;
         if (createWatchlistBtn) createWatchlistBtn.disabled = false;
 
-        const seenView = document.getElementById('seenView'); // Get elements as needed
+        const seenView = document.getElementById('seenView');
         if (seenView && !seenView.classList.contains('hidden-view')) {
-            await loadAndDisplaySeenItems(currentUserId, elements.seenItemsDisplayContainer, elements.messageArea);
+            await loadAndDisplaySeenItems(); // seenList needs `elements.seenItemsDisplayContainer`, etc.
         }
-        await loadAndDisplayWatchlistsFromFirestore(); // Assumes it can get its needed refs
+        await loadAndDisplayWatchlistsFromFirestore(); // watchlist needs its own elements
 
         if (currentSelectedItemDetails) {
-            const activeBtnContainerId = determineActiveWatchlistButtonContainerId(); // Assumes it can get its needed refs
+            const activeBtnContainerId = determineActiveWatchlistButtonContainerId();
             updateAddToWatchlistButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeBtnContainerId);
-            const activeSeenBtnContainerId = determineActiveSeenButtonContainerId(); // Assumes it can get its needed refs
+            const activeSeenBtnContainerId = determineActiveSeenButtonContainerId();
             updateMarkAsSeenButtonState(currentSelectedItemDetails.tmdb_id, currentSelectedItemDetails, activeSeenBtnContainerId);
         }
     } else {
-        // localStorage.removeItem(`mediaFinderLastSelectedWatchlist_${currentUserId}`); // This was moved to signout
         updateCurrentUserId(null);
         updateCurrentSelectedWatchlistName(null);
 
@@ -157,7 +147,6 @@ export async function handleAuthStateChanged(user, elements) {
         if (watchlistDisplayContainer) watchlistDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Sign in to manage your watchlists.</p>';
         if (seenItemsDisplayContainer) seenItemsDisplayContainer.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Sign in to see your seen items.</p>';
 
-        // clearAllDynamicContent('watchlist'); // This might be too broad, handle specific watchlist UI reset
         if (newWatchlistNameInput) newWatchlistNameInput.disabled = true;
         if (createWatchlistBtn) createWatchlistBtn.disabled = true;
 

@@ -1,8 +1,7 @@
-// js/main.js 
-import { auth, db, firebaseAuthFunctions, firebaseFirestoreFunctions, loadFirebaseIfNeeded } from './firebase.js';
-import { initApiRefs, fetchTmdbCategoryContent } from './api.js';
-import { initUiRefs, clearAllDynamicContent, showPositionSavedIndicator, positionPopup, createBackButton, clearItemDetailPanel, clearSearchResultsPanel } from './ui.js'; // Added clearItemDetailPanel, clearSearchResultsPanel
-import { initAuthRefs, handleAuthStateChanged, createAuthFormUI } from './auth.js';
+// Website/main.js
+import { initApiRefs, fetchTmdbCategoryContent, fetchSearchResults, fetchItemDetails } from './api.js';
+import { initUiRefs, clearAllDynamicContent, showPositionSavedIndicator, positionPopup, createBackButton, clearItemDetailPanel, clearSearchResultsPanel } from './ui.js';
+import { initAuthRefs, handleAuthStateChanged, createAuthFormUI } from '../SignIn/auth.js'; // Updated path
 import { initWatchlistRefs, loadAndDisplayWatchlistsFromFirestore, closeAllOptionMenus, handleCreateWatchlist, displayItemsInSelectedWatchlist } from './watchlist.js';
 import { initSeenListRefs, loadAndDisplaySeenItems } from './seenList.js';
 import { initHandlerRefs, handleSearch, handleItemSelect } from './handlers.js';
@@ -11,27 +10,24 @@ import {
     currentLatestType, currentLatestCategory, updateLatestPage, updateLatestType, updateLatestCategory,
     currentPopularType, updatePopularPage, updatePopularType, 
     previousStateForBackButton, updatePreviousStateForBackButton,
-    scrollPositions, // Removed updateScrollPosition as it's used internally in handlers/state
+    scrollPositions,
     updateSelectedCertifications,
     selectedCertifications
 } from './state.js';
+import { auth, db, firebaseAuthFunctions, firebaseFirestoreFunctions, loadFirebaseIfNeeded } from '../SignIn/firebase.js'; // Updated path
+import { loadUserFirestoreWatchlists as loadUserFirestoreWatchlistsApi } from '../SignIn/firebase_api.js'; // Correct Firebase Firestore functions from new API module
 
 // Global cache for user watchlists
 export let firestoreWatchlistsCache = []; // Export for watchlist.js to use via initWatchlistRefs
 
 // Load watchlists for the current user and cache them
-// Export this function so it can be passed to watchlist.js
 export async function loadUserFirestoreWatchlists() { 
     firestoreWatchlistsCache.length = 0; // Clear array while keeping reference
     const user = auth.currentUser;
     if (!user) return;
     try {
-        const { getDocs, collection } = firebaseFirestoreFunctions;
-        const watchlistsColRef = collection(db, 'users', user.uid, 'watchlists');
-        const querySnapshot = await getDocs(watchlistsColRef);
-        // Corrected: Use forEach to populate the cache directly.
-        // The previous use of map was incorrect as it didn't return values for a new array
-        // and was improperly nested with another forEach.
+        const watchlistsColRef = firebaseFirestoreFunctions.collection(db, 'users', user.uid, 'watchlists');
+        const querySnapshot = await firebaseFirestoreFunctions.getDocs(watchlistsColRef);
         querySnapshot.docs.forEach(docSnap => {
             const data = docSnap.data();
             const items = Array.isArray(data.items) ? data.items : (Array.isArray(data.movies) ? data.movies : []);
@@ -58,7 +54,7 @@ let searchInput, searchButton, resultsContainer,
     latestContentDisplay, latestMoviesSubTab, latestTvShowsSubTab,
     popularContentDisplay, popularMoviesSubTab, popularTvShowsSubTab,
     userAuthIcon, authDropdownMenu,
-    detailOverlay, detailOverlayContent, closeOverlayButton, // Ensure detailOverlayContent is declared
+    detailOverlay, detailOverlayContent, closeOverlayButton,
     overlayDetailTitle, overlayDetailContainer,
     overlayVidsrcPlayerSection,
     overlaySeasonsEpisodesSection,
@@ -92,7 +88,6 @@ async function initializeAppState() {
     createWatchlistBtn = document.getElementById('createWatchlistBtn');
     watchlistTilesContainer = document.getElementById('watchlistTilesContainer');
     watchlistDisplayContainer = document.getElementById('watchlistDisplayContainer');
-    /* Removed obsolete watchlist detail queries */
 
     seenItemsDisplayContainer = document.getElementById('seenItemsDisplayContainer');
 
@@ -108,7 +103,7 @@ async function initializeAppState() {
     authDropdownMenu = document.getElementById('authDropdownMenu');
 
     detailOverlay = document.getElementById('detailOverlay');
-    detailOverlayContent = document.getElementById('detailOverlayContent'); // Make sure this is assigned
+    detailOverlayContent = document.getElementById('detailOverlayContent');
     closeOverlayButton = document.getElementById('closeOverlayButton');
     overlayDetailTitle = document.getElementById('overlayDetailTitle');
     overlayDetailContainer = document.getElementById('overlayDetailContainer');
@@ -137,16 +132,18 @@ async function initializeAppState() {
         positionIndicator, itemVidsrcPlayerSection
     };
 
+    // Initialize modules, passing necessary DOM elements and callbacks
     initUiRefs(allElements);
     initApiRefs(allElements);
-    initAuthRefs(allElements);
-    initWatchlistRefs(allElements, firestoreWatchlistsCache, loadUserFirestoreWatchlists); // Pass cache and loader
-    initSeenListRefs(allElements);
-    initHandlerRefs(allElements);
+    initAuthRefs(allElements); // auth.js in SignIn folder
+    initWatchlistRefs(allElements, firestoreWatchlistsCache, loadUserFirestoreWatchlists);
+    initSeenListRefs(allElements); // seenList.js
+    initHandlerRefs(allElements); // handlers.js
 
     if (userAuthIcon) {
         userAuthIcon.addEventListener('click', (e) => {
             e.stopPropagation();
+            if (authDropdownMenu) positionPopup(userAuthIcon, authDropdownMenu); // Position on click
             if (authDropdownMenu) authDropdownMenu.classList.toggle('hidden');
         });
     }
@@ -160,7 +157,8 @@ async function initializeAppState() {
     setupRatingFilters();
 
     // Additional fallback for select-based filters (if present on page)
-    if (typeof ratingFilters !== 'undefined' && ratingFilters.length > 0) {
+    const ratingFilters = document.querySelectorAll('select[id^="ratingFilter"]');
+    if (ratingFilters && ratingFilters.length > 0) {
         ratingFilters.forEach(sel => {
             sel.addEventListener('change', () => {
                 const values = Array.from(sel.selectedOptions).map(o => o.value);
@@ -177,7 +175,7 @@ async function initializeAppState() {
     // Function to handle closing the overlay
     const closeOverlay = () => {
         if (detailOverlay) detailOverlay.classList.add('hidden');
-        clearItemDetailPanel('overlay'); // Use specific clearer for overlay details
+        clearItemDetailPanel('overlay');
         if (previousStateForBackButton) {
             if (previousStateForBackButton.originTabId === 'tabLatest' && latestContentDisplay) {
                 latestContentDisplay.scrollTop = scrollPositions.latest;
@@ -192,10 +190,9 @@ async function initializeAppState() {
         closeOverlayButton.addEventListener('click', closeOverlay);
     }
 
-    // NEW: Listener for clicking overlay backdrop to close
     if (detailOverlay) {
         detailOverlay.addEventListener('click', (event) => {
-            if (event.target === detailOverlay) { // Only close if the click is directly on the backdrop
+            if (event.target === detailOverlay) {
                 closeOverlay();
             }
         });
@@ -243,7 +240,6 @@ function setupMainNavigationTabs() {
     const mainTabsConfig = [
         { button: tabSearch, view: searchView, action: () => {
             clearItemDetailPanel('item');
-            // clearSearchResultsPanel(); // Uncomment if you want to clear results when clicking "Search" tab
           }
         },
         { button: tabWatchlist, view: watchlistView, action: async () => { await loadAndDisplayWatchlistsFromFirestore(); clearItemDetailPanel('watchlist'); } },

@@ -1,7 +1,7 @@
 // js/seenList.js 
-import { db, firebaseFirestoreFunctions } from './firebase.js';
+import { db, firebaseFirestoreFunctions } from '../SignIn/firebase.js';
 import { showToast, showLoading, showMessage, positionPopup } from './ui.js';
-import { createAuthFormUI } from './auth.js';
+import { createAuthFormUI } from '../SignIn/auth.js';
 import { genericItemPlaceholder, smallImageBaseUrl } from './config.js';
 import { currentUserId, selectedCertifications } from './state.js';
 import { extractCertification } from './ratingUtils.js';
