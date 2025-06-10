@@ -2,6 +2,18 @@
 
 This project is licensed under the [ISC License](./LICENSE).
 
+## Project structure
+
+Two versions of the site live in this repository:
+
+1. **Root site** – the files in the repository root (`index.html`, `main.js` and
+   friends). This version is bundled with webpack.
+2. **`/app` subdirectory** – an older, standalone version of the application
+   that can be served as static files.
+
+Both versions share some utilities (e.g. `firebase.js`), but are built and
+served separately.
+
 ## Prerequisites
 
 - **Node.js**: version 18 or higher is recommended. Install from [nodejs.org](https://nodejs.org/).
@@ -21,13 +33,27 @@ npm install
 
 ## Development server
 
-Start the webpack dev server which serves `index.html` and watches for changes:
+### Root site
+
+Start the webpack dev server which serves `index.html` from the repository root
+and watches for changes:
 
 ```bash
 npm start
 ```
 
-This will open the application at `http://localhost:8080/` by default.
+The site will be available at `http://localhost:8080/` by default.
+
+### `/app` subdirectory
+
+The contents of the `app/` directory are plain static files. To preview them you
+can use any static file server, for example:
+
+```bash
+npx serve app
+```
+
+Alternatively open `app/index.html` directly in your browser.
 
 ## Tests
 
@@ -41,16 +67,22 @@ The test script sets `NODE_OPTIONS=--experimental-vm-modules` to enable ESM supp
 
 ## Build
 
+### Root site
+
 Create a production build with webpack:
 
 ```bash
 npm run build
 ```
 
-The resulting files will be placed in the `dist/` directory.
-
-To serve the built `index.html`, you can use any static file server, e.g.:
+The bundled files will be placed in the `dist/` directory. Serve them with any
+static file server, for example:
 
 ```bash
 npx serve dist
 ```
+
+### `/app` subdirectory
+
+The files under `app/` are ready to serve as-is and do not require a build
+step.
