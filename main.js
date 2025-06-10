@@ -29,7 +29,9 @@ export async function loadUserFirestoreWatchlists() {
         const { getDocs, collection } = firebaseFirestoreFunctions;
         const watchlistsColRef = collection(db, 'users', user.uid, 'watchlists');
         const querySnapshot = await getDocs(watchlistsColRef);
-        firestoreWatchlistsCache = querySnapshot.docs.map(docSnap => {
+        // Corrected: Use forEach to populate the cache directly.
+        // The previous use of map was incorrect as it didn't return values for a new array
+        // and was improperly nested with another forEach.
         querySnapshot.docs.forEach(docSnap => {
             const data = docSnap.data();
             const items = Array.isArray(data.items) ? data.items : (Array.isArray(data.movies) ? data.movies : []);

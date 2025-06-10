@@ -680,7 +680,7 @@ export function showSignInModal() {
             modal.style.display = 'none';
             document.body.style.overflow = '';
         } catch (err) {
-            errorDiv.textContent = err.message;
+ errorDiv.textContent = err.message;
         }
     };
     signUpBtn.addEventListener('click', async (e) => { // Use addEventListener for consistency
@@ -694,5 +694,5 @@ export function showSignInModal() {
         } catch (err) {
             errorDiv.textContent = err.message;
         }
-    };
+    });
 }
