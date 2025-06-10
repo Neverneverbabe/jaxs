@@ -1,10 +1,11 @@
 import { jest } from '@jest/globals';
 
 jest.unstable_mockModule('firebase/app', () => ({}), { virtual: true });
-jest.unstable_mockModule('firebase/auth', () => ({}), { virtual: true });
-jest.unstable_mockModule('firebase/firestore', () => ({}), { virtual: true });
+jest.unstable_mockModule('firebase/auth', () => ({ auth: {}, firebaseAuthFunctions: {} }), { virtual: true });
+jest.unstable_mockModule('firebase/firestore', () => ({ db: {}, firebaseFirestoreFunctions: {} }), { virtual: true });
 
 jest.unstable_mockModule('../firebase.js', () => ({
+  // Provide minimal mocks for imported firebase objects/functions
   db: {},
   auth: {},
   firebaseAuthFunctions: {},
@@ -12,10 +13,11 @@ jest.unstable_mockModule('../firebase.js', () => ({
   loadFirebaseIfNeeded: async () => {}
 }));
 
-await import('../main.js');
+// Import the specific function being tested directly
+const { loadUserFirestoreWatchlists } = await import('../main.js');
 
 describe('main.js global functions', () => {
   test('loadUserFirestoreWatchlists is defined on window', () => {
-    expect(typeof window.loadUserFirestoreWatchlists).toBe('function');
+    expect(typeof loadUserFirestoreWatchlists).toBe('function');
   });
 });
