@@ -708,9 +708,49 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Library Tab Helper Functions (Firestore Watchlists version) ---
 
+    // --- Library Tab Helper Functions (localStorage version) ---
+    function getLibraryFromLocalStorage() {
+        return JSON.parse(localStorage.getItem('libraryFolders') || '{}');
+    }
+
+    function saveLibraryToLocalStorage(library) {
+        localStorage.setItem('libraryFolders', JSON.stringify(library));
+    }
+
+    async function handleCreateLibraryFolder(folderName) {
+        const trimmedName = folderName.trim();
+        if (!trimmedName) {
+            alert("Please enter a valid folder name.");
+            return;
+        }
+        let library = getLibraryFromLocalStorage();
+        if (library[trimmedName]) {
+            alert(`Folder "${trimmedName}" already exists.`);
+            return;
+        }
+        library[trimmedName] = [];
+        saveLibraryToLocalStorage(library);
+        await renderLibraryFolderCards(); // Re-render folder cards
+    }
+
+    async function handleDeleteLibraryFolder(folderName) {
+        if (!confirm(`Are you sure you want to delete the folder "${folderName}" and all its items? This cannot be undone.`)) {
+            return;
+        }
+        let library = getLibraryFromLocalStorage();
+        delete library[folderName];
+        saveLibraryToLocalStorage(library);
+        await renderLibraryFolderCards(); // Re-render folder cards
+        if (currentSelectedLibraryFolder === folderName) {
+            currentSelectedLibraryFolder = null; // Deselect if it was the one deleted
+            await renderMoviesInSelectedFolder(null); // Clear movie display
+        }
+    }
+
     async function renderLibraryFolderCards() {
         if (!libraryFoldersRow) return;
-        const watchlists = window.firestoreWatchlistsCache || [];
+        const library = getLibraryFromLocalStorage();
+        const folderNames = Object.keys(library);
         libraryFoldersRow.innerHTML = ''; // Clear previous
 
         // --- Add Create Watchlist UI ---
@@ -750,25 +790,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.onclick = async () => {
             const name = input.value.trim();
             if (!name) {
-                alert("Please enter a name for the new watchlist.");
+                alert("Please enter a name for the new folder.");
                 return;
             }
             btn.disabled = true;
             try {
-                await window.handleCreateWatchlistFromLibrary(name);
+                await handleCreateLibraryFolder(name); // Use localStorage version
                 input.value = '';
-                await renderLibraryFolderCards();
             } finally {
                 btn.disabled = false;
             }
         };
 
-        if (watchlists.length === 0) {
-            libraryFoldersRow.innerHTML += `<p style="color:var(--text-secondary); padding: 1rem;">No watchlists yet. Create one above.</p>`;
+        if (folderNames.length === 0) {
+            libraryFoldersRow.innerHTML += `<p style="color:var(--text-secondary); padding: 1rem;">No folders yet. Create one above.</p>`;
             return;
         }
 
-        watchlists.forEach(watchlist => {
+        folderNames.forEach(folderName => {
+            const itemsInFolder = library[folderName] || [];
             // Folder card with delete button
             const card = document.createElement('div');
             card.className = 'content-card folder-card';
@@ -777,18 +817,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             card.style.marginRight = '1rem';
             card.style.marginBottom = '1rem';
             card.style.width = '10rem';
-            card.dataset.folderName = watchlist.id;
+            card.dataset.folderName = folderName;
 
             // Thumbnail
             let thumb = '';
-            if (watchlist.items && watchlist.items.length > 0 && watchlist.items[0].poster_path) {
-                thumb = `<img src="https://image.tmdb.org/t/p/w200${watchlist.items[0].poster_path}" style="width:100%;border-radius:0.5rem;">`;
+                if (itemsInFolder.length > 0 && itemsInFolder[0].poster_path) { // Use poster_path directly if it's full URL
+                    const posterUrl = itemsInFolder[0].poster_path.startsWith('http') ? itemsInFolder[0].poster_path : `https://image.tmdb.org/t/p/w200${itemsInFolder[0].poster_path}`;
+                    thumb = `<img src="${posterUrl}" style="width:100%;border-radius:0.5rem;">`;
             } else {
                 thumb = `<img src="https://placehold.co/150x225/374151/9CA3AF?text=N/A" style="width:100%;border-radius:0.5rem;">`;
             }
             card.innerHTML = `
                 ${thumb}
-                <p style="text-align:center;margin-top:0.5rem;font-size:0.9em;">${watchlist.id}</p>
+                <p style="text-align:center;margin-top:0.5rem;font-size:0.9em;">${folderName}</p>
             `;
 
             // Add delete button
@@ -808,18 +849,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             deleteBtn.style.cursor = 'pointer';
             deleteBtn.onclick = async (e) => {
                 e.stopPropagation();
-                if (confirm(`Delete watchlist "${watchlist.id}"?`)) {
-                    await window.handleDeleteWatchlist(watchlist.id);
-                    renderLibraryFolderCards();
-                    renderMoviesInSelectedFolder(null);
-                }
+                    await handleDeleteLibraryFolder(folderName); // Use localStorage version
             };
             card.appendChild(deleteBtn);
 
             card.addEventListener('click', (e) => {
                 if (e.target === deleteBtn) return;
-                currentSelectedLibraryFolder = watchlist.id;
-                renderMoviesInSelectedFolder(watchlist.id);
+                currentSelectedLibraryFolder = folderName;
+                renderMoviesInSelectedFolder(folderName);
                 libraryFoldersRow.querySelectorAll('.folder-card').forEach(fc => fc.style.border = '2px solid transparent');
                 card.style.border = `2px solid var(--science-blue)`;
             });
@@ -852,17 +889,17 @@ async function renderMoviesInSelectedFolder(folderName) {
     };
 
     if (!folderName) {
-        selectedFolderTitleElement.textContent = 'Movies in Watchlist';
-        librarySelectedFolderMoviesRow.innerHTML = `<p style="color:var(--text-secondary); padding: 1rem;">Select a watchlist above to see its contents.</p>`;
+        selectedFolderTitleElement.textContent = 'Items in Folder';
+        librarySelectedFolderMoviesRow.innerHTML = `<p style="color:var(--text-secondary); padding: 1rem;">Select a folder above to see its contents.</p>`;
         return;
     }
 
     selectedFolderTitleElement.textContent = `Items in "${folderName}"`;
-    const watchlist = (window.firestoreWatchlistsCache || []).find(wl => wl.id === folderName);
-    const items = watchlist ? (watchlist.items || []) : [];
+    const library = getLibraryFromLocalStorage();
+    const items = library[folderName] || [];
 
     if (items.length === 0) {
-        librarySelectedFolderMoviesRow.innerHTML = `<p style="color:var(--text-secondary); padding: 1rem;">This watchlist is empty.</p>`;
+        librarySelectedFolderMoviesRow.innerHTML = `<p style="color:var(--text-secondary); padding: 1rem;">This folder is empty.</p>`;
     } else {
         librarySelectedFolderMoviesRow.innerHTML = ''; // Clear previous movies
         items.forEach(item => {
@@ -873,7 +910,8 @@ async function renderMoviesInSelectedFolder(folderName) {
             tempDiv.innerHTML = cardHtmlString;
             const movieCardElement = tempDiv.firstElementChild;
 
-            movieCardElement.addEventListener('click', () => onLibraryMovieCardClick(item.tmdb_id, item.item_type));
+                // Ensure tmdb_id and item_type are present, fallback for older stored items if necessary
+            movieCardElement.addEventListener('click', () => onLibraryMovieCardClick(item.id || item.tmdb_id, item.type || item.item_type));
             librarySelectedFolderMoviesRow.appendChild(movieCardElement);
         });
         attachSeenToggleListenersToCards(librarySelectedFolderMoviesRow);

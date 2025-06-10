@@ -688,7 +688,7 @@ export function showSignInModal() {
         const email = content.querySelector('#auth-email').value;
         const password = content.querySelector('#auth-password').value;
         try {
-            await window.firebaseAuth.signUp(email, password);
+            await firebaseAuthFunctions.createUserWithEmailAndPassword(auth, email, password);
             modal.style.display = 'none';
             document.body.style.overflow = '';
         } catch (err) {
