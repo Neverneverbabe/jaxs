@@ -1,16 +1,13 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watch TV - Home</title>
-    <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome for icons -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <!-- PWA: Link to manifest.json -->
     <link rel="manifest" href="manifest.json">
 
     <style>
@@ -32,7 +29,8 @@
             --card-bg: #2d2d2d;
             --gradient-start: #6b21a8; /* purple-800 */
             --gradient-end: #3730a3; /* indigo-900 */
-            --header-footer-bg: #0d0d0d; /* bg-gray-950 equivalent */
+            --header-footer-bg-dark-rgb: 13, 13, 13; /* RGB for #0d0d0d */
+            --header-footer-bg: rgba(var(--header-footer-bg-dark-rgb), 0.9);
         }
 
         /* Light Mode Variables - Overrides defaults when .light-mode is active */
@@ -46,7 +44,8 @@
             --card-bg: #e0e0e0;
             --gradient-start: #bfdbfe; /* blue-200 */
             --gradient-end: #818cf8; /* indigo-400 */
-            --header-footer-bg: #fdfdfd; /* bg-gray-100 equivalent */
+            --header-footer-bg-light-rgb: 253, 253, 253; /* RGB for #fdfdfd */
+            --header-footer-bg: rgba(var(--header-footer-bg-light-rgb), 0.9);
         }
 
         /* Base styles */
@@ -87,14 +86,9 @@
             justify-content: space-between;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
             transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
-            background-color: var(--header-footer-bg);
-            background-color: rgba(var(--header-footer-bg-rgb, 13, 13, 13), 0.9); /* for opacity */
+            background-color: var(--header-footer-bg); /* Use the single variable */
             backdrop-filter: blur(8px); /* backdrop-blur-md */
             color: var(--text-primary);
-        }
-
-        body.light-mode header {
-            background-color: rgba(var(--header-footer-bg-rgb, 253, 253, 253), 0.9); /* for opacity */
         }
 
         /* Container for logo and navigation */
@@ -159,7 +153,7 @@
             transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out; /* transition duration-200 */
             color: var(--icon-color-default-dark); /* Default icon color for dark mode */
         }
-        
+
         body.light-mode header .icon-buttons button {
              color: var(--icon-color-default-light); /* Default icon color for light mode */
         }
@@ -170,6 +164,60 @@
         }
         body.light-mode header .icon-buttons button:hover {
             background-color: rgba(0, 0, 0, 0.2); /* Increased opacity for hover background */
+        }
+
+        /* Profile Dropdown Styles (New) */
+        .profile-dropdown {
+            position: absolute;
+            top: calc(100% + 5px); /* Position below the button */
+            right: 0;
+            background-color: var(--card-bg); /* Use a suitable background */
+            border-radius: 0.75rem; /* rounded-lg */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            padding: 0.5rem 0;
+            min-width: 180px;
+            z-index: 100; /* Ensure it's above other header elements */
+            display: none; /* Hidden by default */
+            animation: fadeInDropdown 0.2s ease-out forwards;
+        }
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        @keyframes fadeInDropdown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .profile-dropdown p {
+            padding: 0.5rem 1rem;
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--card-bg); /* Subtle separator */
+        }
+        .profile-dropdown p:last-of-type {
+            border-bottom: none;
+        }
+        .profile-dropdown button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            border-radius: 0; /* No border-radius on individual items */
+        }
+        .profile-dropdown button:hover {
+            background-color: rgba(var(--text-primary-rgb, 255, 255, 255), 0.1); /* Subtle hover */
+            color: var(--text-primary);
+        }
+        .light-mode .profile-dropdown button:hover {
+            background-color: rgba(var(--text-primary-rgb, 0, 0, 0), 0.05);
         }
 
 
@@ -437,7 +485,7 @@
             width: 28px;
             height: 28px;
             background-color: var(--card-bg); /* Matches page background initially */
-            border: 2px solid var(--white);   /* White circle border */
+            border: 2px solid var(--white);    /* White circle border */
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -473,15 +521,11 @@
             font-size: 0.875rem; /* text-sm */
             transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
             background-color: var(--header-footer-bg);
-            background-color: rgba(var(--header-footer-bg-rgb, 13, 13, 13), 0.7); /* for opacity */
             backdrop-filter: blur(4px); /* backdrop-blur-sm */
             color: var(--text-secondary);
             margin-top: auto; /* Push footer to bottom */
         }
 
-        body.light-mode footer {
-            background-color: rgba(var(--header-footer-bg-rgb, 253, 253, 253), 0.7); /* for opacity */
-        }
 
         footer div {
             margin-top: 0.5rem; /* mt-2 */
@@ -678,29 +722,72 @@
             .search-results-grid { grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); }
         }
         /* Sign-In Modal Styles */
-        .sign-in-form input[type="email"],
-        .sign-in-form input[type="password"] {
+        /* Changed to combine sign-in/sign-up forms */
+        .auth-form-container {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem; /* Space between form groups */
+        }
+
+        .auth-form-group {
+            margin-bottom: 1rem;
+        }
+
+        .auth-form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .auth-form-group input {
             width: 100%;
             padding: 0.75em 1em;
-            margin-bottom: 1rem;
             font-size: 1rem;
             font-family: 'Inter', sans-serif;
             background-color: var(--card-bg);
             color: var(--text-primary);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-color, #333);
             border-radius: 8px;
             box-sizing: border-box;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
-        .sign-in-form input[type="email"]:focus,
-        .sign-in-form input[type="password"]:focus {
+        .auth-form-group input:focus {
             outline: none;
             border-color: var(--science-blue);
             box-shadow: 0 0 0 2px rgba(var(--science-blue-rgb, 0, 102, 204), 0.3);
         }
-        .sign-in-form button[type="submit"] {
+
+        .auth-switch-link {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s ease-in-out;
+        }
+        .auth-switch-link:hover {
+            color: var(--science-blue);
+        }
+
+        .auth-submit-button {
             width: 100%;
             padding: 0.75em 1.5em;
+            margin-top: 1.5rem;
+            background-color: var(--black);
+            color: var(--white);
+            border: 1px solid var(--black);
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
         }
+        .auth-submit-button:hover {
+            background-color: #222;
+            border-color: #222;
+        }
+
         /* Seen Action Button in Modal */
         .seen-action-button {
             background-color: var(--card-bg);
@@ -776,7 +863,7 @@
 </head>
 <body>
     <header>
-        <div id="header-main" class="flex items-center space-x-6">
+        <div id="header-main">
             <h1 class="logo">Watch TV</h1>
             <nav id="main-nav">
                 <a href="#" class="tab-link active-nav-link" data-tab="watch-now-tab">Watch TV+</a>
@@ -796,9 +883,8 @@
                     <i class="fas fa-filter"></i>
                 </button>
                 <div id="filter-options-list" class="apple-dropdown" style="display: none;">
-                    <div id="filter-options-items-container" class="dropdown-list hide-scrollbar" style="max-height: 200px; overflow-y: auto; border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom:none;">
-                        <!-- Filter options will be populated by JS -->
-                    </div>
+                    <div id="filter-options-items-container" class="dropdown-list hide-scrollbar">
+                        </div>
                     <div class="filter-dropdown-footer">
                         <button id="filter-clear-btn" class="filter-action-button">Clear</button>
                         <button id="filter-apply-btn" class="filter-action-button apply">Apply</button>
@@ -808,26 +894,31 @@
             <button data-tab="search-tab" title="Search">
                 <i class="fas fa-search"></i>
             </button>
-            <button id="sign-in-button" title="Sign In">
-                <i class="fas fa-user-circle"></i>
-            </button>
+            <div id="profile-menu-container" style="position: relative;">
+                <button id="profile-menu-button" title="User Profile">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+                <div id="profile-dropdown" class="profile-dropdown">
+                    <p id="profile-status">Not Signed In</p>
+                    <button id="profile-signin-btn">Sign In</button>
+                    <button id="profile-signup-btn">Sign Up</button>
+                    <button id="profile-signout-btn" style="display: none;">Sign Out</button>
+                    </div>
+            </div>
         </div>
     </header>
 
     <main>
-        <!-- Tab: Watch Now -->
         <section class="tab-content active-tab" id="watch-now-tab">
             <section class="hero-section">
                 <img id="hero-image-element" src="" alt="Featured Show"
-                     onerror="this.onerror=null;this.src='https://placehold.co/1200x600/3B0764/F3F4F6?text=Fallback+Image';">
+                    onerror="this.onerror=null;this.src='https://placehold.co/1200x600/3B0764/F3F4F6?text=Fallback+Image';">
                 <div class="content">
                     <h2 id="hero-title">Featured Content</h2>
                     <p id="hero-overview">Discover the latest blockbusters and critically acclaimed series.</p>
                     <button>Watch Now</button>
                 </div>
-            </section> <!-- End of hero-section -->
-
-            <section class="content-section">
+            </section> <section class="content-section">
                 <h3>Trending Now</h3>
                 <div class="content-row hide-scrollbar" id="trending-now-row">
                     <p class="loading-message">Loading trending movies...</p>
@@ -845,36 +936,30 @@
                     <p class="loading-message">Loading new releases...</p>
                 </div>
             </section>
-        </section> <!-- End of watch-now-tab -->
-        <!-- Tab: Explore -->
-        <section class="tab-content" id="explore-tab">
-            <div id="explore-grid-container" class="search-results-grid" style="padding-top: 0;">
-                <!-- Movies will be loaded here -->
-            </div>
-            <p id="explore-loading-indicator" style="text-align: center; padding: 1rem; display: none; color: var(--text-secondary);">Loading more movies...</p>
+        </section> <section class="tab-content" id="explore-tab">
+            <div id="explore-grid-container" class="search-results-grid">
+                </div>
+            <p id="explore-loading-indicator">Loading more movies...</p>
         </section>
-        <!-- Tab: Library -->
         <section class="tab-content" id="library-tab">
             <section class="content-section">
                 <h3>Your Folders</h3>
                 <div class="content-row hide-scrollbar" id="library-folders-row">
-                    <p class="loading-message" style="color:var(--text-secondary); padding: 1rem;">Loading folders...</p>
+                    <p class="loading-message">Loading folders...</p>
                 </div>
             </section>
             <section class="content-section">
                 <h3 id="selected-folder-title">Movies in Folder</h3>
                 <div class="content-row hide-scrollbar" id="library-selected-folder-movies-row">
-                    <p style="color:var(--text-secondary); padding: 1rem;">Select a folder above to see its contents.</p>
+                    <p>Select a folder above to see its contents.</p>
                 </div>
             </section>
         </section>
-        <!-- Tab: Seen -->
         <section class="tab-content" id="seen-tab">
             <div id="seen-content">
                 <p>Track what you've already watched.</p>
             </div>
         </section>
-        <!-- Tab: Search -->
         <section class="tab-content" id="search-tab">
             <input id="search-input" type="text" placeholder="Search for movies or TV shows...">
             <button id="search-button">Search</button>
@@ -893,36 +978,42 @@
         </div>
     </footer>
 
-    <!-- Item Detail Modal (Hidden by default, shown when a card is clicked) -->
     <div id="item-detail-modal" class="item-detail-modal">
         <div class="item-detail-modal-content">
             <button class="close-button">&times;</button>
             <div id="modal-content-area">
-                <!-- Details will be dynamically loaded here -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Sign-In Modal -->
-    <div id="sign-in-modal" class="item-detail-modal" style="display:none;">
+    <div id="auth-modal" class="item-detail-modal">
         <div class="item-detail-modal-content" style="max-width: 400px;">
             <button class="close-button" aria-label="Close">&times;</button>
-            <h2>Sign In</h2>
-            <form id="sign-in-form" class="sign-in-form" style="margin-top: 1.5rem;">
-                <div>
-                    <label for="email-input" style="display:block; margin-bottom: 0.5rem; font-weight: 500;">Email</label>
-                    <input type="email" id="email-input" name="email" required autocomplete="username">
+            <h2 id="auth-modal-title">Sign In</h2>
+            <form id="auth-form" class="auth-form-container">
+                <div class="auth-form-group" id="signup-name-group" style="display: none;">
+                    <label for="name-input">Full Name</label>
+                    <input type="text" id="name-input" name="name" autocomplete="name">
                 </div>
-                <div>
-                    <label for="password-input" style="display:block; margin-bottom: 0.5rem; font-weight: 500;">Password</label>
-                    <input type="password" id="password-input" name="password" required autocomplete="current-password">
+                <div class="auth-form-group">
+                    <label for="auth-email-input">Email</label>
+                    <input type="email" id="auth-email-input" name="email" required autocomplete="username">
                 </div>
-                <button type="submit" id="sign-in-submit-button" class="apple-like-button" style="margin-top:1.5rem; background-color: var(--black); color: var(--white); border: 1px solid var(--black); border-radius: 10px; font-weight:500;">Sign In</button>
+                <div class="auth-form-group">
+                    <label for="auth-password-input">Password</label>
+                    <input type="password" id="auth-password-input" name="password" required autocomplete="current-password">
+                </div>
+                <div class="auth-form-group" id="signup-confirm-password-group" style="display: none;">
+                    <label for="confirm-password-input">Confirm Password</label>
+                    <input type="password" id="confirm-password-input" name="confirm_password" autocomplete="new-password">
+                </div>
+                <button type="submit" id="auth-submit-button" class="auth-submit-button">Sign In</button>
             </form>
+            <p id="auth-switch-link" class="auth-switch-link">Don't have an account? Sign Up</p>
         </div>
     </div>
 
-    <!-- JavaScript files -->
+
     <script src="config.js" type="module"></script>
     <script src="api.js" type="module"></script>
     <script src="ui.js" type="module"></script>

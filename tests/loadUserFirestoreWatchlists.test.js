@@ -17,7 +17,7 @@ jest.unstable_mockModule('../firebase.js', () => ({
 const { loadUserFirestoreWatchlists } = await import('../main.js');
 
 describe('main.js global functions', () => {
-  test('loadUserFirestoreWatchlists is defined on window', () => {
+  test('loadUserFirestoreWatchlists is defined', () => { // Changed test description for clarity
     expect(typeof loadUserFirestoreWatchlists).toBe('function');
   });
 });
